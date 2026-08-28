@@ -1,16 +1,25 @@
 using UnityEngine;
 
-public class IdleState : MonoBehaviour
+public sealed class IdleState : IMonsterFsmState
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public MonsterState State => MonsterState.Idle;
+
+    public void Enter(MonsterController monster) { }
+
+    public void Tick(MonsterController monster, float deltaTime)
     {
-        
+        var target = monster.FindTarget();
+        if (target == null)
+        {
+            return;
+        }
+
+        var distance = Vector3.Distance(monster.transform.position, target.position);
+        if (distance <= monster.Status.Data.traceRange)
+        {
+            monster.AI.ChangeState(MonsterState.Trace);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public void Exit(MonsterController monster) { }
 }

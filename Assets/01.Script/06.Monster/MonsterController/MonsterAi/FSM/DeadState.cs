@@ -1,16 +1,10 @@
-using UnityEngine;
-
-public class DeadState : MonoBehaviour
+public sealed class DeadState : IMonsterFsmState
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public MonsterState State => MonsterState.Dead;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public void Enter(MonsterController monster) { }
+
+    public void Tick(MonsterController monster, float deltaTime) { }
+
+    public void Exit(MonsterController monster) { }
 }

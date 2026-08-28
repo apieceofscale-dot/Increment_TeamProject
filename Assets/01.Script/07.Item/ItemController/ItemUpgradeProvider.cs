@@ -1,16 +1,31 @@
 using UnityEngine;
 
-public class ItemUpgradeProvider : MonoBehaviour
+public sealed class ItemUpgradeProvider
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static readonly ItemUpgradeProvider Default = new ItemUpgradeProvider();
+
+    public int Evaluate(ItemData data, int upgradeLevel)
     {
-        
+        if (data == null)
+        {
+            return 0;
+        }
+
+        var level = Mathf.Max(0, upgradeLevel);
+        var step = Mathf.Max(1, data.upgradeStep);
+        return Mathf.Max(0, Mathf.RoundToInt(data.value + level * step * GetTypeExponent(data.type)));
     }
 
-    // Update is called once per frame
-    void Update()
+    public float GetTypeExponent(ItemType type)
     {
-        
+        switch (type)
+        {
+            case ItemType.Equipment:
+                return 1.25f;
+            case ItemType.Weapon:
+                return 1.5f;
+            default:
+                return 1f;
+        }
     }
 }
