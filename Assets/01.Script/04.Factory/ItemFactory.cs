@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ItemFactory : MonoBehaviour
+public class ItemFactory : MonoBehaviour, IBootStrapper
 {
     public static ItemFactory Instance { get; private set; }
 
@@ -19,8 +19,20 @@ public class ItemFactory : MonoBehaviour
         }
     }
 
+    public void IBootStrapperInitialize(BootstrapContext context)
+    {
+        Instance = this;
+        context.OnStepCompleted?.Invoke();
+    }
+
     public ItemController Spawn(int itemId, Vector3 position, Quaternion rotation, int upgradeLevel = 0, int starForce = 0)
     {
+        if (!IsBootReady())
+        {
+            Debug.LogWarning("[ItemFactory] BootStrapper is not completed yet.");
+            return null;
+        }
+
         var pool = ItemObjectPoolManager.instance;
         if (pool == null || prefab == null)
         {
@@ -44,5 +56,11 @@ public class ItemFactory : MonoBehaviour
         }
 
         item.ReturnToPool();
+    }
+
+    static bool IsBootReady()
+    {
+        var boot = FindFirstObjectByType<BootStrapper>();
+        return boot == null || boot.IsBootCompleted;
     }
 }

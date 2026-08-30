@@ -1,15 +1,23 @@
 using System;
 using UnityEngine;
 
-public class MonsterFacade : MonoBehaviour
+public class MonsterFacade : MonoBehaviour, IBootStrapper
 {
     public static event Action<MonsterDiedInfo> MonsterDied;
 
     [SerializeField] MonsterFactory monsterFactory;
     [SerializeField] ItemFacade itemFacade;
 
+    public void IBootStrapperInitialize(BootstrapContext context)
+    {
+        MonsterDied -= HandleMonsterDied;
+        MonsterDied += HandleMonsterDied;
+        context.OnStepCompleted?.Invoke();
+    }
+
     void OnEnable()
     {
+        MonsterDied -= HandleMonsterDied;
         MonsterDied += HandleMonsterDied;
     }
 

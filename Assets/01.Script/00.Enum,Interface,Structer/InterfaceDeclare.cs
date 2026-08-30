@@ -2,12 +2,13 @@ using System;
 
 interface IBootStrapper
 {
-    void IBootStrapperInitialize(); //인자는 적당하게 구조체 만들어서 선언해주세요.
+    /// 이 매니저 초기화가 끝나면 반드시 context.OnStepCompleted 호출할 것
+    void IBootStrapperInitialize(BootstrapContext context);
 }
 
 public interface IPoolable
 {
-    void InitializePoolObj(Action returnAction); //인자 이게 적당해서 넣어놨는데, 꼭 콜백일 필요 없습니다.
+    void InitializePoolObj(Action returnAction);
     void OnSpawn();
     void OnDespawn();
 }

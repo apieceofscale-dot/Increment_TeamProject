@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class MonsterFactory : MonoBehaviour
+public class MonsterFactory : MonoBehaviour, IBootStrapper
 {
     public static MonsterFactory Instance { get; private set; }
 
@@ -20,8 +20,20 @@ public class MonsterFactory : MonoBehaviour
         }
     }
 
+    public void IBootStrapperInitialize(BootstrapContext context)
+    {
+        Instance = this;
+        context.OnStepCompleted?.Invoke();
+    }
+
     public MonsterController Spawn(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 0)
     {
+        if (!IsBootReady())
+        {
+            Debug.LogWarning("[MonsterFactory] BootStrapper is not completed yet.");
+            return null;
+        }
+
         var pool = MonsterObjectPoolManager.instance;
         if (pool == null || prefab == null)
         {
@@ -30,11 +42,6 @@ public class MonsterFactory : MonoBehaviour
         }
 
         var monster = pool.GetObject(prefab);
-        if (!monster.gameObject.TryGetComponent<IPoolable>(out _))
-        {
-            return monster;
-        }
-
         monster.InitializePoolObj(() => pool.ReturnObject(monster));
         monster.transform.SetPositionAndRotation(position, rotation);
         monster.BindSpawn(monsterId, stageIndex > 0 ? stageIndex : defaultStageIndex);
@@ -50,5 +57,11 @@ public class MonsterFactory : MonoBehaviour
         }
 
         monster.ReturnToPool();
+    }
+
+    static bool IsBootReady()
+    {
+        var boot = FindFirstObjectByType<BootStrapper>();
+        return boot == null || boot.IsBootCompleted;
     }
 }

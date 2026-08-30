@@ -1,16 +1,103 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
+[DefaultExecutionOrder(-10000)]
 public class BootStrapper : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Header("√ ±‚»≠ ∏≈¥œ¿˙ ∏Ò∑œ")]
+    [Tooltip("¿«¡∏º∫ ±‘ƒ¢ ∏¬√Á ¿ßø°º≠∫Œ≈Õ µÓ∑œ ø‰∏¡")]
+    [SerializeField]
+    private List<MonoBehaviour> bootTargets = new List<MonoBehaviour>();
+
+    // √ ±‚»≠ º∫∞¯ ∏≈¥œ¿˙µÈ
+    private readonly List<IBootStrapper> initializedTargets = new List<IBootStrapper>();
+
+    /// <summary>
+    /// ∫Œ∆ÆΩ∫∆Æ∑¶ Ω√ƒˆΩ∫ ¡æ∑· √º≈© ø©∫Œ, ø‹∫Œ ¬¸¡∂ ∞°¥…
+    /// </summary>
+    public bool IsBootCompleted { get; private set; }
+
+    // ¡ﬂ∫π »£√‚ ∞®¡ˆ
+    private bool currentStepCallbackInvoked;
+
+
+    private void Awake()
     {
-        
+        // ¡ﬂ∫π ¡¶∞≈
+        if (FindObjectsByType<BootStrapper>(FindObjectsSortMode.None).Length > 1)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        DontDestroyOnLoad(gameObject);
+        InitializeStep(0);
     }
 
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// ∏≈¥œ¿˙ √ ±‚»≠ Ω√¿€, ƒ›πÈ »£√‚ Ω√¡°ø° ¥Ÿ¿Ω ∏≈¥œ¿˙∑Œ ≥—æÓ∞®
+    /// </summary>
+    /// <param name="index"></param>
+    private void InitializeStep(int index)
     {
-        
+        // ¿¸∫Œ ≥°≥™∏È completed true∑Œ ∏∏µÈ∞Ì ¡æ∑·
+        if (index >= bootTargets.Count)
+        {
+            IsBootCompleted = true;
+            Debug.Log($"[BootStrapper] ¿¸√º {initializedTargets.Count}∞≥ √ ±‚»≠ øœ∑·");
+            return;
+        }
+
+        MonoBehaviour target = bootTargets[index];
+
+        // ∫Û ¿ŒΩ∫∆Â≈Õ ΩΩ∑‘ ∞«≥ ∂Ÿ±‚
+        if (target == null)
+        {
+            Debug.LogError($"[BootStrapper] {index}ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔø? ÔøΩÔøΩÔøΩÔøΩ");
+            InitializeStep(index + 1);
+            return;
+        }
+
+        // ¿Œ≈Õ∆‰¿ÃΩ∫ ±∏«ˆ æ» µ» ƒ…¿ÃΩ∫ ∞«≥ ∂Ÿ±‚
+        if (target is not IBootStrapper bootStrapper)
+        {
+            Debug.LogError($"[BootStrapper] '{target.name}'ÔøΩÔøΩ IBootStrapperÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩ æ“ΩÔøΩÔøΩœ¥ÔøΩ. ÔøΩ ±ÔøΩ»≠ÔøΩÔøΩ ÔøΩ«≥ ∂›¥œ¥ÔøΩ.");
+            InitializeStep(index + 1);
+            return;
+        }
+
+        currentStepCallbackInvoked = false;
+
+        BootstrapContext context = new BootstrapContext(
+            onStepCompleted: () => HandleStepCompleted(target, bootStrapper, index)
+        );
+
+        try
+        {
+            bootStrapper.IBootStrapperInitialize(context);
+        }
+        catch
+        {
+            Debug.LogError("√ ±‚»≠ ¡ﬂ øπø‹ πﬂª˝«œø© ¡ﬂ¥‹");
+            return;
+        }
+
     }
+    private void HandleStepCompleted(MonoBehaviour target, IBootStrapper bootStrapper, int index)
+    {
+        if (currentStepCallbackInvoked)
+        {
+            Debug.Log("µŒ π¯ ¿ÃªÛ »£√‚«ﬂΩ¿¥œ¥Ÿ. »Æ¿Œ « ø‰");
+            return;
+        }
+        currentStepCallbackInvoked = true;
+
+        initializedTargets.Add(bootStrapper);
+        Debug.Log($"[BootStrapper] ({index + 1}/{bootTargets.Count}) √ ±‚»≠ øœ∑·");
+
+
+        InitializeStep(index + 1);
+    }
+
 }

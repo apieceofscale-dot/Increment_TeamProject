@@ -1,14 +1,22 @@
 using System;
 using UnityEngine;
 
-public class ItemFacade : MonoBehaviour
+public class ItemFacade : MonoBehaviour, IBootStrapper
 {
     public static event Action<ItemPickedUpInfo> ItemPickedUp;
 
     [SerializeField] ItemFactory itemFactory;
 
+    public void IBootStrapperInitialize(BootstrapContext context)
+    {
+        ItemPickedUp -= HandlePickedUp;
+        ItemPickedUp += HandlePickedUp;
+        context.OnStepCompleted?.Invoke();
+    }
+
     void OnEnable()
     {
+        ItemPickedUp -= HandlePickedUp;
         ItemPickedUp += HandlePickedUp;
     }
 
