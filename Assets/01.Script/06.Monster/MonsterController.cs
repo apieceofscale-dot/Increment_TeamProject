@@ -154,6 +154,13 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     MonsterData ResolveData()
     {
+        if (DataManager.instance != null &&
+            DataManager.instance.TryGetMonsterData(monsterId, out var data) &&
+            data != null)
+        {
+            return data;
+        }
+
         return new MonsterData
         {
             id = monsterId,

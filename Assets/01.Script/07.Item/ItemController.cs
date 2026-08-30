@@ -81,6 +81,13 @@ public class ItemController : MonoBehaviour, IPoolable
 
     ItemData ResolveData()
     {
+        if (DataManager.instance != null &&
+            DataManager.instance.TryGetItemData(itemId, out var data) &&
+            data != null)
+        {
+            return data;
+        }
+
         return new ItemData
         {
             id = itemId,

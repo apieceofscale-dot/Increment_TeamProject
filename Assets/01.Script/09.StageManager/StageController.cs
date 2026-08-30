@@ -1,16 +1,38 @@
 using UnityEngine;
 
-public class StageController : MonoBehaviour
+public class StageController : MonoBehaviour, IBootStrapper
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] MonsterSpawner monsterSpawner;
+    [SerializeField] StageStatus stageStatus;
+    [SerializeField] int stageIndex = 1;
+    [SerializeField] bool spawnOnStart = true;
+
+    public void IBootStrapperInitialize(BootstrapContext context)
     {
-        
+        context.OnStepCompleted?.Invoke();
+        if (spawnOnStart)
+        {
+            StartCoroutine(RunFirstWave());
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    System.Collections.IEnumerator RunFirstWave()
     {
-        
+        if (monsterSpawner == null)
+        {
+            yield break;
+        }
+
+        var boot = FindFirstObjectByType<BootStrapper>();
+        while (boot != null && !boot.IsBootCompleted)
+        {
+            yield return null;
+        }
+
+        var spawned = monsterSpawner.SpawnWave(stageIndex);
+        if (stageStatus != null)
+        {
+            stageStatus.RegisterSpawned(spawned);
+        }
     }
 }

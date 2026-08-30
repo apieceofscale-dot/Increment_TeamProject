@@ -1,112 +1,118 @@
 using UnityEngine;
 
-public class DataManager : MonoBehaviour
+public class DataManager : MonoBehaviour, IBootStrapper
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public static DataManager instance;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-}
+    [SerializeField] MonsterList monsterData;
+    readonly DataRepositary<MonsterData> monsters = new DataRepositary<MonsterData>();
 
+    [SerializeField] ItemList itemData;
+    readonly DataRepositary<ItemData> items = new DataRepositary<ItemData>();
 
-
-
-
-
-/*
- * public static DataManager instance;
-
-  
-   // private readonly List<Monster> thisMonsterList = new List<Monster>(); //readonly는 대충 const랑 비슷. 
-    //private readonly Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
-    [SerializeField] private MonsterList monsterData;  
-    private readonly DataRepositary<Monster> monsters = new DataRepositary<Monster>();
-
-    [SerializeField] private PlayerList playerData;
-    private readonly DataRepositary<Player> players = new DataRepositary<Player>();
-
-    [SerializeField] private WeaponList weaponData;
-    private readonly DataRepositary<Weapon> weapons = new DataRepositary<Weapon>();
-
-    //여기에 데이터 하나씩 위랑 같은 방식으로 넣기. 아래  LoadAllOFData()에도 넣기 . 나중에 스크립터블 오브젝트로
-
-
-
-    private void Awake()
+    void Awake()
     {
         if (instance == null)
+        {
             instance = this;
+        }
         else
+        {
             Destroy(gameObject);
-        
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
+
+    public void IBootStrapperInitialize(BootstrapContext context)
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
 
         LoadAllOFData();
+        context.OnStepCompleted?.Invoke();
     }
 
-    private void LoadAllOFData() //걍 정리한 거.
+    void LoadAllOFData()
     {
-        LoadWeapon();
         LoadMonster();
-        LoadPlayer();
-        
+        LoadItem();
     }
 
-
-    private void LoadMonster()
-    {        
+    void LoadMonster()
+    {
         monsters.Clear();
-
-        if(monsterData == null)
+        if (monsterData == null || monsterData.monsterList == null || monsterData.monsterList.Count == 0)
         {
-            Debug.Log("인스펙터에서 몬스터 데이터 넣어라좀");
+            monsters.Load(CreateFallbackMonsters());
             return;
         }
-        monsters.Load(monsterData.monsterList); 
+
+        monsters.Load(monsterData.monsterList);
     }
 
-    private void LoadPlayer()
+    void LoadItem()
     {
-        players.Clear();
-
-        if(playerData == null)
+        items.Clear();
+        if (itemData == null || itemData.itemList == null || itemData.itemList.Count == 0)
         {
-            Debug.Log("인스펙터에서 플레이어 데이터 넣어라좀");
+            items.Load(CreateFallbackItems());
             return;
         }
-        players.Load(playerData.playerList); 
+
+        items.Load(itemData.itemList);
     }
 
-    private void LoadWeapon()
+    public bool TryGetMonsterData(int id, out MonsterData monster)
     {
-        weapons.Clear();
-        if(weaponData == null)
+        return monsters.TryGet(id, out monster);
+    }
+
+    public bool TryGetItemData(int id, out ItemData item)
+    {
+        return items.TryGet(id, out item);
+    }
+
+    static System.Collections.Generic.List<MonsterData> CreateFallbackMonsters()
+    {
+        return new System.Collections.Generic.List<MonsterData>
         {
-            Debug.Log("인스펙터에서 무기 데이터 넣어라좀");
-        }
-
-        weapons.Load(weaponData.weaponList);
+            new MonsterData
+            {
+                id = 1,
+                name = "DefaultMonster",
+                maxHp = 10,
+                attackDamage = 1,
+                moveSpeed = 1.5f,
+                traceRange = 6f,
+                attackRange = 1.4f,
+                attackCooldown = 1f,
+                dropItemId = 1,
+                dropChance = 1f
+            }
+        };
     }
 
-
-
-    public bool TryGetMonsterData(int id, out Monster monsterData)//아래tryget랑 같은 방식으로 쓴거임. 여기에 out 없으니까 출력 안됨.
+    static System.Collections.Generic.List<ItemData> CreateFallbackItems()
     {
-        return monsters.TryGet(id, out monsterData);
-    }
-    public bool TryGetPlayerData(int id, out Player playerData)
-    {
-        return players.TryGet(id, out playerData);
-    }
-    public bool TryGetWeaponData(int id, out Weapon weaponData)
-    {
-        return  weapons.TryGet(id, out weaponData);
+        return new System.Collections.Generic.List<ItemData>
+        {
+            new ItemData
+            {
+                id = 1,
+                name = "DefaultDrop",
+                type = ItemType.Currency,
+                value = 1,
+                upgradeStep = 1
+            }
+        };
     }
 }
- */

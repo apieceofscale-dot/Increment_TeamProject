@@ -2,15 +2,20 @@ using UnityEngine;
 
 public class StageStatus : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int RemainingMonsters { get; private set; }
+
+    public void RegisterSpawned(int count)
     {
-        
+        RemainingMonsters += Mathf.Max(0, count);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void NotifyMonsterDefeated()
     {
-        
+        RemainingMonsters = Mathf.Max(0, RemainingMonsters - 1);
+    }
+
+    public void ResetCount()
+    {
+        RemainingMonsters = 0;
     }
 }
