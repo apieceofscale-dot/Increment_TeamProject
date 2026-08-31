@@ -1,6 +1,6 @@
 using System;
 
-interface IBootStrapper
+public interface IBootStrapper
 {
     /// 이 매니저 초기화가 끝나면 반드시 context.OnStepCompleted 호출할 것
     void IBootStrapperInitialize(BootstrapContext context);
