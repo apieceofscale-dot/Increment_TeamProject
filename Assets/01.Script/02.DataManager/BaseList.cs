@@ -7,14 +7,16 @@ using UnityEngine;
 public abstract class BaseData
 {
     public int id;
-    public string name;
+    public string codeName;
     public string description;
     public string displayName;
 
-    public BaseData(int id, string name, string description, string displayname)
+
+    public BaseData()    { }
+    public BaseData(int id, string codeName, string description, string displayname)
     {
         this.id = id;
-        this.name = name;
+        this.codeName = codeName;
         this.description = description;
         this.displayName = displayname;
         

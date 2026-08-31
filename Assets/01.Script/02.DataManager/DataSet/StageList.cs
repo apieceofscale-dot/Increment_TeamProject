@@ -14,7 +14,7 @@ public class StageData : BaseData
     public override BaseData Clone()
     {
         //생성자 반환하기.
-        return new StageData(id, name, description, displayName);
+        return new StageData(id, codeName, description, displayName);
     }
 }
 

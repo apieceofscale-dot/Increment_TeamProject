@@ -15,7 +15,7 @@ public class PlayerData : BaseData
     public override BaseData Clone()
     {
         //생성자 반환하기.
-        return new PlayerData(id, name, description, displayName);
+        return new PlayerData(id, codeName, description, displayName);
     }
 }
 

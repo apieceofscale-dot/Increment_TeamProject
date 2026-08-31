@@ -16,7 +16,7 @@ public class ItemData : BaseData
     public override BaseData Clone()
     {
         //생성자 반환하기.
-        return new ItemData(id, name, description, displayName);
+        return new ItemData(id, codeName, description, displayName);
     }
 }
 

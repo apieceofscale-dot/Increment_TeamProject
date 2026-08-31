@@ -22,7 +22,7 @@ public class DataManagerGenerator
     [MenuItem("Tools/Data/Excute this First!/Generate DataManager.g.cs")]
     public static void GnerateDataManager()
     {
-        List <DataEntry> entries = new List <DataEntry>();
+        List <DataAndListEntry> entries = new List <DataAndListEntry>();
 
         Type baseListType = typeof(BaseList<>);
         var listTypes = TypeCache.GetTypesDerivedFrom(baseListType); //반환형이 TypeCache.TypeCollection. 인 조회용 collection여기에 여러 Type이 들어있다.
@@ -34,7 +34,7 @@ public class DataManagerGenerator
             Type dataType = GetBaseListDataType(listType);
             if (dataType == null) continue; //널이면 들어가면 안됨.
             
-            entries.Add(new DataEntry(listType, dataType));          
+            entries.Add(new DataAndListEntry(listType, dataType));          
         }
         entries = entries.OrderBy(x => x.DataType.FullName).ToList(); //foreach의 순회는 순서 보장이 안되므로 항상 같은 결과로 보이게 정렬해줌. 미적요소임.
         /*
@@ -69,7 +69,7 @@ public class DataManagerGenerator
         }
         builder.AppendLine();
         //데이터 리포지토리 생성
-        foreach (DataEntry entry in entries)
+        foreach (DataAndListEntry entry in entries)
         {
             string dataTypeName = GetTypeName(entry.DataType);
             string repositoryname = GetRepositoryName(entry.DataType);
@@ -82,7 +82,7 @@ public class DataManagerGenerator
         //LoadAllData 함수 조립
         builder.AppendLine("    partial void LoadAllOfDataGenerated()");
         builder.AppendLine("    {");
-        foreach (DataEntry entry in entries)
+        foreach (DataAndListEntry entry in entries)
         {
             string repositoryName = GetRepositoryName(entry.DataType);
             string fieldName = GetFieldName(entry.ListType);
@@ -118,7 +118,45 @@ public class DataManagerGenerator
     [MenuItem("Tools/Data/Excute this 2nd/InjectDataManagerAsset")]
     public static void InjectDataManagerAsset()
     {
+        DataManager manager = UnityEngine.Object.FindFirstObjectByType<DataManager>();
+        SerializedObject so = new SerializedObject(manager);
 
+        List<DataAndListEntry> entries = new List<DataAndListEntry>();
+        FieldInfo[] fields = typeof(DataManager).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        foreach (var field in fields)
+        {
+            Type dataType = GetBaseListDataType(field.FieldType);
+            if (dataType == null) continue;
+            entries.Add(new DataAndListEntry(field.FieldType, dataType));
+        }
+
+        entries = entries.OrderBy(x => x.DataType.FullName).ToList();
+
+        foreach (var group in entries.GroupBy(x => x.DataType)) //설마 같은 데이터를 2개 넣는 사람은 없을 거라 생각하긴 하지만...
+        {
+            if (group.Count() <= 1) { continue; }
+            Debug.LogError($"{group.Key.Name} 용 리스트가 DataManager에 여러개 있음.");
+            return;
+        }
+        foreach (var entry in entries)
+        {
+            string fieldType = entry.ListType.Name;
+            string fieldName = GetFieldName(entry.ListType);
+            // Debug.Log($"{fieldType}, {fieldName}");
+            string[] guids = AssetDatabase.FindAssets($"t:{fieldType}");
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"{fieldType} 에셋을 찾지 못했습니다.");
+                continue;
+            }
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            UnityEngine.Object listAsset = AssetDatabase.LoadAssetAtPath(path, entry.ListType);
+
+            
+            SerializedProperty property = so.FindProperty(fieldName);
+            property.objectReferenceValue = listAsset;
+            so.ApplyModifiedProperties();
+        }
     }
 
 
@@ -184,12 +222,12 @@ public class DataManagerGenerator
         }
     }
 
-    private class DataEntry
+    private class DataAndListEntry
     {
         public Type ListType { get; }
         public Type DataType { get; }
 
-        public DataEntry(Type listType, Type dataType)
+        public DataAndListEntry(Type listType, Type dataType)
         {
             ListType = listType;
             DataType = dataType;

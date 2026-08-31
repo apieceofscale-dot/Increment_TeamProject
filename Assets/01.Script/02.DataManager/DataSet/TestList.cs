@@ -7,6 +7,8 @@ public class TestData : BaseData
 
     public int test;
 
+    public TestData() { }   
+
     public TestData(int test, int id, string name, string description, string displayname) : base(id, name, description, displayname)
     {
 
@@ -18,7 +20,7 @@ public class TestData : BaseData
     public override BaseData Clone()
     {
         //생성자 반환하기.
-        return new TestData(test,id,name,description,displayName);
+        return new TestData(test,id,codeName,description,displayName);
     }
 
 }

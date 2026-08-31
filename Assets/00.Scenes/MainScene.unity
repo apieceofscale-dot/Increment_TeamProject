@@ -369,10 +369,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba09235e7adc5bc4481068d9d4c1692b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataManager
-  itemList: {fileID: 0}
-  monsterList: {fileID: 0}
-  playerList: {fileID: 0}
-  stageList: {fileID: 0}
+  itemList: {fileID: 11400000, guid: 0266f93d58bd9164ab3b9d7eca400a89, type: 2}
+  monsterList: {fileID: 11400000, guid: 1f74811534079c442b4d5c9258aeb180, type: 2}
+  playerList: {fileID: 11400000, guid: 1735a7ba43621ab4cb706e67dd0ca289, type: 2}
+  stageList: {fileID: 11400000, guid: 69dc5b2fb61386545a8ac26d4312e5d1, type: 2}
   testList: {fileID: 11400000, guid: 94b8f0d602220c34eb8987f9eadd3b40, type: 2}
 --- !u!4 &820724398
 Transform:

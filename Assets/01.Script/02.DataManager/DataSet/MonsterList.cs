@@ -14,7 +14,7 @@ public class MonsterData : BaseData
     public override BaseData Clone()
     {
         //생성자 반환하기.
-        return new MonsterData(id, name, description, displayName);
+        return new MonsterData(id, codeName, description, displayName);
     }
 }
 
