@@ -2,8 +2,11 @@ using System;
 
 public interface IBootStrapper
 {
-    /// 이 매니저 초기화가 끝나면 반드시 context.OnStepCompleted 호출할 것
-    void IBootStrapperInitialize(BootstrapContext context);
+    /// <summary>
+    /// 폴더 번호에 해당하는 BootLayer를 반환해주세요. public int BootOrder => (int)BootLayer.초기화필요한매니저;
+    /// </summary>
+    int BootOrder { get; }
+    void IBootStrapperInitialize();
 }
 
 public interface IPoolable

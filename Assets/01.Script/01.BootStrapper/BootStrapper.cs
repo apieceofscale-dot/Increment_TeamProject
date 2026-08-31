@@ -1,30 +1,18 @@
 using UnityEngine;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 
 [DefaultExecutionOrder(-10000)]
 public class BootStrapper : MonoBehaviour
 {
-    [Header("초기화 매니저 목록")]
-    [Tooltip("의존성 규칙 맞춰 위에서부터 등록 요망")]
-    [SerializeField]
-    private List<MonoBehaviour> bootTargets = new List<MonoBehaviour>();
-
-    // 초기화 성공 매니저들
-    private readonly List<IBootStrapper> initializedTargets = new List<IBootStrapper>();
-
     /// <summary>
     /// 부트스트랩 시퀀스 종료 체크 여부, 외부 참조 가능
     /// </summary>
     public bool IsBootCompleted { get; private set; }
 
-    // 중복 호출 감지
-    private bool currentStepCallbackInvoked;
-
-
     private void Awake()
     {
-        // 중복 제거
+        // 중복 생성 방지
         if (FindObjectsByType<BootStrapper>(FindObjectsSortMode.None).Length > 1)
         {
             Destroy(gameObject);
@@ -32,72 +20,39 @@ public class BootStrapper : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-        InitializeStep(0);
     }
-
-    /// <summary>
-    /// 매니저 초기화 시작, 콜백 호출 시점에 다음 매니저로 넘어감
-    /// </summary>
-    /// <param name="index"></param>
-    private void InitializeStep(int index)
+    private void Start()
     {
-        // 전부 끝나면 completed true로 만들고 종료
-        if (index >= bootTargets.Count)
-        {
-            IsBootCompleted = true;
-            Debug.Log($"[BootStrapper] 전체 {initializedTargets.Count}개 초기화 완료");
-            return;
-        }
-
-        MonoBehaviour target = bootTargets[index];
-
-        // 빈 인스펙터 슬롯 건너뛰기
-        if (target == null)
-        {
-            Debug.LogError($"[BootStrapper] {index}占쏙옙 占쏙옙占쏙옙 占쏙옙占? 占쏙옙占쏙옙");
-            InitializeStep(index + 1);
-            return;
-        }
-
-        // 인터페이스 구현 안 된 케이스 건너뛰기
-        if (target is not IBootStrapper bootStrapper)
-        {
-            Debug.LogError($"[BootStrapper] '{target.name}'占쏙옙 IBootStrapper占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占십았쏙옙占싹댐옙. 占십깍옙화占쏙옙 占실너뜁니댐옙.");
-            InitializeStep(index + 1);
-            return;
-        }
-
-        currentStepCallbackInvoked = false;
-
-        BootstrapContext context = new BootstrapContext(
-            onStepCompleted: () => HandleStepCompleted(target, bootStrapper, index)
-        );
-
-        try
-        {
-            bootStrapper.IBootStrapperInitialize(context);
-        }
-        catch
-        {
-            Debug.LogError("초기화 중 예외 발생하여 중단");
-            return;
-        }
-
+        RunBootSequence();
     }
-    private void HandleStepCompleted(MonoBehaviour target, IBootStrapper bootStrapper, int index)
+
+    private void RunBootSequence()
     {
-        if (currentStepCallbackInvoked)
+        IBootStrapper[] targets = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            .OfType<IBootStrapper>()
+            .OrderBy(target => target.BootOrder)
+            .ToArray();
+
+        foreach (var target in targets)
         {
-            Debug.Log("두 번 이상 호출했습니다. 확인 필요");
-            return;
+            try
+            {
+                target.IBootStrapperInitialize();
+            }
+            catch (Exception e)
+            {
+                // 두 번째 인자로 target을 넘기면 콘솔에서 클릭 시 해당 오브젝트가 선택된다.
+                Debug.LogError($"[BootStrapper] {target.GetType().Name} 초기화 실패. 부트 시퀀스를 중단합니다.", target as UnityEngine.Object);
+                Debug.LogException(e, target as UnityEngine.Object);
+                return;
+            }
+            Debug.Log($"[BootStrapper] {target.GetType().Name} 초기화 완료");
+
         }
-        currentStepCallbackInvoked = true;
-
-        initializedTargets.Add(bootStrapper);
-        Debug.Log($"[BootStrapper] ({index + 1}/{bootTargets.Count}) 초기화 완료");
-
-
-        InitializeStep(index + 1);
+        IsBootCompleted = true;
+        Debug.Log($"[BootStrapper] 전체 {targets.Length}개 초기화 완료");
     }
+
+
 
 }

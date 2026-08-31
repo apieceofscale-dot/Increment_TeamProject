@@ -8,11 +8,12 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
     [SerializeField] MonsterController prefab;
     [SerializeField] ItemFacade itemFacade;
 
-    public void IBootStrapperInitialize(BootstrapContext context)
+    public int BootOrder => (int)BootLayer.Monster;
+
+    public void IBootStrapperInitialize()
     {
         MonsterDied -= HandleMonsterDied;
         MonsterDied += HandleMonsterDied;
-        context.OnStepCompleted?.Invoke();
     }
 
     void OnEnable()

@@ -7,11 +7,12 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
 
     [SerializeField] ItemController prefab;
 
-    public void IBootStrapperInitialize(BootstrapContext context)
+    public int BootOrder => (int)BootLayer.Item;
+
+    public void IBootStrapperInitialize()
     {
         ItemPickedUp -= HandlePickedUp;
         ItemPickedUp += HandlePickedUp;
-        context.OnStepCompleted?.Invoke();
     }
 
     void OnEnable()
