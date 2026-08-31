@@ -14,7 +14,6 @@ public sealed class AttackState : IMonsterFsmState
     public void Tick(MonsterController monster, float deltaTime)
     {
         var target = monster.FindTarget();
-        var data = monster.Status.Data;
         if (target == null)
         {
             monster.AI.ChangeState(MonsterState.Idle);
@@ -22,7 +21,7 @@ public sealed class AttackState : IMonsterFsmState
         }
 
         var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance > data.attackRange)
+        if (distance > monster.Status.AttackRange)
         {
             monster.AI.ChangeState(MonsterState.Trace);
             return;
@@ -32,7 +31,7 @@ public sealed class AttackState : IMonsterFsmState
         if (_attackTimer <= 0f)
         {
             monster.PerformAttack(target);
-            _attackTimer = Mathf.Max(0.1f, data.attackCooldown);
+            _attackTimer = monster.Status.AttackCooldown;
         }
     }
 

@@ -5,7 +5,7 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
 {
     public static event Action<MonsterDiedInfo> MonsterDied;
 
-    [SerializeField] MonsterFactory monsterFactory;
+    [SerializeField] MonsterController prefab;
     [SerializeField] ItemFacade itemFacade;
 
     public void IBootStrapperInitialize(BootstrapContext context)
@@ -31,6 +31,30 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
         MonsterDied?.Invoke(info);
     }
 
+    public MonsterController Spawn(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 1)
+    {
+        if (prefab == null)
+        {
+            Debug.LogWarning("[MonsterFacade] prefab is missing.");
+            return null;
+        }
+
+        var monster = Instantiate(prefab, position, rotation);
+        monster.BindSpawn(monsterId, stageIndex);
+        monster.OnSpawn();
+        return monster;
+    }
+
+    public void Despawn(MonsterController monster)
+    {
+        if (monster == null)
+        {
+            return;
+        }
+
+        monster.ReturnToPool();
+    }
+
     void HandleMonsterDied(MonsterDiedInfo info)
     {
         if (itemFacade != null)
@@ -38,18 +62,9 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
             itemFacade.DropFromMonster(info);
         }
 
-        if (info.Source == null)
+        if (info.Source != null)
         {
-            return;
-        }
-
-        if (monsterFactory != null)
-        {
-            monsterFactory.Despawn(info.Source);
-        }
-        else
-        {
-            info.Source.ReturnToPool();
+            Despawn(info.Source);
         }
     }
 }

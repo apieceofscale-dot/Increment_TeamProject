@@ -1,118 +1,50 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class DataManager : MonoBehaviour, IBootStrapper
+public partial class DataManager : MonoBehaviour
 {
     public static DataManager instance;
 
-    [SerializeField] MonsterList monsterData;
-    readonly DataRepositary<MonsterData> monsters = new DataRepositary<MonsterData>();
-
-    [SerializeField] ItemList itemData;
-    readonly DataRepositary<ItemData> items = new DataRepositary<ItemData>();
-
-    void Awake()
+    private void Awake()
     {
         if (instance == null)
-        {
             instance = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
+
+        LoadAllOfDataGenerated();
     }
 
-    void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
-    }
+    partial void LoadAllOfDataGenerated();
 
-    public void IBootStrapperInitialize(BootstrapContext context)
+    private void LoadData<T>(DataRepositary<T> repositary, List<T> dataList) where T : BaseData
     {
-        if (instance == null)
+        repositary.Clear();
+
+        if (dataList == null)
         {
-            instance = this;
+            Debug.Log($"{typeof(T).Name} 데이터가 Null");
         }
 
-        LoadAllOFData();
-        context.OnStepCompleted?.Invoke();
+        repositary.Load(dataList);
     }
 
-    void LoadAllOFData()
+    /*
+    public bool TryGetMonsterData(int id, out MonsterData monsterData)//아래tryget을 내가 작성중이라 비워둠. 여기에 out 넣거나 구현 안됨.
     {
-        LoadMonster();
-        LoadItem();
+        return monsters.TryGet(id, out monsterData);
     }
-
-    void LoadMonster()
+    public bool TryGetPlayerData(int id, out PlayerData playerData)
     {
-        monsters.Clear();
-        if (monsterData == null || monsterData.monsterList == null || monsterData.monsterList.Count == 0)
-        {
-            monsters.Load(CreateFallbackMonsters());
-            return;
-        }
-
-        monsters.Load(monsterData.monsterList);
+        return players.TryGet(id, out playerData);
     }
-
-    void LoadItem()
+    public bool TryGetWeaponData(int id, out StageData stageData)
     {
-        items.Clear();
-        if (itemData == null || itemData.itemList == null || itemData.itemList.Count == 0)
-        {
-            items.Load(CreateFallbackItems());
-            return;
-        }
-
-        items.Load(itemData.itemList);
+        return stages.TryGet(id, out stageData);
     }
-
-    public bool TryGetMonsterData(int id, out MonsterData monster)
+    public bool TryGetItemData(int id, out ItemData itemData)
     {
-        return monsters.TryGet(id, out monster);
+        return items.TryGet(id, out itemData);
     }
-
-    public bool TryGetItemData(int id, out ItemData item)
-    {
-        return items.TryGet(id, out item);
-    }
-
-    static System.Collections.Generic.List<MonsterData> CreateFallbackMonsters()
-    {
-        return new System.Collections.Generic.List<MonsterData>
-        {
-            new MonsterData
-            {
-                id = 1,
-                name = "DefaultMonster",
-                maxHp = 10,
-                attackDamage = 1,
-                moveSpeed = 1.5f,
-                traceRange = 6f,
-                attackRange = 1.4f,
-                attackCooldown = 1f,
-                dropItemId = 1,
-                dropChance = 1f
-            }
-        };
-    }
-
-    static System.Collections.Generic.List<ItemData> CreateFallbackItems()
-    {
-        return new System.Collections.Generic.List<ItemData>
-        {
-            new ItemData
-            {
-                id = 1,
-                name = "DefaultDrop",
-                type = ItemType.Currency,
-                value = 1,
-                upgradeStep = 1
-            }
-        };
-    }
+    */
 }

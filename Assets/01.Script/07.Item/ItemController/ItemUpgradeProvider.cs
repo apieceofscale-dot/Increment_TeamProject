@@ -4,16 +4,11 @@ public sealed class ItemUpgradeProvider
 {
     public static readonly ItemUpgradeProvider Default = new ItemUpgradeProvider();
 
-    public int Evaluate(ItemData data, int upgradeLevel)
+    public int Evaluate(ItemType type, int value, int upgradeStep, int upgradeLevel)
     {
-        if (data == null)
-        {
-            return 0;
-        }
-
         var level = Mathf.Max(0, upgradeLevel);
-        var step = Mathf.Max(1, data.upgradeStep);
-        return Mathf.Max(0, Mathf.RoundToInt(data.value + level * step * GetTypeExponent(data.type)));
+        var step = Mathf.Max(1, upgradeStep);
+        return Mathf.Max(0, Mathf.RoundToInt(value + level * step * GetTypeExponent(type)));
     }
 
     public float GetTypeExponent(ItemType type)

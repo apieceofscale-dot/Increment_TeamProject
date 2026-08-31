@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public class ItemDropFacade : MonoBehaviour, IBootStrapper
+public class ItemDropFacade : MonoBehaviour
 {
-    [SerializeField] ItemDropManager itemDropManager;
-
-    public void IBootStrapperInitialize(BootstrapContext context)
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        if (itemDropManager == null)
-        {
-            itemDropManager = FindFirstObjectByType<ItemDropManager>();
-        }
+        
+    }
 
-        context.OnStepCompleted?.Invoke();
+    // Update is called once per frame
+    void Update()
+    {
+        
     }
 }

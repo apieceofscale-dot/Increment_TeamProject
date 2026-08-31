@@ -4,6 +4,9 @@ using UnityEngine;
 public class ItemController : MonoBehaviour, IPoolable
 {
     [SerializeField] int itemId = 1;
+    [SerializeField] ItemType type = ItemType.Currency;
+    [SerializeField] int value = 1;
+    [SerializeField] int upgradeStep = 1;
     [SerializeField] int upgradeLevel;
     [SerializeField] int starForce;
     [SerializeField] string collectorTag = "Player";
@@ -31,7 +34,7 @@ public class ItemController : MonoBehaviour, IPoolable
     public void OnSpawn()
     {
         _spawned = true;
-        _statusProvider.ApplyTo(_status, ResolveData(), upgradeLevel, starForce);
+        _statusProvider.ApplyTo(_status, itemId, type, value, upgradeStep, upgradeLevel, starForce);
     }
 
     public void OnDespawn()
@@ -76,24 +79,12 @@ public class ItemController : MonoBehaviour, IPoolable
     public void ReturnToPool()
     {
         OnDespawn();
-        _returnToPool?.Invoke();
-    }
-
-    ItemData ResolveData()
-    {
-        if (DataManager.instance != null &&
-            DataManager.instance.TryGetItemData(itemId, out var data) &&
-            data != null)
+        if (_returnToPool != null)
         {
-            return data;
+            _returnToPool.Invoke();
+            return;
         }
 
-        return new ItemData
-        {
-            id = itemId,
-            type = ItemType.Currency,
-            value = 1,
-            upgradeStep = 1
-        };
+        Destroy(gameObject);
     }
 }

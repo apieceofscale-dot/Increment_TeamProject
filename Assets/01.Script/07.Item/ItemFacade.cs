@@ -5,7 +5,7 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
 {
     public static event Action<ItemPickedUpInfo> ItemPickedUp;
 
-    [SerializeField] ItemFactory itemFactory;
+    [SerializeField] ItemController prefab;
 
     public void IBootStrapperInitialize(BootstrapContext context)
     {
@@ -30,36 +30,51 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
         ItemPickedUp?.Invoke(info);
     }
 
-    public void DropFromMonster(in MonsterDiedInfo info)
+    public ItemController Spawn(int itemId, Vector3 position, Quaternion rotation, int upgradeLevel = 0, int starForce = 0)
     {
-        if (itemFactory == null || info.Source == null || info.Source.Status.Data == null)
+        if (prefab == null)
         {
-            return;
+            Debug.LogWarning("[ItemFacade] prefab is missing.");
+            return null;
         }
 
-        var data = info.Source.Status.Data;
-        if (data.dropItemId <= 0 || UnityEngine.Random.value > Mathf.Clamp01(data.dropChance))
-        {
-            return;
-        }
-
-        itemFactory.Spawn(data.dropItemId, info.Position, Quaternion.identity);
+        var item = Instantiate(prefab, position, rotation);
+        item.BindSpawn(itemId, upgradeLevel, starForce);
+        item.OnSpawn();
+        return item;
     }
 
-    void HandlePickedUp(ItemPickedUpInfo info)
+    public void Despawn(ItemController item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        item.ReturnToPool();
+    }
+
+    public void DropFromMonster(in MonsterDiedInfo info)
     {
         if (info.Source == null)
         {
             return;
         }
 
-        if (itemFactory != null)
+        var status = info.Source.Status;
+        if (status.DropItemId <= 0 || UnityEngine.Random.value > status.DropChance)
         {
-            itemFactory.Despawn(info.Source);
+            return;
         }
-        else
+
+        Spawn(status.DropItemId, info.Position, Quaternion.identity);
+    }
+
+    void HandlePickedUp(ItemPickedUpInfo info)
+    {
+        if (info.Source != null)
         {
-            info.Source.ReturnToPool();
+            Despawn(info.Source);
         }
     }
 }

@@ -1,26 +1,16 @@
 using UnityEngine;
 
-public class StageFacade : MonoBehaviour, IBootStrapper
+public class StageFacade : MonoBehaviour
 {
-    [SerializeField] StageStatus stageStatus;
-
-    public void IBootStrapperInitialize(BootstrapContext context)
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        MonsterFacade.MonsterDied -= HandleMonsterDied;
-        MonsterFacade.MonsterDied += HandleMonsterDied;
-        context.OnStepCompleted?.Invoke();
+        
     }
 
-    void OnDisable()
+    // Update is called once per frame
+    void Update()
     {
-        MonsterFacade.MonsterDied -= HandleMonsterDied;
-    }
-
-    void HandleMonsterDied(MonsterDiedInfo info)
-    {
-        if (stageStatus != null)
-        {
-            stageStatus.NotifyMonsterDefeated();
-        }
+        
     }
 }

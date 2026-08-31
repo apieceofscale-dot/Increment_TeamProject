@@ -1,21 +1,25 @@
+using UnityEngine;
+
 public sealed class ItemStatus
 {
     public int Id { get; private set; }
     public ItemType Type { get; private set; }
-    public ItemData Data { get; private set; }
+    public int BaseValue { get; private set; }
+    public int UpgradeStep { get; private set; }
     public ItemUpgrade Upgrade { get; } = new ItemUpgrade();
     public ItemEnchant Enchant { get; } = new ItemEnchant();
     public int EffectiveValue { get; private set; }
     public bool PickedUp { get; private set; }
 
-    public void Reset(ItemData data, int upgradeLevel, int starForce, int effectiveValue)
+    public void Reset(int id, ItemType type, int baseValue, int upgradeStep, int upgradeLevel, int starForce, int effectiveValue)
     {
-        Data = data;
-        Id = data != null ? data.id : 0;
-        Type = data != null ? data.type : ItemType.None;
+        Id = id;
+        Type = type;
+        BaseValue = baseValue;
+        UpgradeStep = Mathf.Max(1, upgradeStep);
         EffectiveValue = effectiveValue;
         PickedUp = false;
-        Upgrade.Set(upgradeLevel, UnityEngine.Mathf.Max(0, effectiveValue - (data != null ? data.value : 0)));
+        Upgrade.Set(upgradeLevel, Mathf.Max(0, effectiveValue - baseValue));
         Enchant.Set(starForce);
     }
 
@@ -28,7 +32,7 @@ public sealed class ItemStatus
     {
         PickedUp = false;
         EffectiveValue = 0;
-        Data = null;
+        BaseValue = 0;
         Upgrade.Clear();
         Enchant.Clear();
     }

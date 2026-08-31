@@ -5,6 +5,14 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 {
     [SerializeField] int monsterId = 1;
     [SerializeField] int stageIndex = 1;
+    [SerializeField] int maxHp = 10;
+    [SerializeField] int attackDamage = 1;
+    [SerializeField] float moveSpeed = 1.5f;
+    [SerializeField] float traceRange = 6f;
+    [SerializeField] float attackRange = 1.4f;
+    [SerializeField] float attackCooldown = 1f;
+    [SerializeField] int dropItemId = 1;
+    [SerializeField] float dropChance = 1f;
     [SerializeField] string targetTag = "Player";
 
     readonly MonsterStatus _status = new MonsterStatus();
@@ -44,11 +52,21 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnSpawn()
     {
-        var data = _stageProvider.ApplyStage(ResolveData(), stageIndex) ?? ResolveData();
         var palette = _stageProvider.GetPalette(stageIndex);
         _deathNotified = false;
         _spawned = true;
-        _status.Reset(monsterId, data, palette);
+        _status.Reset(
+            monsterId,
+            maxHp,
+            attackDamage,
+            moveSpeed,
+            traceRange,
+            attackRange,
+            attackCooldown,
+            dropItemId,
+            dropChance,
+            palette);
+        _stageProvider.ApplyStage(_status, stageIndex);
         _ai.Reset();
         if (_spriteRenderer != null)
         {
@@ -133,45 +151,26 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void MoveTowards(Vector3 worldPosition, float deltaTime)
     {
-        var speed = _status.Data != null ? _status.Data.moveSpeed : 1.5f;
-        transform.position = Vector3.MoveTowards(transform.position, worldPosition, speed * deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, worldPosition, _status.MoveSpeed * deltaTime);
     }
 
     public void PerformAttack(Transform target)
     {
         if (target != null && target.TryGetComponent<IDamageable>(out var damageable))
         {
-            var damage = _status.Data != null ? _status.Data.attackDamage : 1;
-            damageable.TakeDamage(Mathf.Max(1, damage));
+            damageable.TakeDamage(Mathf.Max(1, _status.AttackDamage));
         }
     }
 
     public void ReturnToPool()
     {
         OnDespawn();
-        _returnToPool?.Invoke();
-    }
-
-    MonsterData ResolveData()
-    {
-        if (DataManager.instance != null &&
-            DataManager.instance.TryGetMonsterData(monsterId, out var data) &&
-            data != null)
+        if (_returnToPool != null)
         {
-            return data;
+            _returnToPool.Invoke();
+            return;
         }
 
-        return new MonsterData
-        {
-            id = monsterId,
-            maxHp = 10,
-            attackDamage = 1,
-            moveSpeed = 1.5f,
-            traceRange = 6f,
-            attackRange = 1.4f,
-            attackCooldown = 1f,
-            dropItemId = 1,
-            dropChance = 1f
-        };
+        Destroy(gameObject);
     }
 }

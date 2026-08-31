@@ -15,7 +15,7 @@ public sealed class IdleState : IMonsterFsmState
         }
 
         var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance <= monster.Status.Data.traceRange)
+        if (distance <= monster.Status.TraceRange)
         {
             monster.AI.ChangeState(MonsterState.Trace);
         }

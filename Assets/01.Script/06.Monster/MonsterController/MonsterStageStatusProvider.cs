@@ -12,20 +12,15 @@ public sealed class MonsterStageStatusProvider
         new Color(0.90f, 0.75f, 0.25f)
     };
 
-    public MonsterData ApplyStage(MonsterData baseData, int stageIndex)
+    public void ApplyStage(MonsterStatus status, int stageIndex)
     {
-        if (baseData == null)
+        if (status == null)
         {
-            return null;
+            return;
         }
 
         var stage = Mathf.Max(1, stageIndex);
-        var multiplier = 1f + (stage - 1) * 0.25f;
-        var scaled = (MonsterData)baseData.Clone();
-        scaled.maxHp = Mathf.Max(1, Mathf.RoundToInt(baseData.maxHp * multiplier));
-        scaled.attackDamage = Mathf.Max(1, Mathf.RoundToInt(Mathf.Max(1, baseData.attackDamage) * multiplier));
-        scaled.moveSpeed = baseData.moveSpeed * multiplier;
-        return scaled;
+        status.ApplyStageMultiplier(1f + (stage - 1) * 0.25f);
     }
 
     public Color GetPalette(int stageIndex)

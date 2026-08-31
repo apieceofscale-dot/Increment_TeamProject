@@ -9,7 +9,6 @@ public sealed class TraceState : IMonsterFsmState
     public void Tick(MonsterController monster, float deltaTime)
     {
         var target = monster.FindTarget();
-        var data = monster.Status.Data;
         if (target == null)
         {
             monster.AI.ChangeState(MonsterState.Idle);
@@ -17,13 +16,13 @@ public sealed class TraceState : IMonsterFsmState
         }
 
         var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance > data.traceRange)
+        if (distance > monster.Status.TraceRange)
         {
             monster.AI.ChangeState(MonsterState.Idle);
             return;
         }
 
-        if (distance <= data.attackRange)
+        if (distance <= monster.Status.AttackRange)
         {
             monster.AI.ChangeState(MonsterState.Attack);
             return;

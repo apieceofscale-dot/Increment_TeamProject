@@ -1,25 +1,16 @@
 using UnityEngine;
 
-public class ItemDropManager : MonoBehaviour, IBootStrapper
+public class ItemDropManager : MonoBehaviour
 {
-    public int LastPickedItemId { get; private set; }
-    public int LastPickedValue { get; private set; }
-
-    public void IBootStrapperInitialize(BootstrapContext context)
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        ItemFacade.ItemPickedUp -= HandlePickedUp;
-        ItemFacade.ItemPickedUp += HandlePickedUp;
-        context.OnStepCompleted?.Invoke();
+        
     }
 
-    void OnDisable()
+    // Update is called once per frame
+    void Update()
     {
-        ItemFacade.ItemPickedUp -= HandlePickedUp;
-    }
-
-    void HandlePickedUp(ItemPickedUpInfo info)
-    {
-        LastPickedItemId = info.ItemId;
-        LastPickedValue = info.Value;
+        
     }
 }
