@@ -21,7 +21,7 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
     //살아있는 오브젝트들 다 돌려받는용.
     private HashSet<T> activedObjects = new HashSet<T>();
 
-
+    
 
 
     int poolSize;
@@ -69,17 +69,22 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
 
         for (int i = 0; i < poolSize; i++)
         {
-            T go = CreatPooledObject(prefab);
+            T go = CreatePooledObject(prefab);
             go.gameObject.SetActive(false);
             pools[prefab].Enqueue(go);
         }
     }
 
-    public T CreatPooledObject(T prefab) //부족해서 생성해야 할 경우와 코드가 중복되서 분리함.
+    public T CreatePooledObject(T prefab) //부족해서 생성해야 할 경우와 코드가 중복되서 분리함.
     {
         T go = Instantiate(prefab, poolsParents[prefab]);
 
         originPrefabs[go] = prefab; //생성된 프리팹을 저장.
+
+        if (go is IPoolable poolable)
+        {
+            poolable.InitializePoolObj(() => ReturnObject(go));
+        }
 
         return go;
     }
@@ -98,6 +103,7 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         }
 
         T go;
+
         if (pools[prefab].Count > 0)
         {
             go = pools[prefab].Dequeue();
@@ -105,16 +111,30 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         }
         else //풀은 있는데 부족할 경우 생성. 이때 저장 위치 기억.
         {
-            go = CreatPooledObject(prefab);
+            go = CreatePooledObject(prefab);
 
         }
 
         activedObjects.Add(go);
         go.gameObject.SetActive(true);
 
+        if (go is IPoolable poolable)
+            poolable.OnSpawn(); 
+
         return go;
     }
 
+    public T GetObject(T prefab, Vector3 position, Quaternion rotation) // 생성시 바로 위치 및 회전 등 지정 가능한 오버로드
+    {
+        T go = GetObject(prefab);
+
+        if (go == null)
+            return null;
+
+        go.transform.SetPositionAndRotation(position, rotation);
+
+        return go;
+    }
 
 
 
@@ -139,12 +159,13 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
             return;
         }
 
+        if (go is IPoolable poolable)
+            poolable.OnDespawn();
+
         go.gameObject.SetActive(false);
         go.transform.SetParent(poolsParents[originPrefab]); //저장 위치 찾아가기.
         pools[originPrefab].Enqueue(go);
         activedObjects.Remove(go);
-
-
     }
 
     public void ReturnAllobject()
