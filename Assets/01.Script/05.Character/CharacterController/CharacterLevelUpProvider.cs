@@ -8,13 +8,13 @@ public class CharacterLevelUpProvider
     private const long BaseAttackGrowth = 2;
     private const long BaseDefenseGrowth = 1;
 
-    public long GetRequireExp(int level)
+    public long GetRequiredExp(int level)
     {
         if (level < 1)
             level = 1;
         double requiredExp = BaseRequiredExp * Math.Pow(ExpGrowthRate, level - 1);
 
-        return (long)requiredExp;
+        return (long)Math.Round(requiredExp);
     }
 
     // 아래는 임시 공식들
