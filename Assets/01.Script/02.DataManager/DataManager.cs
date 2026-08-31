@@ -4,8 +4,6 @@ using UnityEngine;
 public partial class DataManager : MonoBehaviour
 {
     public static DataManager instance;
- 
-  
 
 
     private void Awake()
