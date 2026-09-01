@@ -23,6 +23,7 @@ public static class ExcelTest
 
         List<TestData> datas = new List<TestData>(); 
         
+        
         for (int i = 1; i < lines.Length; i++) 
         {
             if (string.IsNullOrEmpty(lines[i])) continue;
@@ -30,10 +31,13 @@ public static class ExcelTest
 
             values = lines[i].Split(',');
 
-            Type dataType = typeof(TestData);
+            Type listType = typeof(TestData);
+            Type dataType = listType.BaseType.GetGenericArguments()[0];
 
-            TestData data = (TestData)Activator.CreateInstance(dataType);            
+            BaseData data = (BaseData)Activator.CreateInstance(dataType);
 
+           
+            
             for (int col = 0; col < headers.Length; col++)
             {
                 FieldInfo field = dataType.GetField(headers[col]);
@@ -49,11 +53,14 @@ public static class ExcelTest
                     break;
                 }
             }
+            
 
 
             datas.Add(data);
+            
         }
 
+        
         string listPath = "Assets/04.Data/Test/TestData.asset";
         TestList testList = AssetDatabase.LoadAssetAtPath<TestList>(listPath);
 
@@ -61,6 +68,8 @@ public static class ExcelTest
 
         EditorUtility.SetDirty(testList);
         AssetDatabase.SaveAssets();
+        
+        
     }
 
 
