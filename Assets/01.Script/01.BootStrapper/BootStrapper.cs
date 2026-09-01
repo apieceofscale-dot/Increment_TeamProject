@@ -13,16 +13,6 @@ public class BootStrapper : MonoBehaviour
     private void Awake()
     {
         // 중복 생성 방지
-        if (FindObjectsByType<BootStrapper>(FindObjectsSortMode.None).Length > 1)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        DontDestroyOnLoad(gameObject);
-    }
-    private void Start()
-    {
         RunBootSequence();
     }
 
@@ -33,24 +23,34 @@ public class BootStrapper : MonoBehaviour
             .OrderBy(target => target.BootOrder)
             .ToArray();
 
-        foreach (var target in targets)
+        BootstrapContext context = new BootstrapContext(targets);
+
+
+        if (!RunPhase(targets, "의존성 주입", target => target.IBootStrapperInject(context))) return;
+        if (!RunPhase(targets, "초기화", target => target.IBootStrapperInitialize())) return;
+
+        IsBootCompleted = true;
+        Debug.Log($"[BootStrapper] 전체 {targets.Length}개 초기화 완료");
+    }
+
+    private bool RunPhase(IBootStrapper[] targets, string phaseName, Action<IBootStrapper> phase)
+    {
+        foreach (IBootStrapper target in targets)
         {
             try
             {
-                target.IBootStrapperInitialize();
+                phase(target);
             }
             catch (Exception e)
             {
-                // 두 번째 인자로 target을 넘기면 콘솔에서 클릭 시 해당 오브젝트가 선택된다.
-                Debug.LogError($"[BootStrapper] {target.GetType().Name} 초기화 실패. 부트 시퀀스를 중단합니다.", target as UnityEngine.Object);
+                Debug.LogError($"[BootStrapper] {target.GetType().Name} {phaseName}실패. 부트 시퀀스를 중단합니다.", target as UnityEngine.Object);
                 Debug.LogException(e, target as UnityEngine.Object);
-                return;
+                return false;
             }
-            Debug.Log($"[BootStrapper] {target.GetType().Name} 초기화 완료");
+            Debug.Log($"[BootStrapper] {target.GetType().Name} {phaseName} 완료");
 
         }
-        IsBootCompleted = true;
-        Debug.Log($"[BootStrapper] 전체 {targets.Length}개 초기화 완료");
+        return true;
     }
 
 
