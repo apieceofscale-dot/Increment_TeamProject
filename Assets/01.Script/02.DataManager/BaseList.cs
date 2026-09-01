@@ -12,16 +12,6 @@ public abstract class BaseData
     public string displayName;
 
 
-    public BaseData()    { }
-    public BaseData(int id, string codeName, string description, string displayname)
-    {
-        this.id = id;
-        this.codeName = codeName;
-        this.description = description;
-        this.displayName = displayname;
-        
-    }
-
     public abstract BaseData Clone();
     
 }

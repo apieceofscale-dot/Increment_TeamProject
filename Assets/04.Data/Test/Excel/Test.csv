@@ -1,4 +1,5 @@
 id,codeName,description,displayName
-1,Slime,something,SmallSlime
-2,Goblin,nothing,SmallGoblin
-3,Orc,anyting,SmallOrc
+1000000,Slime,something,SmallSlime
+1000001,Goblin,nothing,SmallGoblin
+1000002,Orc,anyting,SmallOrc
+1000003,ske,sdf,dfg
