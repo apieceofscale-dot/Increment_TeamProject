@@ -156,9 +156,27 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void PerformAttack(Transform target)
     {
-        if (target != null && target.TryGetComponent<IDamageable>(out var damageable))
+        if (target == null)
         {
-            damageable.TakeDamage(Mathf.Max(1, _status.AttackDamage));
+            return;
+        }
+
+        var damage = Mathf.Max(1, _status.AttackDamage);
+        if (target.TryGetComponent<IDamageable>(out var damageable))
+        {
+            damageable.TakeDamage(damage);
+            return;
+        }
+
+        if (target.TryGetComponent<CharacterFacade>(out var characterFacade))
+        {
+            characterFacade.TakeDamage(damage);
+            return;
+        }
+
+        if (target.TryGetComponent<CharacterControllers>(out var character))
+        {
+            character.Status.TakeDamage(damage);
         }
     }
 

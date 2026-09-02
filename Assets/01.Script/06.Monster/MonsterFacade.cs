@@ -10,6 +10,14 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
 
     public int BootOrder => (int)BootLayer.Monster;
 
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+        if (itemFacade == null)
+        {
+            context.TryGet(out itemFacade);
+        }
+    }
+
     public void IBootStrapperInitialize()
     {
         MonsterDied -= HandleMonsterDied;

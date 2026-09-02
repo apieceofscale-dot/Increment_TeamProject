@@ -9,6 +9,10 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
 
     public int BootOrder => (int)BootLayer.Item;
 
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+    }
+
     public void IBootStrapperInitialize()
     {
         ItemPickedUp -= HandlePickedUp;
