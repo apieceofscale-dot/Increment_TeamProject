@@ -67,7 +67,7 @@ public class CharacterStatus
         DodgeRate = 0; // 상대의 명중보다 높으면 회피확률 발생
     }
 
-    public void AddExp(int amount)
+    public void AddExp(long amount)
     {
         Exp += amount;
     }
@@ -98,7 +98,7 @@ public class CharacterStatus
             CurrentHp = 0;
     }
 
-    public void RecoverHp(int amount)
+    public void RecoverHp(long amount)
     {
         if (amount <= 0)
             return;
