@@ -5,25 +5,19 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 {
     public CharacterStatus Status { get; private set; }
     private CharacterLevelUpProvider characterLevelUpProvider;
+    private CharacterSkill testSkill;
 
     private void Awake()
     {
         Status = new CharacterStatus();
         characterLevelUpProvider = new CharacterLevelUpProvider();
+
+        testSkill = new CharacterSkill("테스트", 1, 10, 3f, true);
     }
 
     private void Update()
     {
-        if (Keyboard.current.spaceKey.isPressed)
-        {
-            GainExp(100);
 
-            Debug.Log(
-                $"Lv.{Status.Level} / " +
-                $"Exp : {Status.Exp} / " +
-                $"Attack : {Status.Attack}"
-            );
-        }
     }
 
     public void GainExp(long amount)
@@ -51,6 +45,19 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         }
     }
 
+    public bool UseTestSkill() // 테스트용 임시 메서드
+    {
+        if (!testSkill.CanUse())
+            return false;
+
+        if (!Status.UseMp(testSkill.MpCost))
+            return false;
+
+        testSkill.Use();
+
+        return true;
+    }
+
     private void ApplyLevelUpGrowth() // 실질적인 레벨 업 시 스탯 상승 적용
     {
         int currentLevel = Status.Level;
@@ -62,6 +69,6 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Status.IncreaseAttack(attackGrowth);
         Status.IncreaseDefense(defenseGrowth);
 
-        Debug.Log($"레벨업! Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenseGrowth}");
+        Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenseGrowth}");
     }
 }

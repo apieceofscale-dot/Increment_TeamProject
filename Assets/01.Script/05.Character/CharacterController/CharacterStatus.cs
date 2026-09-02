@@ -98,7 +98,7 @@ public class CharacterStatus
             CurrentHp = 0;
     }
 
-    public void RecoverHp(int amount)
+    public void RecoverHp(long amount)
     {
         if (amount <= 0)
             return;
