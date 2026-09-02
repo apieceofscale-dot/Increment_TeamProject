@@ -3,13 +3,20 @@ using UnityEngine;
 [Serializable]
 public class TestData : BaseData
 {
-    
+    public AnimationClip idleClip;
 
-  
+
     public override BaseData Clone()
     {
-        //생성자 반환하기.
-        return new TestData();
+        TestData clone = new TestData();
+
+        clone.id = this.id;
+        clone.codeName = this.codeName;
+        clone.description = this.description;
+        clone.displayName = this.displayName;
+        clone.idleClip = this.idleClip;
+
+        return clone;
     }
 
 }
