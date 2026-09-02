@@ -19,7 +19,25 @@ public readonly struct BootstrapContext
             }
         }
 
-        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}À»(¸¦) ¾À¿¡¼­ Ã£Áö ¸øÇß½À´Ï´Ù");
+        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}ï¿½ï¿½(ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ï´ï¿½");
     }
 }
 
+public readonly struct DropTableEntry
+{
+    /// <summary>ë“œëë  ì•„ì´í…œ ID,ItemId enum í™•ì • í›„ íƒ€ì… êµì²´</summary>
+    public readonly int ItemId;
+
+    /// <summary>ë“œë í™•ë¥ . 0f ~ 1f. 1fë©´ í™•ì •</summary>
+    public readonly float Chance;
+    public readonly int MinAmount;
+    public readonly int MaxAmount;
+
+    public DropTableEntry(int itemId, float chance, int minAmount, int maxAmount)
+    {
+        ItemId = itemId;
+        Chance = chance;
+        MinAmount = minAmount;
+        MaxAmount = maxAmount;
+    }
+}
