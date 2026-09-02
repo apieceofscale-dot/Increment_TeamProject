@@ -12,4 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586e74af41e2ab049bee567f4991d142, type: 3}
   m_Name: TestData
   m_EditorClassIdentifier: Assembly-CSharp::TestList
-  baseList: []
+  baseList:
+  - id: 1000000
+    codeName: Slime
+    description: something
+    displayName: SmallSlime
+  - id: 1000001
+    codeName: Goblin
+    description: nothing
+    displayName: SmallGoblin
+  - id: 1000002
+    codeName: Orc
+    description: anyting
+    displayName: SmallOrc
+  - id: 1000003
+    codeName: ske
+    description: sdf
+    displayName: dfg
