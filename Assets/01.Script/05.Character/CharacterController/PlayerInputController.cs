@@ -19,6 +19,7 @@ public class PlayerInputController : MonoBehaviour
         TestUseMp();
         TestRecoverMp();
         UseTestSkill();
+        TestSkillLevelUp();
     }
 
     // 테스트용 임시 메서드들
@@ -90,5 +91,13 @@ public class PlayerInputController : MonoBehaviour
             Debug.Log($"스킬 사용 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
         else
             Debug.Log("스킬 사용 실패");
+    }
+
+    private void TestSkillLevelUp()
+    {
+        if(!Keyboard.current.digit7Key.wasPressedThisFrame)
+            return;
+
+        characterFacade.TestSkillLevelUp();
     }
 }

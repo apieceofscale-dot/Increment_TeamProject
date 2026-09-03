@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82584a74bd8c43645a578a800b1deeae, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerList
-  baseList: []
+  baseList:
+  - id: 1000
+    codeName: Knight
+    description: something
+    displayName: Knight
+  - id: 1001
+    codeName: Wizard
+    description: nothing
+    displayName: Wizard
+  - id: 1002
+    codeName: Rogue
+    description: anyting
+    displayName: Rogue

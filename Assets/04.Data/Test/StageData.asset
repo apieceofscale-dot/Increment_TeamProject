@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 275eff5452f16654da08258705e7b632, type: 3}
   m_Name: StageData
   m_EditorClassIdentifier: Assembly-CSharp::StageList
-  baseList: []
+  baseList:
+  - id: 9000
+    codeName: St1
+    description: something
+    displayName: Stage 1
+  - id: 9001
+    codeName: St2
+    description: nothing
+    displayName: Stage 2
+  - id: 9002
+    codeName: St3
+    description: anyting
+    displayName: Stage 3
