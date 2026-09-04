@@ -13,6 +13,9 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
+        HandleMovement();
+        HandleJump();
+        //테스트용
         TestGainExp();
         TestTakeDamage();
         TestRecoverHp();
@@ -20,6 +23,26 @@ public class PlayerInputController : MonoBehaviour
         TestRecoverMp();
         UseTestSkill();
         TestSkillLevelUp();
+    }
+
+    private void HandleMovement()
+    {
+        float moveInput = 0f;
+
+        if (Keyboard.current.aKey.isPressed)
+            moveInput -= 1f;
+        if (Keyboard.current.dKey.isPressed)
+            moveInput += 1f;
+
+        characterFacade.SetMoveInput(moveInput);
+    }
+
+    private void HandleJump()
+    {
+        if (!Keyboard.current.spaceKey.wasPressedThisFrame)
+            return;
+
+        characterFacade.Jump();
     }
 
     // 테스트용 임시 메서드들
