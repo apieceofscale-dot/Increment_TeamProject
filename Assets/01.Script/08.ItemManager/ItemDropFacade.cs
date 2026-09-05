@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ItemDropFacade : MonoBehaviour
 {
-    [SerializeField] private ItemDropManager dropManager;
+    private ItemDropManager dropManager;
 
     public int BootOrder => (int)BootLayer.ItemManager;
 
