@@ -13,7 +13,10 @@ public class ItemData : BaseData
     {
         ItemData clone = new ItemData();
 
-        //clone.id =this.id;
+        clone.id = this.id;
+        clone.codeName = this.codeName;
+        clone.description = this.description;
+        clone.displayName = this.displayName;
 
         return clone;
     }

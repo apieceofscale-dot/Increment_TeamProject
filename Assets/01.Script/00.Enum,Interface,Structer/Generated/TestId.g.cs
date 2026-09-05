@@ -8,4 +8,5 @@ public enum TestId
     Goblin = 1000001,
     Orc = 1000002,
     ske = 1000003,
+    asdf = 1000004,
 }

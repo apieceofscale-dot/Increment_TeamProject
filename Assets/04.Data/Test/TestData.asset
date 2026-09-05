@@ -17,15 +17,74 @@ MonoBehaviour:
     codeName: Slime
     description: something
     displayName: SmallSlime
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
+    idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
+    runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
+    attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
+    hitClip: {fileID: 7400000, guid: 27c9095b6ba87a5448020161911d56ac, type: 2}
+    deadClip: {fileID: 7400000, guid: 11b7a2f178ca0744a85c201121b61e9c, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    hitAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
   - id: 1000001
     codeName: Goblin
     description: nothing
     displayName: SmallGoblin
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
+    idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
+    runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
+    attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
+    hitClip: {fileID: 7400000, guid: 27c9095b6ba87a5448020161911d56ac, type: 2}
+    deadClip: {fileID: 7400000, guid: 11b7a2f178ca0744a85c201121b61e9c, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    hitAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
   - id: 1000002
     codeName: Orc
     description: anyting
     displayName: SmallOrc
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
+    idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
+    runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
+    attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
+    hitClip: {fileID: 7400000, guid: 27c9095b6ba87a5448020161911d56ac, type: 2}
+    deadClip: {fileID: 7400000, guid: 11b7a2f178ca0744a85c201121b61e9c, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    hitAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
   - id: 1000003
     codeName: ske
     description: sdf
     displayName: dfg
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
+    idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
+    runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
+    attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
+    hitClip: {fileID: 7400000, guid: 27c9095b6ba87a5448020161911d56ac, type: 2}
+    deadClip: {fileID: 7400000, guid: 11b7a2f178ca0744a85c201121b61e9c, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    hitAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
+  - id: 1000004
+    codeName: asdf
+    description: asdf
+    displayName: asdf
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
+    idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
+    runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
+    attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
+    hitClip: {fileID: 7400000, guid: 27c9095b6ba87a5448020161911d56ac, type: 2}
+    deadClip: {fileID: 7400000, guid: 11b7a2f178ca0744a85c201121b61e9c, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    hitAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}

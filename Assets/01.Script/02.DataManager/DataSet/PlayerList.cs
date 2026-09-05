@@ -12,7 +12,10 @@ public class PlayerData : BaseData
     {
         PlayerData clone = new PlayerData();
 
-        //clone.id =this.id;
+        clone.id = this.id;
+        clone.codeName = this.codeName;
+        clone.description = this.description;
+        clone.displayName = this.displayName;
 
         return clone;
     }
