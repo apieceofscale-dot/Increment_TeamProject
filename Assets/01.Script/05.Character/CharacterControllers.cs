@@ -8,8 +8,18 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private CharacterSkill testSkill;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
 
+    private Rigidbody2D rigid;
+    private float moveInput;
+
+    [SerializeField] private float jumpForce = 8f;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+
     private void Awake()
     {
+        rigid = GetComponent<Rigidbody2D>();
+
         Status = new CharacterStatus();
         characterLevelUpProvider = new CharacterLevelUpProvider();
         skillLevelUpProvider = new CharacterSkillLevelUpProvider();
@@ -17,9 +27,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         testSkill = new CharacterSkill("테스트", 1, 10, 3f, true);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-
+        Move();
     }
 
     public void GainExp(long amount)
@@ -45,6 +55,39 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
             ApplyLevelUpGrowth();
         }
+    }
+
+    public void SetMoveInput(float input)
+    {
+        moveInput = Mathf.Clamp(input, -1f, 1f);
+    }
+
+    private void Move()
+    {
+        rigid.linearVelocity = new Vector2(moveInput * Status.MoveSpeed, rigid.linearVelocity.y);
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
+    }
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+            return;
+
+        Gizmos.DrawWireSphere(
+            groundCheck.position,
+            groundCheckRadius
+        );
+    }
+
+    public void Jump()
+    {
+        if (!IsGrounded())
+            return;
+
+        rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
     }
 
     public bool UseTestSkill() // 테스트용 임시 메서드
