@@ -9,6 +9,7 @@ public class ItemController : MonoBehaviour, IPoolable
     [SerializeField] int upgradeStep = 1;
     [SerializeField] int upgradeLevel;
     [SerializeField] int starForce;
+    [SerializeField] int quantity = 1;
     [SerializeField] string collectorTag = "Player";
 
     readonly ItemStatus _status = new ItemStatus();
@@ -19,11 +20,12 @@ public class ItemController : MonoBehaviour, IPoolable
 
     public ItemStatus Status => _status;
 
-    public void BindSpawn(int id, int upgrade, int star)
+    public void BindSpawn(int id, int upgrade, int star, int stackAmount = 1)
     {
         itemId = id;
         upgradeLevel = upgrade;
         starForce = star;
+        quantity = Mathf.Max(1, stackAmount);
     }
 
     public void InitializePoolObj(Action returnAction)
@@ -35,6 +37,7 @@ public class ItemController : MonoBehaviour, IPoolable
     {
         _spawned = true;
         _statusProvider.ApplyTo(_status, itemId, type, value, upgradeStep, upgradeLevel, starForce);
+        _status.ApplyStack(quantity);
     }
 
     public void OnDespawn()

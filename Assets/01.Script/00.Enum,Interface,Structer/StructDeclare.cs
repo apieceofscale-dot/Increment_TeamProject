@@ -20,7 +20,7 @@ public readonly struct BootstrapContext
             }
         }
 
-        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}À»(¸¦) ¾À¿¡¼­ Ã£Áö ¸øÇß½À´Ï´Ù");
+        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}ì„(ë¥¼) ì”¬ì—ì„œ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤");
     }
 
     public bool TryGet<T>(out T match) where T : class
@@ -36,6 +36,22 @@ public readonly struct BootstrapContext
 
         match = null;
         return false;
+    }
+}
+
+public readonly struct DropTableEntry
+{
+    public readonly int ItemId;
+    public readonly float Chance;
+    public readonly int MinAmount;
+    public readonly int MaxAmount;
+
+    public DropTableEntry(int itemId, float chance, int minAmount, int maxAmount)
+    {
+        ItemId = itemId;
+        Chance = chance;
+        MinAmount = minAmount;
+        MaxAmount = maxAmount;
     }
 }
 

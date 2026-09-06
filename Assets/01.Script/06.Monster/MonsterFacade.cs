@@ -6,15 +6,15 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
     public static event Action<MonsterDiedInfo> MonsterDied;
 
     [SerializeField] MonsterController prefab;
-    [SerializeField] ItemFacade itemFacade;
+    [SerializeField] ItemDropFacade itemDropFacade;
 
     public int BootOrder => (int)BootLayer.Monster;
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-        if (itemFacade == null)
+        if (itemDropFacade == null)
         {
-            context.TryGet(out itemFacade);
+            context.TryGet(out itemDropFacade);
         }
     }
 
@@ -66,9 +66,9 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
 
     void HandleMonsterDied(MonsterDiedInfo info)
     {
-        if (itemFacade != null)
+        if (itemDropFacade != null)
         {
-            itemFacade.DropFromMonster(info);
+            itemDropFacade.RequestDrop(info.MonsterId, info.Position);
         }
 
         if (info.Source != null)

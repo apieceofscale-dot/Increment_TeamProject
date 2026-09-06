@@ -49,6 +49,20 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
         return item;
     }
 
+    public ItemController Spawn(int itemId, int amount, Vector3 position)
+    {
+        if (prefab == null)
+        {
+            Debug.LogWarning("[ItemFacade] prefab is missing.");
+            return null;
+        }
+
+        var item = Instantiate(prefab, position, Quaternion.identity);
+        item.BindSpawn(itemId, 0, 0, amount);
+        item.OnSpawn();
+        return item;
+    }
+
     public void Despawn(ItemController item)
     {
         if (item == null)

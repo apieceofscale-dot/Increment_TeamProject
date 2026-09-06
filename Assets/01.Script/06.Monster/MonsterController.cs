@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 {
-    [SerializeField] int monsterId = 1;
+    [SerializeField] int monsterId = (int)MonsterId.Slime;
     [SerializeField] int stageIndex = 1;
     [SerializeField] int maxHp = 10;
     [SerializeField] int attackDamage = 1;
