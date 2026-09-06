@@ -36,6 +36,11 @@ public class CharacterFacade : MonoBehaviour
         return characterControllers.UseTestSkill();
     }
 
+    public void TestSkillLevelUp()
+    {
+        characterControllers.TestSkillLevelUp();
+    }
+
     public void RecoverMp(int amount)
     {
         characterControllers.Status.RecoverMp(amount);

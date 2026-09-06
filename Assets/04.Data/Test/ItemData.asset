@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a890e78e7dba1e48ac351b27e4412ca, type: 3}
   m_Name: ItemData
   m_EditorClassIdentifier: Assembly-CSharp::ItemList
-  baseList: []
+  baseList:
+  - id: 10000
+    codeName: HpPotion
+    description: something
+    displayName: HealingPotion
+  - id: 10001
+    codeName: ManaPotion
+    description: nothing
+    displayName: ManaPotion
+  - id: 10002
+    codeName: Portal
+    description: anyting
+    displayName: PortalScroll

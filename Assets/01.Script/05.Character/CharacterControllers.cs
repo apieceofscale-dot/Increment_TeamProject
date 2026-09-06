@@ -6,11 +6,13 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public CharacterStatus Status { get; private set; }
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkill testSkill;
+    private CharacterSkillLevelUpProvider skillLevelUpProvider;
 
     private void Awake()
     {
         Status = new CharacterStatus();
         characterLevelUpProvider = new CharacterLevelUpProvider();
+        skillLevelUpProvider = new CharacterSkillLevelUpProvider();
 
         testSkill = new CharacterSkill("테스트", 1, 10, 3f, true);
     }
@@ -56,6 +58,20 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         testSkill.Use();
 
         return true;
+    }
+
+    public void TestSkillLevelUp()
+    {
+        testSkill.IncreaseLevel();
+
+        int currentLevel = testSkill.Level;
+        int mpCost = skillLevelUpProvider.GetMpCost(currentLevel);
+        float cooldown = skillLevelUpProvider.GetCooldown(currentLevel);
+
+        testSkill.SetMpCost(mpCost);
+        testSkill.SetCooldown(cooldown);
+
+        Debug.Log($"{testSkill.SkillName} 강화 | Lv.{testSkill.Level} / Mp : {testSkill.MpCost} / Coodown : {testSkill.Cooldown}");
     }
 
     private void ApplyLevelUpGrowth() // 실질적인 레벨 업 시 스탯 상승 적용
