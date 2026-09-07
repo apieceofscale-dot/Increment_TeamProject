@@ -15,6 +15,7 @@ public class PlayerInputController : MonoBehaviour
     {
         HandleMovement();
         HandleJump();
+        HandleAttack();
         //테스트용
         TestGainExp();
         TestTakeDamage();
@@ -43,6 +44,17 @@ public class PlayerInputController : MonoBehaviour
             return;
 
         characterFacade.Jump();
+    }
+
+    private void HandleAttack()
+    {
+        if (!Keyboard.current.jKey.wasPressedThisFrame)
+            return;
+
+        bool isAttacked = characterFacade.Attack();
+
+        if (isAttacked)
+            Debug.Log("공격");
     }
 
     // 테스트용 임시 메서드들
@@ -105,20 +117,19 @@ public class PlayerInputController : MonoBehaviour
 
     private void UseTestSkill()
     {
-        if (!Keyboard.current.digit6Key.wasPressedThisFrame)
-            return;
+        if (Keyboard.current.digit6Key.wasPressedThisFrame)
+            characterFacade.UseSkillSlash();
 
-        bool isUsed = characterFacade.UseTestSkill();
+        if (Keyboard.current.digit7Key.wasPressedThisFrame)
+            characterFacade.UseSkillProjectile();
 
-        if (isUsed)
-            Debug.Log($"스킬 사용 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
-        else
-            Debug.Log("스킬 사용 실패");
+        if (Keyboard.current.digit8Key.wasPressedThisFrame)
+            characterFacade.UseSkillAttackBuff();
     }
 
     private void TestSkillLevelUp()
     {
-        if(!Keyboard.current.digit7Key.wasPressedThisFrame)
+        if(!Keyboard.current.digit0Key.wasPressedThisFrame)
             return;
 
         characterFacade.TestSkillLevelUp();

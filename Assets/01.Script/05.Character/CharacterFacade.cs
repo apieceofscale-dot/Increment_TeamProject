@@ -41,9 +41,24 @@ public class CharacterFacade : MonoBehaviour
         characterControllers.Jump();
     }
 
-    public bool UseTestSkill() // 테스트용 임시 메서드
+    public bool Attack()
     {
-        return characterControllers.UseTestSkill();
+        return characterControllers.TryAttack();
+    }
+
+    public bool UseSkillSlash()
+    {
+        return characterControllers.UseSkillSlash();
+    }
+
+    public bool UseSkillProjectile()
+    {
+        return characterControllers.UseSkillProjectile();
+    }
+
+    public bool UseSkillAttackBuff()
+    {
+        return characterControllers.UseSkillAttackBuff();
     }
 
     public void TestSkillLevelUp()

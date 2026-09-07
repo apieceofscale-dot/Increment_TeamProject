@@ -8,6 +8,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private CharacterSkill testSkill;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
 
+    // 이동 및 점프 관련
     private Rigidbody2D rigid;
     private float moveInput;
 
@@ -15,6 +16,20 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+
+    [SerializeField] Transform visualRoot;
+
+    // 공격 관련
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackRange = 1.2f;
+    [SerializeField] private LayerMask monsterLayer;
+
+    // 스킬 테스트용
+    [SerializeField] private CharacterSkillSlash skillSlash;
+    [SerializeField] private CharacterSkillProjectile skillProjectile;
+    [SerializeField] private CharacterSkillAttackBuff skillAttackBuff;
+
+    private float lastAttackTime;
 
     private void Awake()
     {
@@ -60,6 +75,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public void SetMoveInput(float input)
     {
         moveInput = Mathf.Clamp(input, -1f, 1f);
+        UpdateDirection();
     }
 
     private void Move()
@@ -73,13 +89,11 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     }
     private void OnDrawGizmosSelected()
     {
-        if (groundCheck == null)
-            return;
+        if (groundCheck != null)
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
-        Gizmos.DrawWireSphere(
-            groundCheck.position,
-            groundCheckRadius
-        );
+        if (attackPoint != null)
+            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
     public void Jump()
@@ -88,6 +102,48 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             return;
 
         rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
+    }
+
+    private void UpdateDirection()
+    {
+        if (moveInput == 0f)
+            return;
+
+        Vector3 scale = visualRoot.localScale;
+        scale.x = Mathf.Abs(scale.x) * (moveInput > 0f ? 1f : -1f);
+
+        visualRoot.localScale = scale;
+    }
+
+    public bool TryAttack()
+    {
+        float attackInterval = GetAttackInterval();
+
+        if (Time.time < lastAttackTime + attackInterval)
+            return false;
+
+        lastAttackTime = Time.time;
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, monsterLayer);
+
+        foreach (Collider2D hit in hits)
+        {
+            IDamageable damageable = hit.GetComponent<IDamageable>();
+
+            if (damageable == null)
+                continue;
+
+            damageable.TakeDamage(Status.Attack);
+        }
+
+        return true;
+    }
+
+    private float GetAttackInterval()
+    {
+        const float baseAttackInterval = 1f;
+        float attackSpeedMultiplier = 1f + Status.AttackSpeedRate;
+        return baseAttackInterval / attackSpeedMultiplier;
     }
 
     public bool UseTestSkill() // 테스트용 임시 메서드
@@ -129,5 +185,20 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Status.IncreaseDefense(defenseGrowth);
 
         Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenseGrowth}");
+    }
+
+    public bool UseSkillSlash()
+    {
+        return skillSlash.TryUse();
+    }
+
+    public bool UseSkillProjectile()
+    {
+        return skillProjectile.TryUse();
+    }
+
+    public bool UseSkillAttackBuff()
+    {
+        return skillAttackBuff.TryUse();
     }
 }

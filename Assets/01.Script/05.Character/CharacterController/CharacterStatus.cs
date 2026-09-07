@@ -145,6 +145,17 @@ public class CharacterStatus
         Attack += amount;
     }
 
+    public void DecreaseAttack(long amount)
+    {
+        if (amount <= 0)
+            return;
+
+        Attack -= amount;
+
+        if (Attack < 0)
+            Attack = 0;
+    }
+
     public void IncreaseDefense(long amount)
     {
         if (amount <= 0)
