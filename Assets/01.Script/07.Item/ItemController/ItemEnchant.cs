@@ -1,16 +1,14 @@
-using UnityEngine;
-
-public class ItemEnchant : MonoBehaviour
+public sealed class ItemEnchant
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int StarForce { get; private set; }
+
+    public void Set(int starForce)
     {
-        
+        StarForce = UnityEngine.Mathf.Max(0, starForce);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Clear()
     {
-        
+        StarForce = 0;
     }
 }
