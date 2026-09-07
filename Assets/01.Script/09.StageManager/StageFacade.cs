@@ -1,16 +1,26 @@
+using System;
 using UnityEngine;
 
-public class StageFacade : MonoBehaviour
+public sealed class StageFacade : MonoBehaviour, IBootStrapper
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    //세이브매니저만들어지면 완성되면 이 값을 false로 두고 SaveManager가 StartStage를 호출
+    [SerializeField] private bool autoStartOnBoot = true;
+
+    private StageController stageController;
+    private MonsterFacade monsterFacade;
+
+    public int BootOrder => (int)BootLayer.StageManager;
+
+
+    public void IBootStrapperInject(BootstrapContext context)
     {
-        
+
     }
 
-    // Update is called once per frame
-    void Update()
+    public void IBootStrapperInitialize()
     {
-        
+
     }
+
+
 }

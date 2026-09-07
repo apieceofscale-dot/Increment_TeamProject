@@ -1,4 +1,6 @@
 using System;
+using UnityEngine;
+
 public readonly struct BootstrapContext
 {
     private readonly IBootStrapper[] targets;
@@ -57,19 +59,24 @@ public readonly struct StageDefinition
     public readonly string DisplayName;
     public readonly StageType Type;
 
+    // 일반몹
     public readonly int MonsterId; // 스테이지별 드랍 테이블
     public readonly int DropTableId;
 
-    public readonly int MidBossMonsterId;
-    //public readonly int MidBossDropTableId;   // 분리할지 고민
-    public readonly float MidBossTimeLimit;
-
+    // 1000^((Chapter-1) + (IndexInChapter-1)/StagePerChapter)
     public readonly float StatMultiplier;
+
     public readonly int ClearKillCount;
     public readonly int MaxAliveMonster;
     public readonly float SpawnInterval;
-
     public readonly float TimeLimit;
+
+
+    // 엘리트(중간보스)
+    public readonly int EliteMonsterId; // 0일시 엘리트없는던전(보스, 경험치)
+    public readonly int EliteDropTableId;   // 장비위주 드롭 테이블
+    public readonly float EliteTimeLimit; // 소환 후 제한시간?
+
 
     public readonly int NextStageId;
     public readonly int FailStageId;
@@ -77,9 +84,15 @@ public readonly struct StageDefinition
     public bool HasTimeLimit => TimeLimit > 0f;
 
 
-    public StageDefinition(int stageId, int chapter, int indexInChapter, string stageCodeName, string displayName, StageType type,
-        int monsterId, int dropTableId, int midBossMonsterId, float midBossTimeLimit, float statMultiplier, int clearKillCount,
-        int maxAliveMonster, float spawnInterval, float timeLimit,
+    /// <summary>
+    /// 복잡하니 호출부에서 named argument 쓰기 권장
+    /// </summary>
+
+    public StageDefinition(
+        int stageId, int chapter, int indexInChapter, string stageCodeName, string displayName, StageType type,
+        int monsterId, int dropTableId, float statMultiplier,
+        int clearKillCount, int maxAliveMonster, float spawnInterval, float timeLimit,
+        int eliteMonsterId, int eliteDropTableId, float eliteTimeLimit,
         int nextStageId, int failStageId)
     {
         StageId = stageId;
@@ -90,15 +103,38 @@ public readonly struct StageDefinition
         Type = type;
         MonsterId = monsterId;
         DropTableId = dropTableId;
-        MidBossMonsterId = midBossMonsterId;
-        MidBossTimeLimit = midBossTimeLimit;
         StatMultiplier = statMultiplier;
         ClearKillCount = clearKillCount;
         MaxAliveMonster = maxAliveMonster;
         SpawnInterval = spawnInterval;
         TimeLimit = timeLimit;
+        EliteMonsterId = eliteMonsterId;
+        EliteDropTableId = eliteDropTableId;
+        EliteTimeLimit = eliteTimeLimit;
         NextStageId = nextStageId;
         FailStageId = failStageId;
+    }
+
+    public bool HasElite => EliteMonsterId > 0;
+
+}
+
+
+public readonly struct MonsterSpawnRequest
+{
+    public readonly int MonsterId;
+    public readonly int Chapter; // 팔레트 스왑용
+    public readonly float StatMultiplier;  // MonsterStageStatusProvider가 base 스탯에 곱함
+    public readonly int DropTableId;
+    public readonly Vector3 Position;
+
+    public MonsterSpawnRequest(int monsterId, int chapter, float statMultiplier, int dropTableId, Vector3 position)
+    {
+        MonsterId = monsterId;
+        Chapter = chapter;
+        StatMultiplier = statMultiplier;
+        DropTableId = dropTableId;
+        Position = position;
     }
 
 
@@ -116,19 +152,16 @@ public readonly struct StageProgressInfo
 
     public readonly int KillCount;
     public readonly int ClearKillCount; // 어떤 방식으로 다음 스테이지 넘길 지 반영
-
-    public readonly bool HasTimeLimit;
     public readonly float RemainTime;
 
-    public readonly int NextStageId;
+    public readonly bool IsClearConditionMet;
 
 
 
 
-    public StageProgressInfo(int stageId, int chapter, int indexInChapter, string displayName,
-        StageType type, StageState state,
-        int killCount, int clearKillCount,
-        bool hasTimeLimit, float remainTime, int nextStageId)
+    public StageProgressInfo(
+        int stageId, int chapter, int indexInChapter, string displayName, StageType type, StageState state,
+        int killCount, int clearKillCount, float remainTime, bool isClearConditionMet)
     {
         StageId = stageId;
         Chapter = chapter;
@@ -138,15 +171,29 @@ public readonly struct StageProgressInfo
         State = state;
         KillCount = killCount;
         ClearKillCount = clearKillCount;
-        HasTimeLimit = hasTimeLimit;
         RemainTime = remainTime;
-        NextStageId = nextStageId;
+        IsClearConditionMet = isClearConditionMet;
     }
 }
 
-public readonly struct MonsterSpawnRequest
+// 엘리트 진행상황 분리 구독용
+public readonly struct EliteProgressInfo
 {
+    public readonly bool IsActive;
+    public readonly bool CanSummon; // 소환 버튼 활성 조건 (스테이지가 엘리트를 가지고, 지금 없고, 전투 중)
+    public readonly float RemainTime; // IsActive일 때만 의미 있음
+    public readonly float TimeLimit;// 게이지 비율 계산용
 
+    public EliteProgressInfo(bool isActive, bool canSummon, float remainTime, float timeLimit)
+    {
+        IsActive = isActive;
+        CanSummon = canSummon;
+        RemainTime = remainTime;
+        TimeLimit = timeLimit;
+    }
 }
+
+
+
 
 
