@@ -128,10 +128,11 @@ public class PlayerInputController : MonoBehaviour
     }
 
     private void TestSkillLevelUp()
-    {
+    void Update()
         if(!Keyboard.current.digit0Key.wasPressedThisFrame)
             return;
 
         characterFacade.TestSkillLevelUp();
+        
     }
 }

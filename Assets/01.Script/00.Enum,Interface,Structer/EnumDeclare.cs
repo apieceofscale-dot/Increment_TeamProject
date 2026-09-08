@@ -31,3 +31,21 @@ public enum BootLayer
     UIManager = 12,
     Codex = 13,
 }
+
+// 추후 값 변경
+public enum StageType
+{
+    Farm, // 하위스테이지
+    Boss,
+    Dungeon, // 경험치던전, 챕터 진행이랑 무관
+
+}
+
+public enum StageState
+{
+    None,
+    Battle,
+    Cleared, // 보스 
+    Failed
+}
+}

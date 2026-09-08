@@ -23,11 +23,6 @@ public sealed class ItemStatus
         Enchant.Set(starForce);
     }
 
-    public void ApplyStack(int amount)
-    {
-        EffectiveValue = Mathf.Max(1, EffectiveValue) * Mathf.Max(1, amount);
-    }
-
     public void MarkPickedUp()
     {
         PickedUp = true;
