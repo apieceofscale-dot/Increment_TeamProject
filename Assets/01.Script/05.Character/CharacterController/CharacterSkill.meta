@@ -1,9 +1,7 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/01.Script/05.Character/CharacterController/CharacterSkill.meta
+
 guid: bef31040840a5a746a2d2c9b42a8726a
-========
-guid: 4bea378716608104ba708834f5f807ab
->>>>>>>> hyolim:Assets/04.Data/Animations.meta
+
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
