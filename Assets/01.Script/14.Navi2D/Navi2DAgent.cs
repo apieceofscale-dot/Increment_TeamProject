@@ -6,26 +6,19 @@ using Unity.VisualScripting;
 //네놈은 부트스트래퍼를 통해 pathfinder를 찾는다.
 //결국 FSM에서 호출할 Trace함수 하나 만들어주면 끝.
 public class Navi2DAgent : MonoBehaviour
-{       
+{
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckHeight = 0.1f;
     [SerializeField] private float groundCheckWidthRatio = 0.8f;
 
-    [Header("Agent 설정")]    
+    [Header("Agent 설정")]
     [SerializeField] private float MoveSpeed = 3f; //캐릭터 스테이터스
-<<<<<<< HEAD
-    [SerializeField] private float jumpMaxHeight = 2f; // 실제 값 아님. 
-=======
     [SerializeField] private float jumpMaxHeight = 0.1f; // 실제 값 아님. 
->>>>>>> teamjang
     [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기   
 
-    private Navi2DPathFinder pathFinder;    
+    private Navi2DPathFinder pathFinder;
     private Rigidbody2D rb;
-<<<<<<< HEAD
-=======
 
->>>>>>> teamjang
     private Collider2D col;
 
     private List<Navi2DNode> path;
@@ -41,13 +34,11 @@ public class Navi2DAgent : MonoBehaviour
     private bool isDropping;
     private bool hasleftGround;
 
-<<<<<<< HEAD
-=======
     float gravity;
 
->>>>>>> teamjang
     public Vector2 FootPosition
-    { get
+    {
+        get
         {
             Bounds bounds = col.bounds;
             return new Vector2(bounds.center.x, bounds.min.y);
@@ -63,11 +54,7 @@ public class Navi2DAgent : MonoBehaviour
 
     private void Start()
     {
-<<<<<<< HEAD
-        
-=======
         gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
->>>>>>> teamjang
     }
 
     private void FixedUpdate()
@@ -89,12 +76,12 @@ public class Navi2DAgent : MonoBehaviour
     }
     private void FollowPath() //walk에서 MoveToNode 를 재호출 하니 while문으로 고치기.
     {
-        if(path == null || path.Count == 0) return;
+        if (path == null || path.Count == 0) return;
 
-        if(currentPathIndex >= path.Count)
+        if (currentPathIndex >= path.Count)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            
+
             return;
         }
 
@@ -105,16 +92,16 @@ public class Navi2DAgent : MonoBehaviour
 
     private void MoveToNode(Navi2DNode targetNode)
     {
-        if(currentPathIndex <= 0) return;
+        if (currentPathIndex <= 0) return;
 
         Navi2DNode currentNode = path[currentPathIndex - 1];
-        if(currentNode == null) return;
+        if (currentNode == null) return;
 
         Vector2Int delta = targetNode.gridPos - currentNode.gridPos;
 
         bool isWalk = delta.y == 0 && Mathf.Abs(delta.x) <= 1; //근데 이러면 노드단위로 이동하긴 함.
 
-        if(isWalk)
+        if (isWalk)
         {
             Walk(targetNode);
         }
@@ -143,17 +130,17 @@ public class Navi2DAgent : MonoBehaviour
         }
 
         float direction = Mathf.Sign(targetNode.worldPos.x - FootPosition.x);
-        rb.linearVelocity = new Vector2(direction *MoveSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(direction * MoveSpeed, rb.linearVelocity.y);
 
     }
     private void MoveThroughLink(Navi2DNode currentNode, Navi2DNode targetNode)
     {
         float heightDelta = targetNode.worldPos.y - currentNode.worldPos.y;
-        if(heightDelta >= -0.01f)
+        if (heightDelta >= -0.01f)
         {
-            StartJump(currentNode,targetNode);
+            StartJump(currentNode, targetNode);
             return;
-        }        
+        }
 
         StartDrop(currentNode, targetNode);
 
@@ -164,11 +151,7 @@ public class Navi2DAgent : MonoBehaviour
         //Debug.Log("StartJump 호출");
         if (isJumping) return;
 
-<<<<<<< HEAD
-        float gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
-=======
-        
->>>>>>> teamjang
+
 
         bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
             currentNode.worldPos,
@@ -189,14 +172,14 @@ public class Navi2DAgent : MonoBehaviour
         rb.linearVelocity = jumpVelocity;
 
         jumpTargetNode = targetNode;
-        isJumping = true;   
+        isJumping = true;
     }
 
     private void StartDrop(Navi2DNode currentNode, Navi2DNode targetNode)
     {
         float deltaX = targetNode.worldPos.x - currentNode.worldPos.x;
 
-        if(Mathf.Abs(deltaX) < 0.01f)
+        if (Mathf.Abs(deltaX) < 0.01f)
         {
             Debug.LogWarning($"수직 Drop은 현재 지원하지 않음 : " + $"{currentNode.gridPos} -> {targetNode.gridPos}");
             return;
@@ -213,11 +196,11 @@ public class Navi2DAgent : MonoBehaviour
 
     private void UpdateDrop()
     {
-        if(!hasleftGround)
+        if (!hasleftGround)
         {
-            if(!IsGrounded())
+            if (!IsGrounded())
             {
-                hasleftGround=true;
+                hasleftGround = true;
             }
             return;
         }
@@ -225,10 +208,10 @@ public class Navi2DAgent : MonoBehaviour
         if (!IsGrounded()) return;
 
 
-        isDropping =false;
+        isDropping = false;
         hasleftGround = false;
 
-        if(repathPending)
+        if (repathPending)
         {
             repathPending = false;
             RequestPath();
@@ -237,21 +220,21 @@ public class Navi2DAgent : MonoBehaviour
 
         currentPathIndex++;
 
-        
+
 
     }
 
     private void UpdateJump()
     {
-        if(rb.linearVelocity.y > 0f)
+        if (rb.linearVelocity.y > 0f)
             return;
 
         if (!IsGrounded()) return;
 
-        isJumping = false;      
+        isJumping = false;
         jumpTargetNode = null;
 
-        if(repathPending)
+        if (repathPending)
         {
             repathPending = false;
             RequestPath();
@@ -316,24 +299,15 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
-<<<<<<< HEAD
-        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight);
-=======
-        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed,jumpMaxHeight, gravity);
->>>>>>> teamjang
+        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed, jumpMaxHeight, gravity);
 
         if (path == null || path.Count == 0)
         {
             currentPathIndex = 0;
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
-<<<<<<< HEAD
-        }
-
-=======
 
         }
->>>>>>> teamjang
         currentPathIndex = path.Count > 1 ? 1 : 0;
         Debug.Log($"Repath : Target Node {lastTargetNode?.gridPos}");
     }

@@ -69,7 +69,7 @@ public class CharacterStatus
         DodgeRate = 0; // 상대의 명중보다 높으면 회피확률 발생
     }
     */
-
+    /*
     public void Initialize(PlayerData data)
     {
         Level = 1;
@@ -106,6 +106,8 @@ public class CharacterStatus
         DodgeRate = data.dodgeRate;
 
     }
+    */
+
     public void AddExp(long amount)
     {
         Exp += amount;

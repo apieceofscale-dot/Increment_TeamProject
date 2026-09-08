@@ -19,7 +19,7 @@ public class CharacterFacade : MonoBehaviour
             return;
         }
 
-        Status.Initialize(playerData);
+        // Status.Initialize(playerData);
     }
 
     public void GainExp(long amount)
