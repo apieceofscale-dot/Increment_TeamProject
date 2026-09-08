@@ -33,7 +33,7 @@ public class CharacterStatus
     public long Defense { get; private set; } //기본 방어도
     public int DodgeRate { get; private set; } //회피
 
-    /*
+    
     public CharacterStatus()
     {
         Level = 1;
@@ -68,8 +68,8 @@ public class CharacterStatus
         Defense = 0; // 0만큼 피해 감소
         DodgeRate = 0; // 상대의 명중보다 높으면 회피확률 발생
     }
-    */
-    /*
+
+    /* 왠지 내가 다른 파일 잘못 건드린 것 같아서 비활성화
     public void Initialize(PlayerData data)
     {
         Level = 1;
