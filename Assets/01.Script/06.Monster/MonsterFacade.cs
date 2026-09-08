@@ -14,7 +14,7 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
     {
         if (itemDropFacade == null)
         {
-            context.TryGet(out itemDropFacade);
+            //context.TryGet(out itemDropFacade);
         }
     }
 

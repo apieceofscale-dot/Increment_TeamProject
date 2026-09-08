@@ -23,7 +23,7 @@ public class PlayerInputController : MonoBehaviour
         TestUseMp();
         TestRecoverMp();
         UseTestSkill();
-        TestSkillLevelUp();
+        //TestSkillLevelUp();
     }
 
     private void HandleMovement()
@@ -127,6 +127,7 @@ public class PlayerInputController : MonoBehaviour
             characterFacade.UseSkillAttackBuff();
     }
 
+    /*
     private void TestSkillLevelUp()
     void Update()
         if(!Keyboard.current.digit0Key.wasPressedThisFrame)
@@ -135,4 +136,5 @@ public class PlayerInputController : MonoBehaviour
         characterFacade.TestSkillLevelUp();
         
     }
+    */
 }
