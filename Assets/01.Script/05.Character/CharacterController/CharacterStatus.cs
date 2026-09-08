@@ -1,3 +1,5 @@
+using Unity.Android.Gradle.Manifest;
+
 public class CharacterStatus
 {
     public int Level { get; private set; }
@@ -16,7 +18,7 @@ public class CharacterStatus
     public int Luck { get; private set; } //LUK 운
 
     // 피해 관련
-    public long Attack { get; private set; } //기본 공격력
+    public int Attack { get; private set; } //기본 공격력
     public float AttackSpeedRate { get; private set; } //공격 속도 증가율 최대 +150%(1+1.5f)
     public int HitRate { get; private set; } //명중
     public float CriticalRate { get; private set; } //치명타 확률
@@ -31,7 +33,7 @@ public class CharacterStatus
     public long Defense { get; private set; } //기본 방어도
     public int DodgeRate { get; private set; } //회피
 
-
+    
     public CharacterStatus()
     {
         Level = 1;
@@ -66,6 +68,45 @@ public class CharacterStatus
         Defense = 0; // 0만큼 피해 감소
         DodgeRate = 0; // 상대의 명중보다 높으면 회피확률 발생
     }
+
+    /* 왠지 내가 다른 파일 잘못 건드린 것 같아서 비활성화
+    public void Initialize(PlayerData data)
+    {
+        Level = 1;
+        Exp = 0;
+
+        MaxHp = data.maxHp;
+        CurrentHp = MaxHp;
+        MaxMp = data.maxMp;
+        CurrentMp = MaxMp;
+        RecoverMpPerSec = data.recoverMpPerSec;
+
+        MoveSpeed = data.moveSpeed;
+
+        Strength = data.strength;
+        Dexterity = data.dexterity;
+        Intelligence = data.intelligence;
+        Luck = data.luck;
+
+        Attack = data.attack;
+        AttackSpeedRate = data.attackSpeedRate;
+        HitRate = data.hitRate;
+
+        CriticalRate = data.criticalRate;
+        CriticalDamage = data.criticalDamage;
+
+        DamageByMainStat = data.damageByMainStat;
+        DamageOnBoss = data.damageOnBoss;
+        DamageOnNormal = data.damageOnNormal;
+
+        ArmorPenetration = data.armorPenetration;
+        FinalDamage = data.finalDamage;
+
+        Defense = data.defence;
+        DodgeRate = data.dodgeRate;
+
+    }
+    */
 
     public void AddExp(long amount)
     {
@@ -137,12 +178,23 @@ public class CharacterStatus
         MaxHp += amount;
     }
 
-    public void IncreaseAttack(long amount)
+    public void IncreaseAttack(int amount)
     {
         if (amount <= 0)
             return;
 
         Attack += amount;
+    }
+
+    public void DecreaseAttack(int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        Attack -= amount;
+
+        if (Attack < 0)
+            Attack = 0;
     }
 
     public void IncreaseDefense(long amount)

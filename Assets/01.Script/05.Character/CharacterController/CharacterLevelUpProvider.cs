@@ -5,8 +5,8 @@ public class CharacterLevelUpProvider
     private const long BaseRequiredExp = 100;
     private const double ExpGrowthRate = 1.15; // 임시로 1.15로 지정, 추후 기획에 따라 변경예정
     private const long BaseHpGrowth = 10;
-    private const long BaseAttackGrowth = 2;
-    private const long BaseDefenseGrowth = 1;
+    private const int BaseAttackGrowth = 2;
+    private const int BaseDefenseGrowth = 1;
 
     public long GetRequiredExp(int level)
     {
@@ -27,7 +27,7 @@ public class CharacterLevelUpProvider
         return BaseHpGrowth + level;
     }
 
-    public long GetAttackGrowth(int level)
+    public int GetAttackGrowth(int level)
     {
         if (level < 1)
             level = 1;
@@ -35,7 +35,7 @@ public class CharacterLevelUpProvider
         return BaseAttackGrowth + level / 5;
     }
 
-    public long GetDefenseGrowth(int level)
+    public int GetDefenseGrowth(int level)
     {
         if (level < 1)
             level = 1;

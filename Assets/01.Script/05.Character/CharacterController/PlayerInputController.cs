@@ -13,12 +13,48 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
+        HandleMovement();
+        HandleJump();
+        HandleAttack();
+        //테스트용
         TestGainExp();
         TestTakeDamage();
         TestRecoverHp();
         TestUseMp();
         TestRecoverMp();
         UseTestSkill();
+        TestSkillLevelUp();
+    }
+
+    private void HandleMovement()
+    {
+        float moveInput = 0f;
+
+        if (Keyboard.current.aKey.isPressed)
+            moveInput -= 1f;
+        if (Keyboard.current.dKey.isPressed)
+            moveInput += 1f;
+
+        characterFacade.SetMoveInput(moveInput);
+    }
+
+    private void HandleJump()
+    {
+        if (!Keyboard.current.spaceKey.wasPressedThisFrame)
+            return;
+
+        characterFacade.Jump();
+    }
+
+    private void HandleAttack()
+    {
+        if (!Keyboard.current.jKey.wasPressedThisFrame)
+            return;
+
+        bool isAttacked = characterFacade.Attack();
+
+        if (isAttacked)
+            Debug.Log("공격");
     }
 
     // 테스트용 임시 메서드들
@@ -81,14 +117,21 @@ public class PlayerInputController : MonoBehaviour
 
     private void UseTestSkill()
     {
-        if (!Keyboard.current.digit6Key.wasPressedThisFrame)
+        if (Keyboard.current.digit6Key.wasPressedThisFrame)
+            characterFacade.UseSkillSlash();
+
+        if (Keyboard.current.digit7Key.wasPressedThisFrame)
+            characterFacade.UseSkillProjectile();
+
+        if (Keyboard.current.digit8Key.wasPressedThisFrame)
+            characterFacade.UseSkillAttackBuff();
+    }
+
+    private void TestSkillLevelUp()
+    {
+        if(!Keyboard.current.digit0Key.wasPressedThisFrame)
             return;
 
-        bool isUsed = characterFacade.UseTestSkill();
-
-        if (isUsed)
-            Debug.Log($"스킬 사용 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
-        else
-            Debug.Log("스킬 사용 실패");
+        characterFacade.TestSkillLevelUp();
     }
 }

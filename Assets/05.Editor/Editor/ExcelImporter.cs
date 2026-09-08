@@ -74,14 +74,67 @@ public static class ExcelImporter
             for (int col = 0; col < headers.Length; col++)
             {
                 FieldInfo field = dataType.GetField(headers[col]);
+                Debug.Log($"{dataType.Name}/ [{headers[col]}].");
                 if (field == null)
                 {
-                    // Debug.LogError($"{dataType.Name}에 [{headers[col]}] 필드가 없습니다.");
-                    // return;
-                    continue;
+                    Debug.LogError($"{dataType.Name}에 [{headers[col]}] 필드가 없습니다.");
+                    return;
+                    
                 }
-                object value = Convert.ChangeType(values[col], field.FieldType);
+                //object value = Convert.ChangeType(values[col], field.FieldType); 이 코드는 AnimationClip을 못 읽음.
 
+                object value;
+
+                if(typeof(UnityEngine.Object).IsAssignableFrom(field.FieldType))
+                {
+                    string assetPath = values[col].Trim();
+
+                    if (string.IsNullOrWhiteSpace(assetPath))
+                    {
+                        value = null; //드디어 들어간 안전처리.
+                    }
+                    else
+                    {
+                        value = AssetDatabase.LoadAssetAtPath(assetPath, field.FieldType);
+
+                        if (value == null)
+                        {
+                            Debug.LogError($"{field.FieldType.Name} is not found : {assetPath}");
+                            return;
+                        }
+                    }
+                }
+                else
+                {                    
+                    value = Convert.ChangeType(values[col],field.FieldType);
+                }
+
+                /*
+                if(field.FieldType == typeof(AnimationClip))
+                {
+                    string clipPath = values[col].Trim();
+                    if(string.IsNullOrEmpty(clipPath))
+                    {
+                        value = null;
+                    }
+                    else
+                    {
+                        AnimationClip clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(clipPath);
+
+                        if(clipPath == null)
+                        {
+                            Debug.LogError("AnimationClip is not found : " + clipPath);
+                            return;
+                        }
+                        value = clip;
+                    }               
+
+                }
+                else
+                {
+                    value = Convert.ChangeType(values[col], field.FieldType);
+                }
+                */
                 field.SetValue(data, value);
 
                 if (col > 100)

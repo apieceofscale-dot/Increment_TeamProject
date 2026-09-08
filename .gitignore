@@ -105,3 +105,19 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+<<<<<<< HEAD
+Assets/01.Script/05.Character/TestMonsterDummy.cs
+Assets/01.Script/05.Character/TestMonsterDummy.cs.meta
+=======
+
+LicensedAsset
+/Assets/03.Asset/Licensed
+/Assets/03.Asset/Licensed.meta
+
+git rm -r --cached Assets/03.Asset/Licensed
+git rm --cached Assets/03.Asset/Licensed
+
+git add .gitignore
+git commit -m "Ignore licensed third-party asset"
+git push
+>>>>>>> teamjang

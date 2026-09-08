@@ -1,5 +1,6 @@
-id,codeName,description,displayName
-1000000,Slime,something,SmallSlime
-1000001,Goblin,nothing,SmallGoblin
-1000002,Orc,anyting,SmallOrc
-1000003,ske,sdf,dfg
+id,codeName,description,displayName,animatorController,idleClip,runClip,attackClip,hitClip,deadClip,idleAudioClip;,runAudioClip,attackAudioClip,hitAudioClip,deadAudioClip
+1000000,Slime,something,SmallSlime,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+1000001,Goblin,nothing,SmallGoblin,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+1000002,Orc,anyting,SmallOrc,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+1000003,ske,sdf,dfg,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+1000004,asdf,asdf,asdf,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
