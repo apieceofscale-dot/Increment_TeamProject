@@ -33,8 +33,6 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void Awake()
     {
-        rigid = GetComponent<Rigidbody2D>();
-
         Status = new CharacterStatus();
         characterLevelUpProvider = new CharacterLevelUpProvider();
         skillLevelUpProvider = new CharacterSkillLevelUpProvider();

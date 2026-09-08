@@ -37,7 +37,7 @@ public class ItemController : MonoBehaviour, IPoolable
     {
         _spawned = true;
         _statusProvider.ApplyTo(_status, itemId, type, value, upgradeStep, upgradeLevel, starForce);
-       // _status.ApplyStack(quantity);
+        _status.ApplyStack(quantity);
     }
 
     public void OnDespawn()

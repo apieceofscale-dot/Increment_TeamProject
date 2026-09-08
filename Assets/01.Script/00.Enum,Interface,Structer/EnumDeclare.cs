@@ -15,7 +15,6 @@ public enum ItemType
     Weapon = 4
 }
 
-// 아까 enum값 중복되지 않게 하라 말씀주셨는데 일단 폴더 번호를 사용했으니 검토 부탁드려요
 public enum BootLayer
 {
     DataManager = 2,
@@ -32,20 +31,18 @@ public enum BootLayer
     Codex = 13,
 }
 
-// 추후 값 변경
 public enum StageType
 {
-    Farm, // 하위스테이지
+    Farm,
     Boss,
-    Dungeon, // 경험치던전, 챕터 진행이랑 무관
-
+    Dungeon,
 }
 
 public enum StageState
 {
     None,
     Battle,
-    Cleared, // 보스 
+    Cleared,
     Failed
 }
 
