@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71da75d8efea1474b9192db1c80c5441, type: 3}
+  m_Name: MonsterData
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterList
+  baseList:
+  - id: 2000
+    codeName: Slime
+    description: something
+    displayName: SmallSlime
+  - id: 2001
+    codeName: Goblin
+    description: nothing
+    displayName: SmallGoblin
+  - id: 2002
+    codeName: Orc
+    description: anyting
+    displayName: SmallOrc

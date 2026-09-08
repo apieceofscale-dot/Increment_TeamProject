@@ -1,16 +1,17 @@
-using UnityEngine;
-
-public class ItemUpgrade : MonoBehaviour
+public sealed class ItemUpgrade
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int Level { get; private set; }
+    public int BonusValue { get; private set; }
+
+    public void Set(int level, int bonusValue)
     {
-        
+        Level = UnityEngine.Mathf.Max(0, level);
+        BonusValue = UnityEngine.Mathf.Max(0, bonusValue);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Clear()
     {
-        
+        Level = 0;
+        BonusValue = 0;
     }
 }

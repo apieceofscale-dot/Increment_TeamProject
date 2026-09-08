@@ -1,16 +1,70 @@
+using System;
 using UnityEngine;
 
-public class MonsterFacade : MonoBehaviour
+public class MonsterFacade : MonoBehaviour, IBootStrapper
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static event Action<MonsterDiedInfo> MonsterDied;
+
+    [SerializeField] MonsterController prefab;
+    [SerializeField] ItemFacade itemFacade;
+
+    public void IBootStrapperInitialize(BootstrapContext context)
     {
-        
+        MonsterDied -= HandleMonsterDied;
+        MonsterDied += HandleMonsterDied;
+        context.OnStepCompleted?.Invoke();
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnEnable()
     {
-        
+        MonsterDied -= HandleMonsterDied;
+        MonsterDied += HandleMonsterDied;
+    }
+
+    void OnDisable()
+    {
+        MonsterDied -= HandleMonsterDied;
+    }
+
+    public static void NotifyDied(in MonsterDiedInfo info)
+    {
+        MonsterDied?.Invoke(info);
+    }
+
+    public MonsterController Spawn(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 1)
+    {
+        if (prefab == null)
+        {
+            Debug.LogWarning("[MonsterFacade] prefab is missing.");
+            return null;
+        }
+
+        var monster = Instantiate(prefab, position, rotation);
+        monster.BindSpawn(monsterId, stageIndex);
+        monster.OnSpawn();
+        return monster;
+    }
+
+    public void Despawn(MonsterController monster)
+    {
+        if (monster == null)
+        {
+            return;
+        }
+
+        monster.ReturnToPool();
+    }
+
+    void HandleMonsterDied(MonsterDiedInfo info)
+    {
+        if (itemFacade != null)
+        {
+            itemFacade.DropFromMonster(info);
+        }
+
+        if (info.Source != null)
+        {
+            Despawn(info.Source);
+        }
     }
 }

@@ -1,0 +1,4 @@
+id,codeName,description,displayName
+10000,HpPotion,something,HealingPotion
+10001,ManaPotion,nothing,ManaPotion
+10002,Portal,anyting,PortalScroll
