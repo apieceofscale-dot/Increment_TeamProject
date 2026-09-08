@@ -4,7 +4,11 @@ using UnityEngine;
 
 //점프에 가로길이 추가해야함 -> 캐릭터 가로길이가 2인데, 점프길이가 1이면 걍 걸어가기.
 //Navi2Dgrddata 있는 오브젝트에 같이 붙이세요.
+<<<<<<< HEAD
 public class Navi2DPathFinder : MonoBehaviour
+=======
+public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
+>>>>>>> teamjang
 {   
     Navi2DGridata gD;
 
@@ -13,7 +17,12 @@ public class Navi2DPathFinder : MonoBehaviour
         gD = GetComponent<Navi2DGridata>();
     }
 
+<<<<<<< HEAD
     public List<Navi2DNode> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth)
+=======
+    public List<Navi2DNode> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float moveSpeed,
+    float jumpMaxHeight, float gravity)
+>>>>>>> teamjang
     {
         Navi2DNode startNode = FindClosestNode(agentPos);
         if(startNode == null)
@@ -126,6 +135,24 @@ public class Navi2DPathFinder : MonoBehaviour
 
                 if (linkNeighbor.height < agentHeigth) continue;
 
+<<<<<<< HEAD
+=======
+                float heightDelta = linkNeighbor.worldPos.y - current.worldPos.y;
+
+                if(heightDelta >= -0.01f)
+                {
+                    bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
+                        current.worldPos,
+                        linkNeighbor.worldPos,
+                        moveSpeed,
+                        jumpMaxHeight,
+                        gravity,
+                        out _); // _문법은 값은 필요 없다는 뜻.
+
+                    if(!canJump) continue;
+                }
+
+>>>>>>> teamjang
                 float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
 
                 float newCost = cost[current] + moveCost;

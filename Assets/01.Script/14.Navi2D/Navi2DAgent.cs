@@ -13,11 +13,19 @@ public class Navi2DAgent : MonoBehaviour
 
     [Header("Agent 설정")]    
     [SerializeField] private float MoveSpeed = 3f; //캐릭터 스테이터스
+<<<<<<< HEAD
     [SerializeField] private float jumpMaxHeight = 2f; // 실제 값 아님. 
+=======
+    [SerializeField] private float jumpMaxHeight = 0.1f; // 실제 값 아님. 
+>>>>>>> teamjang
     [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기   
 
     private Navi2DPathFinder pathFinder;    
     private Rigidbody2D rb;
+<<<<<<< HEAD
+=======
+
+>>>>>>> teamjang
     private Collider2D col;
 
     private List<Navi2DNode> path;
@@ -33,6 +41,11 @@ public class Navi2DAgent : MonoBehaviour
     private bool isDropping;
     private bool hasleftGround;
 
+<<<<<<< HEAD
+=======
+    float gravity;
+
+>>>>>>> teamjang
     public Vector2 FootPosition
     { get
         {
@@ -50,7 +63,11 @@ public class Navi2DAgent : MonoBehaviour
 
     private void Start()
     {
+<<<<<<< HEAD
         
+=======
+        gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
+>>>>>>> teamjang
     }
 
     private void FixedUpdate()
@@ -147,7 +164,11 @@ public class Navi2DAgent : MonoBehaviour
         //Debug.Log("StartJump 호출");
         if (isJumping) return;
 
+<<<<<<< HEAD
         float gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
+=======
+        
+>>>>>>> teamjang
 
         bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
             currentNode.worldPos,
@@ -295,15 +316,24 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
+<<<<<<< HEAD
         path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight);
+=======
+        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed,jumpMaxHeight, gravity);
+>>>>>>> teamjang
 
         if (path == null || path.Count == 0)
         {
             currentPathIndex = 0;
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
+<<<<<<< HEAD
         }
 
+=======
+
+        }
+>>>>>>> teamjang
         currentPathIndex = path.Count > 1 ? 1 : 0;
         Debug.Log($"Repath : Target Node {lastTargetNode?.gridPos}");
     }
