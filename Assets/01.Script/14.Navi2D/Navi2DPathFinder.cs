@@ -16,7 +16,23 @@ public class Navi2DPathFinder : MonoBehaviour
     public List<Navi2DNode> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth)
     {
         Navi2DNode startNode = FindClosestNode(agentPos);
-        Navi2DNode targetNode = FindClosestNode(targetPos);
+        if(startNode == null)
+        {
+            startNode = FindGroundNodeBelow(agentPos);
+        }
+        Navi2DNode targetNode = null;
+        if (!gD.TryGetGroundNodeBelow(targetPos, out targetNode)) return null;
+
+        if (startNode == null || targetNode == null)
+        {
+            Debug.LogWarning($"PathFinding 실패 - " + $"Start:{startNode?.gridPos.ToString() ?? "null"} / "
+                + $"Target:{targetNode?.gridPos.ToString() ?? "null"}");
+
+            return null;
+        }
+
+
+
 
         if (startNode == null || targetNode == null) return null;
 
@@ -64,16 +80,15 @@ public class Navi2DPathFinder : MonoBehaviour
             open.Remove(current);// currnet에 들어간 노드의 조사가 끝남
             closed.Add(current); //이제 여기 넣어 중복조사를 방지.
 
-            //좌우만 이동가능. 일단은
-            Vector2Int[] neighborPositions = { current.gridPos + Vector2Int.left, current.gridPos + Vector2Int.right }; //왜.x,y가 필요없지?
+            Vector2Int[] neighborPositions = { current.gridPos + Vector2Int.left, current.gridPos + Vector2Int.right };
 
-            foreach(Vector2Int neighborPos in neighborPositions)
+            foreach (Vector2Int neighborPos in neighborPositions)
             {
-                if(!gD.NodeData.TryGetValue(neighborPos,out Navi2DNode neighbor)) continue; //양옆에 노드가 있는지 확인
+                if (!gD.NodeData.TryGetValue(neighborPos, out Navi2DNode neighbor)) continue; //양옆에 노드가 있는지 확인
                 if (closed.Contains(neighbor)) continue; //조사가 끝낸 노드이면 넘어가기
-                if(neighbor.height < agentHeigth) continue; //높이때문에 못 지나가면 넘어가기.
+                if (neighbor.height < agentHeigth) continue; //높이때문에 못 지나가면 넘어가기.
 
-                float moveCost =Vector2.Distance(current.worldPos, neighbor.worldPos);// 현재->이웃 이동비용 게산.
+                float moveCost = Vector2.SqrMagnitude(current.worldPos - neighbor.worldPos);// 현재->이웃 이동비용 게산.
 
                 float newCost = cost[current] + moveCost;//총 비용을 계산. cost[current]는 시작지점부터 현재 지점까지라는 뜻.           
 
@@ -87,7 +102,47 @@ public class Navi2DPathFinder : MonoBehaviour
                         open.Add(neighbor);
                     }
                 }
-            }  
+            }
+
+
+            foreach (Navi2DLinkData link in gD.LinkData)
+            {
+                Navi2DNode linkNeighbor = null;
+
+                if (link.aNode == current)  //a->b냐 b->a냐 결정하는 과정
+                {
+                    linkNeighbor = link.bNode;
+                }
+                else if (link.bNode == current)
+                {
+                    linkNeighbor = link.aNode;
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (closed.Contains(linkNeighbor)) continue;
+
+                if (linkNeighbor.height < agentHeigth) continue;
+
+                float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
+
+                float newCost = cost[current] + moveCost;
+
+                if (!cost.ContainsKey(linkNeighbor) || newCost < cost[linkNeighbor])
+                {
+                    cost[linkNeighbor] = newCost;
+                    parent[linkNeighbor] = current;
+
+                    if (!open.Contains(linkNeighbor))
+                    {
+                        open.Add(linkNeighbor);
+                    }
+
+                    //Debug.Log($"[Navi2D Link 후보] : {current.gridPos} -> {linkNeighbor.gridPos}");
+                }
+            }
         }
         return null;
     }
@@ -98,16 +153,16 @@ public class Navi2DPathFinder : MonoBehaviour
                                                           //다만, 애초에 몹은 노드 위에 배치되어야 하므로, 런타임에서 넉백등으로
                                                           //날라가는 게 문제인데 그건 나중에 생각
     {
-        Vector2Int currentGrid = gD.WorldToGridPos(currentPos);
+        Vector2Int currentGrid = gD.WorldToGroundGridPos(currentPos);
 
         foreach (var pair in gD.NodeData)
         {
-           Debug.Log($"Node Key : {pair.Key}, WorldPos : {pair.Value.worldPos}");            
+           //Debug.Log($"Node Key : {pair.Key}, WorldPos : {pair.Value.worldPos}");            
         }
         //현재 위치에 노드가 있으면 즉시 반환.
         if (gD.NodeData.TryGetValue(currentGrid, out Navi2DNode currentNode))
         {
-            Debug.Log($"FindClosestNode 반환 성공 : {currentNode.gridPos}");
+            //Debug.Log($"FindClosestNode 반환 성공 : {currentNode.gridPos}");
             return currentNode;
         } 
 
@@ -131,6 +186,16 @@ public class Navi2DPathFinder : MonoBehaviour
 
     }
 
+    public Navi2DNode FindGroundNodeBelow(Vector2 worldPos)
+    {
+        if (gD.TryGetGroundNodeBelow(worldPos, out Navi2DNode node))
+        {
+            return node;
+        }
+        return null;
+    }
+
+
     //Dictionary<Vector2Int,Navi2DNode> nodeData
     /*
     public class Navi2DNode
@@ -153,3 +218,6 @@ public class Navi2DPathFinder : MonoBehaviour
     */
 
 }
+
+
+
