@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class TestSkillProjectile : MonoBehaviour
 {
-    private long damage;
+    private int damage;
     private float speed;
     private Vector2 direction;
 
-    public void Initialize(long damage, float speed, Vector2 direction)
+    public void Initialize(int damage, float speed, Vector2 direction)
     {
         this.damage = damage;
         this.speed = speed;

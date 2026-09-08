@@ -12,7 +12,7 @@ public class CharacterSkillProjectile : CharacterSkillBase
         if (projectilePrefab == null || firePoint == null)
             return;
 
-        long damage = (long)(characterFacade.Status.Attack * damageMultiplier);
+        int damage = (int)(characterFacade.Status.Attack * damageMultiplier);
         Vector2 direction = transform.localScale.x >= 0f ? Vector2.right : Vector2.left;
 
         // 테스트 용 추후 ObjectPoolManager 사용

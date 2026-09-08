@@ -20,7 +20,7 @@ public class CharacterSkillAttackBuff : CharacterSkillBase
     {
         isBuffActive = true;
 
-        long bonusAttack = (long)(characterFacade.Status.Attack * attackIncreaseRate);
+        int bonusAttack = (int)(characterFacade.Status.Attack * attackIncreaseRate);
         characterFacade.Status.IncreaseAttack(bonusAttack);
 
         Debug.Log($"공격력 {bonusAttack} 증가");

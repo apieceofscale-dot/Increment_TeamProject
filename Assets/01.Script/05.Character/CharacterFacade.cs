@@ -11,6 +11,17 @@ public class CharacterFacade : MonoBehaviour
             characterControllers = GetComponent<CharacterControllers>();
     }
 
+    public void Initialize(PlayerData playerData)
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("플레이어 데이터 없음");
+            return;
+        }
+
+        Status.Initialize(playerData);
+    }
+
     public void GainExp(long amount)
     {
         characterControllers.GainExp(amount);

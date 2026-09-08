@@ -14,7 +14,7 @@ public class CharacterSkillSlash : CharacterSkillBase
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius, monsterLayer);
 
-        long damage = (long)(characterFacade.Status.Attack * damageMultiplier);
+        int damage = (int)(characterFacade.Status.Attack * damageMultiplier);
 
         foreach (Collider2D hit in hits)
         {

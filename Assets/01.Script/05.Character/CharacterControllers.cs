@@ -177,7 +177,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         int currentLevel = Status.Level;
         long hpGorwth = characterLevelUpProvider.GetMaxHpGrowth(currentLevel);
-        long attackGrowth = characterLevelUpProvider.GetAttackGrowth(currentLevel);
+        int attackGrowth = characterLevelUpProvider.GetAttackGrowth(currentLevel);
         long defenseGrowth = characterLevelUpProvider.GetDefenseGrowth(currentLevel);
 
         Status.IncreaseMaxHp(hpGorwth);
