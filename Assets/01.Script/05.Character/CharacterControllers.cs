@@ -6,30 +6,18 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public CharacterStatus Status { get; private set; }
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkill testSkill;
-    private CharacterSkillLevelUpProvider skillLevelUpProvider;
-
-    private Rigidbody2D rigid;
-    private float moveInput;
-
-    [SerializeField] private float jumpForce = 8f;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    [SerializeField] private LayerMask groundLayer;
 
     private void Awake()
     {
-        rigid = GetComponent<Rigidbody2D>();
-
         Status = new CharacterStatus();
         characterLevelUpProvider = new CharacterLevelUpProvider();
-        skillLevelUpProvider = new CharacterSkillLevelUpProvider();
 
         testSkill = new CharacterSkill("테스트", 1, 10, 3f, true);
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        Move();
+
     }
 
     public void GainExp(long amount)
@@ -57,39 +45,6 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         }
     }
 
-    public void SetMoveInput(float input)
-    {
-        moveInput = Mathf.Clamp(input, -1f, 1f);
-    }
-
-    private void Move()
-    {
-        rigid.linearVelocity = new Vector2(moveInput * Status.MoveSpeed, rigid.linearVelocity.y);
-    }
-
-    private bool IsGrounded()
-    {
-        return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
-    }
-    private void OnDrawGizmosSelected()
-    {
-        if (groundCheck == null)
-            return;
-
-        Gizmos.DrawWireSphere(
-            groundCheck.position,
-            groundCheckRadius
-        );
-    }
-
-    public void Jump()
-    {
-        if (!IsGrounded())
-            return;
-
-        rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
-    }
-
     public bool UseTestSkill() // 테스트용 임시 메서드
     {
         if (!testSkill.CanUse())
@@ -101,20 +56,6 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         testSkill.Use();
 
         return true;
-    }
-
-    public void TestSkillLevelUp()
-    {
-        testSkill.IncreaseLevel();
-
-        int currentLevel = testSkill.Level;
-        int mpCost = skillLevelUpProvider.GetMpCost(currentLevel);
-        float cooldown = skillLevelUpProvider.GetCooldown(currentLevel);
-
-        testSkill.SetMpCost(mpCost);
-        testSkill.SetCooldown(cooldown);
-
-        Debug.Log($"{testSkill.SkillName} 강화 | Lv.{testSkill.Level} / Mp : {testSkill.MpCost} / Coodown : {testSkill.Cooldown}");
     }
 
     private void ApplyLevelUpGrowth() // 실질적인 레벨 업 시 스탯 상승 적용

@@ -31,24 +31,9 @@ public class CharacterFacade : MonoBehaviour
         return characterControllers.Status.UseMp(amount);
     }
 
-    public void SetMoveInput(float input)
-    {
-        characterControllers.SetMoveInput(input);
-    }
-
-    public void Jump()
-    {
-        characterControllers.Jump();
-    }
-
     public bool UseTestSkill() // 테스트용 임시 메서드
     {
         return characterControllers.UseTestSkill();
-    }
-
-    public void TestSkillLevelUp()
-    {
-        characterControllers.TestSkillLevelUp();
     }
 
     public void RecoverMp(int amount)

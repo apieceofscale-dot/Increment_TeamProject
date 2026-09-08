@@ -73,22 +73,6 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
         item.ReturnToPool();
     }
 
-    public void DropFromMonster(in MonsterDiedInfo info)
-    {
-        if (info.Source == null)
-        {
-            return;
-        }
-
-        var status = info.Source.Status;
-        if (status.DropItemId <= 0 || UnityEngine.Random.value > status.DropChance)
-        {
-            return;
-        }
-
-        Spawn(status.DropItemId, info.Position, Quaternion.identity);
-    }
-
     void HandlePickedUp(ItemPickedUpInfo info)
     {
         if (info.Source != null)
