@@ -13,11 +13,12 @@ public class Navi2DAgent : MonoBehaviour
 
     [Header("Agent 설정")]    
     [SerializeField] private float MoveSpeed = 3f; //캐릭터 스테이터스
-    [SerializeField] private float jumpMaxHeight = 2f; // 실제 값 아님. 
+    [SerializeField] private float jumpMaxHeight = 0.1f; // 실제 값 아님. 
     [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기   
 
     private Navi2DPathFinder pathFinder;    
     private Rigidbody2D rb;
+
     private Collider2D col;
 
     private List<Navi2DNode> path;
@@ -32,6 +33,8 @@ public class Navi2DAgent : MonoBehaviour
     private bool repathPending;
     private bool isDropping;
     private bool hasleftGround;
+
+    float gravity;
 
     public Vector2 FootPosition
     { get
@@ -50,7 +53,7 @@ public class Navi2DAgent : MonoBehaviour
 
     private void Start()
     {
-        
+        gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
     }
 
     private void FixedUpdate()
@@ -147,7 +150,7 @@ public class Navi2DAgent : MonoBehaviour
         //Debug.Log("StartJump 호출");
         if (isJumping) return;
 
-        float gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
+        
 
         bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
             currentNode.worldPos,
@@ -295,15 +298,15 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
-        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight);
+        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed,jumpMaxHeight, gravity);
 
         if (path == null || path.Count == 0)
         {
             currentPathIndex = 0;
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             return;
-        }
 
+        }
         currentPathIndex = path.Count > 1 ? 1 : 0;
         Debug.Log($"Repath : Target Node {lastTargetNode?.gridPos}");
     }
