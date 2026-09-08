@@ -13,15 +13,14 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
-=========
->>>>>>>>> Temporary merge branch 2
+
+
         TestGainExp();
         TestTakeDamage();
         TestRecoverHp();
         TestUseMp();
         UseTestSkill();
-<<<<<<<<< Temporary merge branch 1
->>>>>>>>> Temporary merge branch 2
+
     }
 
     // 테스트용 임시 메서드들
@@ -87,6 +86,7 @@ public class PlayerInputController : MonoBehaviour
         if (Keyboard.current.digit6Key.wasPressedThisFrame)
             characterFacade.UseSkillSlash();
 
+       /*
         if (isUsed)
             Debug.Log($"스킬 사용 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
         else
@@ -95,8 +95,9 @@ public class PlayerInputController : MonoBehaviour
             return;
 
         characterFacade.TestSkillLevelUp();
-=========
->>>>>>>>> Temporary merge branch 2
+       */
+
+
     }
-    */
+    
 }
