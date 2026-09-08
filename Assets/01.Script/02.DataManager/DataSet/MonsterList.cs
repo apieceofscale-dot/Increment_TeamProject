@@ -8,7 +8,10 @@ public class MonsterData : BaseData
     {
         MonsterData clone = new MonsterData();
 
-        //clone.id =this.id;
+        clone.id = this.id;
+        clone.codeName = this.codeName;
+        clone.description = this.description;
+        clone.displayName = this.displayName;
 
         return clone;
     }

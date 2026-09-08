@@ -31,6 +31,7 @@ public class DataRepositary<T> where T : BaseData //각종 data클래스
                 continue;
             }
 
+            
             if (!dataByID.TryAdd(clonedData.id, clonedData)) //여기서 넣는거임.
             {
                 Debug.LogError($"데이터 ID 중복: ID={clonedData.id}, {i}, {typeof(T).Name}");
