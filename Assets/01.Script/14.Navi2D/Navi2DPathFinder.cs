@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 //점프에 가로길이 추가해야함 -> 캐릭터 가로길이가 2인데, 점프길이가 1이면 걍 걸어가기.
@@ -13,16 +14,13 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         gD = GetComponent<Navi2DGridata>();
     }
 
-    public List<Navi2DNode> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float moveSpeed,
-    float jumpMaxHeight, float gravity)
+    public List<Navi2DPathStep> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float moveSpeed,
+    float jumpMaxHeight, float gravity, float airClearanceMargin)
     {
-        Navi2DNode startNode = FindClosestNode(agentPos);
-        if (startNode == null)
-        {
-            startNode = FindGroundNodeBelow(agentPos);
-        }
-        Navi2DNode targetNode = null;
-        if (!gD.TryGetGroundNodeBelow(targetPos, out targetNode)) return null;
+        Debug.Log($"PathFinding 호출 / LinkCount = {gD.LinkData.Count}");
+
+        Navi2DNode startNode = FindGroundNodeBelow(agentPos);       
+        Navi2DNode targetNode = FindGroundNodeBelow(targetPos);        
 
         if (startNode == null || targetNode == null)
         {
@@ -32,21 +30,19 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
             return null;
         }
 
-
-
-
-        if (startNode == null || targetNode == null) return null;
-
         List<Navi2DNode> open = new List<Navi2DNode>(); //조사할 노드
         HashSet<Navi2DNode> closed = new HashSet<Navi2DNode>(); //조사가 끝난 노드
         Dictionary<Navi2DNode, float> cost = new Dictionary<Navi2DNode, float>(); //각 노드까지 이동한 최소비용
-        Dictionary<Navi2DNode, Navi2DNode> parent = new Dictionary<Navi2DNode, Navi2DNode>(); // 이 노드까지 어디에서 왔는가?
+        
+
+        Dictionary<Navi2DNode, Navi2DPathStep> cameFrom = new Dictionary<Navi2DNode, Navi2DPathStep>();
 
         open.Add(startNode);
         cost[startNode] = 0f;
 
         while (open.Count > 0)
         {
+
             // 이동이 비용이 가장 낮은 노드 찾기
             Navi2DNode current = open[0];
             for (int i = 1; i < open.Count; i++)
@@ -56,23 +52,23 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                     current = open[i];
                 }
             }
-
+            
             //목적지 도착후 그동안 있던 경로를 반환하는 코드.
             if (current == targetNode)//조사할 경로가 목적지
             {
-                List<Navi2DNode> path = new List<Navi2DNode>();//반환용 리스트
+                List<Navi2DPathStep> path = new List<Navi2DPathStep>();//반환용 리스트
 
                 Navi2DNode pathNode = targetNode; //목적지부터 검사해서 시작지점까지.
 
                 while (pathNode != startNode)//시작지점에 도달하면 종료
                 {
-                    path.Add(pathNode);//반환용 리스트에 목적지부터~시작노드까지 추가.
-                    pathNode = parent[pathNode];//추적 담당용 딕셔너리에 키값이 현재노드, 값이 이전 노드로 저장 되어있음.
-                    //그래서 노드를 pathNOde를 먼저 대임-> 이걸 키로 조회 하면 이전 노드가 나옴.
+                    Navi2DPathStep step = cameFrom[pathNode];
+
+                    path.Add(step);
+
+                    pathNode = step.fromNode;                    
                 }
-
-                path.Add(startNode);//같은순간 끝나기 대문에 여기서 한 번 추가.
-
+               
                 path.Reverse(); //목적지 시작지가 반대라 뒤집음
 
                 return path;
@@ -96,67 +92,81 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                 if (!cost.ContainsKey(neighbor) || newCost < cost[neighbor])//처음 발견 node or 경로가 저렴해지면 갱신
                 {
                     cost[neighbor] = newCost; //현재까지 발견한 neighbor까지의 최소 비용
-                    parent[neighbor] = current; //그 비용으로 neghbor까지 왔을 때, 바로 전 노드는 current다.
+                    
+                    cameFrom[neighbor] = new Navi2DPathStep(current, neighbor, Navi2DMoveType.walk);
+
 
                     if (!open.Contains(neighbor))//탐색 후보에 없던 노드라면 open에 추가.
                     {
                         open.Add(neighbor);
                     }
+
+
                 }
             }
 
 
             foreach (Navi2DLinkData link in gD.LinkData)
             {
-                Navi2DNode linkNeighbor = null;
+                List<Navi2DNode> targetCandidates = null;
 
-                if (link.aNode == current)  //a->b냐 b->a냐 결정하는 과정
+                if (link.aCandidates.Contains(current))  //a->b냐 b->a냐 결정하는 과정
                 {
-                    linkNeighbor = link.bNode;
+                    
+                    targetCandidates = link.bCandidates;
                 }
-                else if (link.bNode == current)
+                else if (link.bCandidates.Contains(current))
                 {
-                    linkNeighbor = link.aNode;
+                    
+                    targetCandidates = link.aCandidates;
                 }
                 else
                 {
                     continue;
                 }
 
-                if (closed.Contains(linkNeighbor)) continue;
-
-                if (linkNeighbor.height < agentHeigth) continue;
-
-                float heightDelta = linkNeighbor.worldPos.y - current.worldPos.y;
-
-                if (heightDelta >= -0.01f)
+                foreach(Navi2DNode linkNeighbor in targetCandidates)
                 {
-                    bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
+                    if(linkNeighbor == null) continue;
+                    if(closed.Contains(linkNeighbor)) continue;
+                    if(linkNeighbor.height < agentHeigth) continue;
+
+                    bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
                         current.worldPos,
                         linkNeighbor.worldPos,
                         moveSpeed,
                         jumpMaxHeight,
                         gravity,
-                        out _); // _문법은 값은 필요 없다는 뜻.
+                        airClearanceMargin, 
+                        link.obstacleTopY,
+                        out  _); // _문법은 값은 필요 없다는 뜻.
 
-                    if (!canJump) continue;
-                }
+                    
+                    if (!canAirMove) continue;
+                    if (current.gridPos == new Vector2Int(-1, -3))
+                        continue;
 
-                float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
+                    float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
 
-                float newCost = cost[current] + moveCost;
+                    float newCost = cost[current] + moveCost;
 
-                if (!cost.ContainsKey(linkNeighbor) || newCost < cost[linkNeighbor])
-                {
-                    cost[linkNeighbor] = newCost;
-                    parent[linkNeighbor] = current;
-
-                    if (!open.Contains(linkNeighbor))
+                    if (!cost.ContainsKey(linkNeighbor) || newCost < cost[linkNeighbor])
                     {
-                        open.Add(linkNeighbor);
+                        cost[linkNeighbor] = newCost;
+                       
+
+                        cameFrom[linkNeighbor] = new Navi2DPathStep(current, linkNeighbor, Navi2DMoveType.AirMove, link);
+
+                        if (!open.Contains(linkNeighbor))
+                        {
+                            open.Add(linkNeighbor);
+                        }
+
+                        
+
                     }
 
-                    //Debug.Log($"[Navi2D Link 후보] : {current.gridPos} -> {linkNeighbor.gridPos}");
+                    
                 }
             }
         }
