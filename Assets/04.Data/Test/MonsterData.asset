@@ -12,3 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71da75d8efea1474b9192db1c80c5441, type: 3}
   m_Name: MonsterData
   m_EditorClassIdentifier: Assembly-CSharp::MonsterList
+  baseList:
+  - id: 2000
+    codeName: Slime
+    description: something
+    displayName: SmallSlime
+  - id: 2001
+    codeName: Goblin
+    description: nothing
+    displayName: SmallGoblin
+  - id: 2002
+    codeName: Orc
+    description: anyting
+    displayName: SmallOrc
