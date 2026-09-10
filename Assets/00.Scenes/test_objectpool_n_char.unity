@@ -454,7 +454,7 @@ GameObject:
   - component: {fileID: 1827243155}
   - component: {fileID: 1827243160}
   - component: {fileID: 1827243159}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: TestDummy
   m_TagString: Monster
   m_Icon: {fileID: 0}
@@ -506,9 +506,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1827243154}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d25551225b2fa8041a6fcac16709eafe, type: 3}
+  m_Script: {fileID: 11500000, guid: 4401a615d9dca0c49bc058d49462b1da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestMonsterDummy
+  monsterId: 2000
+  stageIndex: 1
+  maxHp: 10
+  attackDamage: 1
+  moveSpeed: 1.5
+  traceRange: 6
+  attackRange: 1.4
+  attackCooldown: 1
+  dropItemId: 1
+  dropChance: 1
+  targetTag: Player
 --- !u!212 &1827243157
 SpriteRenderer:
   serializedVersion: 2

@@ -13,14 +13,50 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
+        if (Keyboard.current == null || characterFacade == null)
+            return;
 
+        HandleMovement();
+        HandleJump();
+        UseTestSkill();
+        HandleAttack();
 
         TestGainExp();
         TestTakeDamage();
         TestRecoverHp();
         TestUseMp();
-        UseTestSkill();
+        TestRecoverMp();
+    }
 
+    private void HandleMovement()
+    {
+        float moveInput = 0f;
+
+        if (Keyboard.current.aKey.isPressed)
+            moveInput -= 1f;
+        if (Keyboard.current.dKey.isPressed)
+            moveInput += 1f;
+
+        characterFacade.SetMoveInput(moveInput);
+    }
+
+    private void HandleJump()
+    {
+        if (!Keyboard.current.spaceKey.wasPressedThisFrame)
+            return;
+
+        characterFacade.Jump();
+    }
+
+    private void HandleAttack()
+    {
+        if (!Keyboard.current.jKey.wasPressedThisFrame)
+            return;
+
+        bool isAttacked = characterFacade.Attack();
+
+        if (isAttacked)
+            Debug.Log("공격");
     }
 
     // 테스트용 임시 메서드들
@@ -86,18 +122,34 @@ public class PlayerInputController : MonoBehaviour
         if (Keyboard.current.digit6Key.wasPressedThisFrame)
             characterFacade.UseSkillSlash();
 
-       /*
-        if (isUsed)
-            Debug.Log($"스킬 사용 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
-        else
-            Debug.Log("스킬 사용 실패");
-        if(!Keyboard.current.digit7Key.wasPressedThisFrame)
-            return;
+        if (Keyboard.current.digit7Key.wasPressedThisFrame)
+            characterFacade.UseSkillProjectile();
 
-        characterFacade.TestSkillLevelUp();
-       */
+        if (Keyboard.current.digit8Key.wasPressedThisFrame)
+            characterFacade.UseSkillAttackBuff();
 
+        if (Keyboard.current.digit9Key.wasPressedThisFrame)
+            characterFacade.ChangeNextJob();
 
+        if (Keyboard.current.f1Key.wasPressedThisFrame)
+        {
+            characterFacade.RestoreBasicAttack();
+            Debug.Log("기존 기본 공격 선택");
+        }
+
+        if (Keyboard.current.f2Key.wasPressedThisFrame)
+            Debug.Log(characterFacade.SetSlashBasicAttack() ? "베기 대체 공격 선택" : "베기 연결 확인 필요");
+        
+        if (Keyboard.current.f3Key.wasPressedThisFrame)
+            Debug.Log(characterFacade.SetProjectileBasicAttack() ? "투사체 대체 공격 선택" : "투사체 연결 확인 필요");
+        
+        if (Keyboard.current.f4Key.wasPressedThisFrame)
+            characterFacade.TestSkillLevelUp();
     }
-    
+
+    private void OnDisable()
+    {
+        if (characterFacade != null)
+            characterFacade.SetMoveInput(0f);
+    }
 }

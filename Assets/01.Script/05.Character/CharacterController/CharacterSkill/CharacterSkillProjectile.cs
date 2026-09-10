@@ -4,21 +4,23 @@ public class CharacterSkillProjectile : CharacterSkillBase
 {
     [SerializeField] private TestSkillProjectile projectilePrefab;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private float projectileSpeed = 8f;
-    [SerializeField] private float damageMultiplier = 1.5f;
+    [SerializeField, Min(0.01f)] private float projectileSpeed = 8f;
+    [SerializeField, Min(0.01f)] private float maxDistance = 8f;
+    [SerializeField, Min(0f)] private float damageMultiplier = 1.5f;
+    [SerializeField] private LayerMask monsterLayer;
+    [SerializeField] private LayerMask blockingLayer;
+    public override bool CanReplaceBasicAttack => true;
+
+    protected override bool CanUse()
+    {
+        return firePoint != null && projectilePrefab != null && projectilePrefab.gameObject.activeSelf && projectilePrefab.enabled;
+    }
 
     protected override void Execute()
     {
-        if (projectilePrefab == null || firePoint == null)
-            return;
-
-        int damage = (int)(characterFacade.Status.Attack * damageMultiplier);
-        Vector2 direction = transform.localScale.x >= 0f ? Vector2.right : Vector2.left;
-
-        // 테스트 용 추후 ObjectPoolManager 사용
-        TestSkillProjectile projectile = Instantiate(projectilePrefab,firePoint.position,Quaternion.identity);
-        projectile.Initialize(damage, projectileSpeed, direction);
-
-        Debug.Log($"{skillName} 사용 | {damage} 피해");
+        int damage = (int)((double)characterFacade.Status.Attack * Mathf.Max(0f, damageMultiplier));
+        Vector2 direction = characterFacade.FacingDirection < 0 ? Vector2.left : Vector2.right;
+        TestSkillProjectile projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        projectile.Initialize(damage, projectileSpeed, direction, maxDistance, monsterLayer, blockingLayer, characterFacade.transform);
     }
 }
