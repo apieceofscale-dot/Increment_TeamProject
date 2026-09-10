@@ -5,11 +5,14 @@ public class CharacterFacade : MonoBehaviour
     [SerializeField] private CharacterControllers characterControllers;
     public CharacterStatus Status => characterControllers.Status;
     public PlayerData Data { get; private set; }
+    public PlayerData CurrentJob => characterControllers.CurrentJob;
+    public int FacingDirection => characterControllers.FacingDirection;
 
     private void Awake()
     {
         if (characterControllers == null)
             characterControllers = GetComponent<CharacterControllers>();
+
         if (characterControllers == null)
             Debug.LogError("캐릭터 컨트롤러 없음", this);
     }
@@ -18,15 +21,17 @@ public class CharacterFacade : MonoBehaviour
     {
         if (playerData == null)
         {
-            Debug.LogError("플레이어 데이터 없음");
+            Debug.LogError("플레이어 데이터 없음", this);
             return;
         }
 
         Data = playerData;
+        Status.Initialize(playerData);
 
-        // Status.Initialize(playerData);
-        // 왠지 내가 다른 파일 잘못 건드린 것 같아서 비활성화
-        // 당장은 Status에 있는 생성자에 있는 수치를 적용
+        if (characterControllers == null)
+            characterControllers = GetComponent<CharacterControllers>();
+
+        characterControllers.ChangeJob(playerData.id);
     }
 
     public void GainExp(long amount)
@@ -62,6 +67,36 @@ public class CharacterFacade : MonoBehaviour
     public bool Attack()
     {
         return characterControllers.TryAttack();
+    }
+
+    public bool ChangeJob(int id) 
+    {
+        return characterControllers.ChangeJob(id); 
+    }
+
+    public bool ChangeNextJob() 
+    { 
+        return characterControllers.ChangeNextJob(); 
+    }
+
+    public void RestoreBasicAttack() 
+    { 
+        characterControllers.RestoreBasicAttack(); 
+    }
+
+    public bool SetSlashBasicAttack() 
+    { 
+        return characterControllers.SetSlashBasicAttack(); 
+    }
+
+    public bool SetProjectileBasicAttack() 
+    { 
+        return characterControllers.SetProjectileBasicAttack(); 
+    }
+
+    public bool SetBasicAttackReplacement(CharacterSkillBase skill)
+    {
+        return characterControllers.SetBasicAttackReplacement(skill);
     }
 
     public bool UseSkillSlash()

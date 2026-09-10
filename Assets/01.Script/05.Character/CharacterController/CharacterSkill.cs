@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 public class CharacterSkill
 {
@@ -7,59 +8,59 @@ public class CharacterSkill
     public int MpCost { get; private set; }
     public float Cooldown { get; private set; }
     public bool IsUnlocked { get; private set; }
-    private DateTime lastUsedTime;
 
-    public CharacterSkill(string skillName, int level, int mpCost, float cooldown, bool isUnlocked = false)
+    private readonly Func<float> clock;
+    private float readyTime = float.NegativeInfinity;
+    public float RemainingCooldown => Math.Max(0f, readyTime - clock());
+
+    public CharacterSkill(string skillName, int level, int mpCost, float cooldown, bool isUnlocked = false, Func<float> clock = null)
     {
         SkillName = skillName;
-        Level = 1;
-        MpCost = mpCost;
-        Cooldown = cooldown;
+        Level = Math.Max(1, level);
+        MpCost = Math.Max(0, mpCost);
+        Cooldown = Math.Max(0f, cooldown);
         IsUnlocked = isUnlocked;
-        lastUsedTime = DateTime.MinValue;
+
+        if (clock != null)
+            this.clock = clock;
+        else
+        {
+            Stopwatch timer = Stopwatch.StartNew();
+            this.clock = () => (float)timer.Elapsed.TotalSeconds;
+        }
     }
 
-    public bool CanUse()
+    public bool CanUse() => IsUnlocked && clock() >= readyTime;
+
+    public bool TryUse(float effectiveCooldown)
     {
-        if (!IsUnlocked)
+        if (!CanUse())
             return false;
 
-        double elapsedTime = (DateTime.UtcNow - lastUsedTime).TotalSeconds;
-
-        return elapsedTime >= Cooldown;
+        readyTime = clock() + Math.Max(0.01f, effectiveCooldown);
+        return true;
     }
 
     public void Use()
     {
-        if (!CanUse())
-            return;
-
-        lastUsedTime = DateTime.UtcNow;
+        TryUse(Cooldown);
     }
-
     public void Unlock()
     {
         IsUnlocked = true;
     }
-
     public void IncreaseLevel()
     {
         Level++;
     }
-
-    public void SetMpCost(int mpCost)
+    public void SetMpCost(int value) 
     {
-        if (mpCost < 0)
-            return;
-
-        MpCost = mpCost;
+        if (value >= 0)
+            MpCost = value; 
     }
-
-    public void SetCooldown(float cooldown)
-    {
-        if (cooldown < 0f)
-            return;
-
-        Cooldown = cooldown;
+    public void SetCooldown(float value) 
+    { 
+        if (value >= 0f)
+            Cooldown = value;
     }
 }

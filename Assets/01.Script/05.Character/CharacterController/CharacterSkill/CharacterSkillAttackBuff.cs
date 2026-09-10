@@ -1,36 +1,51 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 public class CharacterSkillAttackBuff : CharacterSkillBase
 {
-    [SerializeField] private float attackIncreaseRate = 0.5f;
-    [SerializeField] private float duration = 5f;
-
+    [SerializeField, Min(0f)] private float attackIncreaseRate = 0.5f;
+    [SerializeField, Min(0.01f)] private float duration = 5f;
     private bool isBuffActive;
+    private int appliedBonus;
+    private CharacterStatus buffTarget;
+    private Coroutine routine;
 
-    protected override void Execute()
+    protected override bool CanUse() 
     {
-        if (isBuffActive)
-            return;
-
-        StartCoroutine(AttackBuff());
+        return !isBuffActive;
+    }
+    protected override void Execute() 
+    { 
+        routine = StartCoroutine(AttackBuff()); 
     }
 
     private IEnumerator AttackBuff()
     {
         isBuffActive = true;
+        buffTarget = characterFacade.Status;
+        appliedBonus = (int)(buffTarget.Attack * Mathf.Max(0f, attackIncreaseRate));
+        buffTarget.IncreaseAttack(appliedBonus);
+        yield return new WaitForSeconds(Mathf.Max(0.01f, duration));
+        RemoveBonus();
+        routine = null;
+    }
 
-        int bonusAttack = (int)(characterFacade.Status.Attack * attackIncreaseRate);
-        characterFacade.Status.IncreaseAttack(bonusAttack);
+    private void OnDisable()
+    {
+        if (routine != null)
+            StopCoroutine(routine);
 
-        Debug.Log($"공격력 {bonusAttack} 증가");
+        routine = null;
+        RemoveBonus();
+    }
 
-        yield return new WaitForSeconds(duration);
+    private void RemoveBonus()
+    {
+        if (isBuffActive && buffTarget != null)
+            buffTarget.DecreaseAttack(appliedBonus);
 
-        characterFacade.Status.DecreaseAttack(bonusAttack);
-
+        appliedBonus = 0;
+        buffTarget = null;
         isBuffActive = false;
-
-        Debug.Log("공격력 버프 시간 종료");
     }
 }

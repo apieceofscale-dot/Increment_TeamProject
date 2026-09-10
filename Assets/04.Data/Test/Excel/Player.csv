@@ -1,4 +1,5 @@
-id,codeName,description,displayName
-1000,Knight,something,Knight
-1001,Wizard,nothing,Wizard
-1002,Rogue,anyting,Rogue
+id,codeName,description,displayName,level,exp,maxHp,currentHp,maxMp,currentMp,recoverMpPerSec,moveSpeed,strength,dexterity,intelligence,luck,attack,attackSpeedRate,hitRate,criticalRate,criticalDamage,damageByMainStat,damageOnBoss,damageOnNormal,armorPenetration,finalDamage,defence,dodgeRate
+1000,Knight,something,Knight,1,0,100,100,100,100,5,5,10,5,2,5,10,0,10,0.1,0.5,0.01,0,0,0,0,0,0
+1001,Wizard,nothing,Wizard,1,0,100,100,100,100,5,5,2,5,10,5,10,0,10,0.1,0.5,0.01,0,0,0,0,0,0
+1002,Rogue,anyting,Rogue,1,0,100,100,100,100,5,5,5,10,2,5,10,0,10,0.1,0.5,0.01,0,0,0,0,0,0
+1003,arhcer,"---",Archer,1,0,100,100,100,100,5,5,5,10,5,2,10,0,10,0.1,0.5,0.01,0,0,0,0,0,0

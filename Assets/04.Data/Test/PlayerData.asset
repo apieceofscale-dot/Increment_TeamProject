@@ -17,11 +17,111 @@ MonoBehaviour:
     codeName: Knight
     description: something
     displayName: Knight
+    level: 1
+    exp: 0
+    maxHp: 100
+    currentHp: 100
+    maxMp: 100
+    currentMp: 100
+    recoverMpPerSec: 5
+    moveSpeed: 5
+    strength: 10
+    dexterity: 5
+    intelligence: 2
+    luck: 5
+    attack: 10
+    attackSpeedRate: 0
+    hitRate: 10
+    criticalRate: 0.1
+    criticalDamage: 0.5
+    damageByMainStat: 0.01
+    damageOnBoss: 0
+    damageOnNormal: 0
+    armorPenetration: 0
+    finalDamage: 0
+    defence: 0
+    dodgeRate: 0
   - id: 1001
     codeName: Wizard
     description: nothing
     displayName: Wizard
+    level: 1
+    exp: 0
+    maxHp: 100
+    currentHp: 100
+    maxMp: 100
+    currentMp: 100
+    recoverMpPerSec: 5
+    moveSpeed: 5
+    strength: 2
+    dexterity: 5
+    intelligence: 10
+    luck: 5
+    attack: 10
+    attackSpeedRate: 0
+    hitRate: 10
+    criticalRate: 0.1
+    criticalDamage: 0.5
+    damageByMainStat: 0.01
+    damageOnBoss: 0
+    damageOnNormal: 0
+    armorPenetration: 0
+    finalDamage: 0
+    defence: 0
+    dodgeRate: 0
   - id: 1002
     codeName: Rogue
     description: anyting
     displayName: Rogue
+    level: 1
+    exp: 0
+    maxHp: 100
+    currentHp: 100
+    maxMp: 100
+    currentMp: 100
+    recoverMpPerSec: 5
+    moveSpeed: 5
+    strength: 5
+    dexterity: 10
+    intelligence: 2
+    luck: 5
+    attack: 10
+    attackSpeedRate: 0
+    hitRate: 10
+    criticalRate: 0.1
+    criticalDamage: 0.5
+    damageByMainStat: 0.01
+    damageOnBoss: 0
+    damageOnNormal: 0
+    armorPenetration: 0
+    finalDamage: 0
+    defence: 0
+    dodgeRate: 0
+  - id: 1003
+    codeName: arhcer
+    description: '"---"'
+    displayName: Archer
+    level: 1
+    exp: 0
+    maxHp: 100
+    currentHp: 100
+    maxMp: 100
+    currentMp: 100
+    recoverMpPerSec: 5
+    moveSpeed: 5
+    strength: 5
+    dexterity: 10
+    intelligence: 5
+    luck: 2
+    attack: 10
+    attackSpeedRate: 0
+    hitRate: 10
+    criticalRate: 0.1
+    criticalDamage: 0.5
+    damageByMainStat: 0.01
+    damageOnBoss: 0
+    damageOnNormal: 0
+    armorPenetration: 0
+    finalDamage: 0
+    defence: 0
+    dodgeRate: 0
