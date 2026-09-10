@@ -15,20 +15,24 @@ public enum ItemType
     Weapon = 4
 }
 
-public enum BootLayer
+
+// 부트 대상 목록 -> 주석에 들어간 매니저와 파사드 쪽에 구현
+// -> 씬에 하나씩 존재하는 매니저만. 런타임 생성 객체는 대상x Character, Monster, Item은 제거
+// -> 그 객체가 필요한 참조는 자기를 만든 팩토리가 생성 시점에 넣어준다.
+// 같은 값끼리 순서는 보장되지 않는데, 필요해지면 분리할 예정
+
+public enum BootLayer // 
 {
-    DataManager = 2,
-    ObjectPool = 3,
-    Factory = 4,
-    Character = 5,
-    Monster = 6,
-    Item = 7,
-    ItemManager = 8,
-    StageManager = 9,
-    SoundManager = 10,
-    SaveManager = 11,
-    UIManager = 12,
-    Codex = 13,
+    DataManager = 2, // DataManager
+    ObjectPool = 3, // MonsterObjectPoolManager, ItemObjectPoolManager
+    Navi2D = 4, // Navi2DGridData, Navi2DPathFinder
+    Factory = 5, // CharacterFactory, MonsterFactory, ItemFactory
+    ItemManager = 6,// ItemDropFacade
+    StageManager = 7, // StageFacade
+    SoundManager = 8,
+    SaveManager = 9,
+    UIManager = 10,
+    Codex = 11,
 }
 
 public enum StageType
