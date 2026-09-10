@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 
 
 //네놈은 부트스트래퍼를 통해 pathfinder를 찾는다.
@@ -8,31 +7,42 @@ using Unity.VisualScripting;
 public class Navi2DAgent : MonoBehaviour
 {
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float groundCheckHeight = 0.1f;
-    [SerializeField] private float groundCheckWidthRatio = 0.8f;
+    
 
     [Header("Agent 설정")]
     [SerializeField] private float MoveSpeed = 3f; //캐릭터 스테이터스
-    [SerializeField] private float jumpMaxHeight = 0.1f; // 실제 값 아님. 
-    [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기   
+    [SerializeField] private float jumpMaxHeight = 2f; // 실제 값 아님. 
+    [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기
+
+    private float AirClearanceMargin
+    {
+        get
+        {
+            return col.bounds.extents.y * 0.2f;
+        }
+    }
 
     private Navi2DPathFinder pathFinder;
     private Rigidbody2D rb;
 
     private Collider2D col;
 
-    private List<Navi2DNode> path;
+    private List<Navi2DPathStep> path;
     private int currentPathIndex;
 
-    private Vector2 targetPosition;
-    private Navi2DNode jumpTargetNode;
+    private Vector2 targetPosition;    
     private Navi2DNode lastTargetNode;
+    private Navi2DNode airTargetNode;
 
-    private bool isTracing;
-    private bool isJumping;
+    private bool isTracing;    
     private bool repathPending;
-    private bool isDropping;
-    private bool hasleftGround;
+
+    private bool isAirMoving;
+
+    private bool hasLeftGround;
+
+    private readonly ContactPoint2D[] groundContacts = new ContactPoint2D[8];
+    private ContactFilter2D groundContactFilter;
 
     float gravity;
 
@@ -50,6 +60,10 @@ public class Navi2DAgent : MonoBehaviour
         pathFinder = FindFirstObjectByType<Navi2DPathFinder>();
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
+
+        groundContactFilter = new ContactFilter2D();
+        groundContactFilter.SetLayerMask(groundLayer); //필터 정보에 사용하고자 하는 레이어 마스크 정보
+        groundContactFilter.useTriggers = false; //필터 정보에 Trigger쓰는 콜라이더 제외
     }
 
     private void Start()
@@ -61,14 +75,9 @@ public class Navi2DAgent : MonoBehaviour
     {
         if (!isTracing) return;
 
-        if (isJumping)
+        if(isAirMoving)
         {
-            UpdateJump();
-            return;
-        }
-        if (isDropping)
-        {
-            UpdateDrop();
+            UpdateAirMove();
             return;
         }
 
@@ -85,29 +94,22 @@ public class Navi2DAgent : MonoBehaviour
             return;
         }
 
-        Navi2DNode targetNode = path[currentPathIndex];
+        Navi2DPathStep step = path[currentPathIndex];
 
-        MoveToNode(targetNode);
+        MoveToStep(step);
     }
 
-    private void MoveToNode(Navi2DNode targetNode)
+    private void MoveToStep(Navi2DPathStep step)
     {
-        if (currentPathIndex <= 0) return;
-
-        Navi2DNode currentNode = path[currentPathIndex - 1];
-        if (currentNode == null) return;
-
-        Vector2Int delta = targetNode.gridPos - currentNode.gridPos;
-
-        bool isWalk = delta.y == 0 && Mathf.Abs(delta.x) <= 1; //근데 이러면 노드단위로 이동하긴 함.
-
-        if (isWalk)
+        switch (step.moveType)
         {
-            Walk(targetNode);
-        }
-        else
-        {
-            MoveThroughLink(currentNode, targetNode);
+            case Navi2DMoveType.walk:
+                Walk(step.toNode); 
+                break;
+
+            case Navi2DMoveType.AirMove:
+                StartAirMove(step);
+                break;
         }
 
     }
@@ -123,7 +125,7 @@ public class Navi2DAgent : MonoBehaviour
 
             if (currentPathIndex < path.Count)
             {
-                MoveToNode(path[currentPathIndex]);
+                MoveToStep(path[currentPathIndex]);
             }
 
             return;
@@ -133,125 +135,84 @@ public class Navi2DAgent : MonoBehaviour
         rb.linearVelocity = new Vector2(direction * MoveSpeed, rb.linearVelocity.y);
 
     }
-    private void MoveThroughLink(Navi2DNode currentNode, Navi2DNode targetNode)
+ 
+    private void StartAirMove(Navi2DPathStep step)
     {
-        float heightDelta = targetNode.worldPos.y - currentNode.worldPos.y;
-        if (heightDelta >= -0.01f)
-        {
-            StartJump(currentNode, targetNode);
+        if (isAirMoving)
             return;
-        }
 
-        StartDrop(currentNode, targetNode);
+        if (!IsGrounded())
+            return;
 
-    }
-
-    private void StartJump(Navi2DNode currentNode, Navi2DNode targetNode)
-    {
-        //Debug.Log("StartJump 호출");
-        if (isJumping) return;
-
-
-
-        bool canJump = Navi2DJumpCalculator.TryCalculateJumpVelocity(
-            currentNode.worldPos,
-            targetNode.worldPos,
+        bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
+            step.fromNode.worldPos,
+            step.toNode.worldPos,
             MoveSpeed,
             jumpMaxHeight,
             gravity,
-            out Vector2 jumpVelocity);
+            AirClearanceMargin,
+            step.linkData.obstacleTopY,
+            out Vector2 airVelocity);
 
-        if (!canJump)
+        if (step.linkData == null)
         {
-            Debug.LogWarning($"점프 불가능 : {currentNode.gridPos} -> {targetNode.gridPos}");
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocityY);
+            Debug.LogError($"AirMove Step에 LinkData가 없습니다. " + $"{step.fromNode.gridPos} -> {step.toNode.gridPos}");
+            return;
+        }
+
+        if (!canAirMove)
+        {
+            Debug.LogWarning($"AirMove 불가능 :{step.fromNode.gridPos} -> {step.toNode.gridPos}");
+
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
             return;
         }
 
-        rb.linearVelocity = jumpVelocity;
 
-        jumpTargetNode = targetNode;
-        isJumping = true;
+        rb.linearVelocity = airVelocity;
+        airTargetNode = step.toNode;
+
+        hasLeftGround = false;
+        isAirMoving = true;
     }
 
-    private void StartDrop(Navi2DNode currentNode, Navi2DNode targetNode)
+    private void UpdateAirMove()
     {
-        float deltaX = targetNode.worldPos.x - currentNode.worldPos.x;
-
-        if (Mathf.Abs(deltaX) < 0.01f)
+        if(!hasLeftGround)
         {
-            Debug.LogWarning($"수직 Drop은 현재 지원하지 않음 : " + $"{currentNode.gridPos} -> {targetNode.gridPos}");
-            return;
-        }
-
-        float direction = Mathf.Sign(deltaX);
-        rb.linearVelocity = new Vector2(direction * MoveSpeed, 0f);
-
-        hasleftGround = false;
-        isDropping = true;
-
-
-    }
-
-    private void UpdateDrop()
-    {
-        if (!hasleftGround)
-        {
-            if (!IsGrounded())
+            if(!IsGrounded())
             {
-                hasleftGround = true;
+                hasLeftGround = true;
             }
-            return;
+            return;            
         }
 
         if (!IsGrounded()) return;
+        
+        isAirMoving =false;
+        hasLeftGround = false;
+        airTargetNode = null;
 
-
-        isDropping = false;
-        hasleftGround = false;
-
-        if (repathPending)
-        {
-            repathPending = false;
-            RequestPath();
-            return;
-        }
-
-        currentPathIndex++;
-
-
+        RequestPath();
 
     }
 
-    private void UpdateJump()
-    {
-        if (rb.linearVelocity.y > 0f)
-            return;
-
-        if (!IsGrounded()) return;
-
-        isJumping = false;
-        jumpTargetNode = null;
-
-        if (repathPending)
-        {
-            repathPending = false;
-            RequestPath();
-            return;
-        }
-
-        currentPathIndex++;
-    }
 
     private bool IsGrounded()
     {
-        Bounds bounds = col.bounds;
+        int contactCount = col.GetContacts(groundContactFilter, groundContacts);
+        for(int i =  0; i < contactCount; i++)
+        {
+            ContactPoint2D contact = groundContacts[i];
+            if(contact.normal.y >0.7f)
+            {
+                return true;
+            }
 
-        Vector2 checkPosition = new Vector2(bounds.center.x, bounds.min.y - groundCheckHeight * 0.5f);
-        Vector2 checkSize = new Vector2(bounds.size.x * groundCheckWidthRatio, groundCheckHeight);
+        }
+        return false;
 
-        return Physics2D.OverlapBox(checkPosition, checkSize, 0f, groundLayer) != null;
     }
 
 
@@ -287,8 +248,12 @@ public class Navi2DAgent : MonoBehaviour
 
         if (path == null || isFirstTarget || targetChanged || repathPending)
         {
-            repathPending = false;
 
+            isAirMoving = false;
+            hasLeftGround = false;
+            airTargetNode = null;
+
+            repathPending = false;
             RequestPath();
 
             return;
@@ -299,7 +264,7 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
-        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed, jumpMaxHeight, gravity);
+        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed, jumpMaxHeight, gravity, AirClearanceMargin);
 
         if (path == null || path.Count == 0)
         {
@@ -308,8 +273,7 @@ public class Navi2DAgent : MonoBehaviour
             return;
 
         }
-        currentPathIndex = path.Count > 1 ? 1 : 0;
-        Debug.Log($"Repath : Target Node {lastTargetNode?.gridPos}");
+        currentPathIndex = 0;       
     }
 
 }

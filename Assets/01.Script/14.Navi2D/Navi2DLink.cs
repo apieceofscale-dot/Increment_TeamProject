@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -10,8 +10,12 @@ public class Navi2DLink : MonoBehaviour // 나중에 이거 상속시켜서 사다리, 덫 만�
     [SerializeField] private Transform pointA;
     [SerializeField] private Transform pointB;
 
+    [SerializeField, Min(0)] int candidateRange = 2;
+
     public Vector2 PointA => pointA.position;
     public Vector2 PointB => pointB.position;
+
+    public int CandidateRange => candidateRange;
 
     public bool IsValid => pointA != null && pointB != null; 
 
@@ -31,11 +35,21 @@ public class Navi2DLink : MonoBehaviour // 나중에 이거 상속시켜서 사다리, 덫 만�
 public class Navi2DLinkData
 {
     public Navi2DNode aNode;
-    public Navi2DNode bNode; 
+    public Navi2DNode bNode;
 
-    public Navi2DLinkData(Navi2DNode aNode, Navi2DNode bNode)
+    public List<Navi2DNode> aCandidates;
+    public List<Navi2DNode> bCandidates;
+
+    public float obstacleTopY;
+
+    public Navi2DLinkData(Navi2DNode aNode, Navi2DNode bNode, List<Navi2DNode> aCandidates, List<Navi2DNode> bCandidates, float obstacleTopY)
     {
         this.aNode = aNode;
-        this.bNode = bNode;             
+        this.bNode = bNode;       
+        
+        this.aCandidates = aCandidates;
+        this.bCandidates = bCandidates;
+
+        this.obstacleTopY = obstacleTopY;
     }
 }

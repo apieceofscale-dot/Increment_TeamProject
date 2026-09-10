@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.Experimental.Animations;
 
 //런타임시 부분 재계산 기능 필요
 //맵이 쉽게 바뀌는 게 아니므로 시작하기 전에 이걸 seriailzable로 해서 값 자체를 미리 저장한 후 게임으로 보내기 -> 부분재계산이 가장 좋음.
@@ -110,8 +112,27 @@ public class Navi2DGridata : MonoBehaviour
                 continue;
             }
 
-            linkData.Add(new Navi2DLinkData(aNode, bNode));
-            //Debug.Log($"[Navi2D Link] " + $"{aNode.gridPos} <-> {bNode.gridPos}");
+            List<Navi2DNode> aCandidates = GetLinkCandidates(aNode,link.CandidateRange);
+            List<Navi2DNode> bCandidates = GetLinkCandidates(bNode,link.CandidateRange);
+
+            float obstacleTopY = GetLinkObstacleTopY(aNode, bNode);
+
+
+            /*
+            foreach (Navi2DNode node in aCandidates)
+            {
+                Debug.Log($"A Candidate : {node.gridPos}");
+            }
+
+            foreach (Navi2DNode node in bCandidates)
+            {
+                Debug.Log($"B Candidate : {node.gridPos}");
+            }
+            Debug.Log($"Link : {aNode.gridPos} <-> {bNode.gridPos} / " +  $"ObstacleTopY : {obstacleTopY}");
+            */
+
+            linkData.Add(new Navi2DLinkData(aNode, bNode,aCandidates,bCandidates,obstacleTopY));
+           
         }
 
        
@@ -160,6 +181,74 @@ public class Navi2DGridata : MonoBehaviour
     //int.Tryparse 메서드를 선언하는 방식과 똑같음.
      //이 방식을 쓰는 이유는 노드가 필요한데 null을 반환하면 null체크를 해야함.
      //try~를 쓰면 bool을 함께 반환하기 때문에 의도가 명확해져서 읽기 좋은 코드가됨.
+
+
+    private List<Navi2DNode> GetLinkCandidates(Navi2DNode anchorNode,int range)
+    {
+        List<Navi2DNode> candidates = new List<Navi2DNode>();
+
+        if(anchorNode == null) return candidates;
+
+        candidates.Add(anchorNode);
+
+        for (int i = 1; i <= range; i++) //왼쪽 후보 모으기
+        {
+            Vector2Int gridPos = anchorNode.gridPos + Vector2Int.left * i;
+
+            if (!nodeData.TryGetValue(gridPos, out Navi2DNode node)) break; //중간에 끊긴 노드 체크
+            
+            candidates.Add(node);
+        }
+
+        for(int i = 1; i<=range; i++) //오른쪽 후보 모으기
+        {
+            Vector2Int gridPos = anchorNode.gridPos + Vector2Int.right * i;
+
+            if(!nodeData.TryGetValue(gridPos,out Navi2DNode node)) break;
+            candidates.Add(node);
+        }
+
+        return candidates;
+    }
+
+
+
+    private float GetLinkObstacleTopY(Navi2DNode aNode, Navi2DNode bNode)
+    {
+        int minX = Mathf.Min(aNode.gridPos.x, bNode.gridPos.x);
+        int maxX = Mathf.Max(aNode.gridPos.x, bNode.gridPos.x);
+
+        float baseY = Mathf.Min(aNode.worldPos.y,bNode.worldPos.y);
+        float obstacleTopY = Mathf.Max(aNode.worldPos.y, bNode.worldPos.y);
+
+        for(int x = minX+1; x< maxX;x++)
+        {
+            Navi2DNode closestSurface = null;
+
+            foreach (var node in nodeData.Values)
+            {
+               if(node.gridPos.x!=x) continue;
+               if(node.worldPos.y <baseY) continue;
+
+               if(closestSurface == null || node.worldPos.y < closestSurface.worldPos.y)
+                {
+                    closestSurface = node;
+                }
+
+            }
+
+            if (closestSurface == null) continue;
+
+            if(closestSurface.worldPos.y > obstacleTopY)
+            {
+                obstacleTopY = closestSurface.worldPos.y;
+            }
+            //Debug.Log($"Obstacle Node : " + $"gridY={closestSurface.gridPos.y}, " + $"worldY={closestSurface.worldPos.y}");
+        }
+
+
+        return obstacleTopY;
+    }
 
 
 
