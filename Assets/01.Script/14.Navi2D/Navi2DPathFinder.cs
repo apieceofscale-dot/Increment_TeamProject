@@ -15,9 +15,9 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
     }
 
     public List<Navi2DPathStep> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float moveSpeed,
-    float jumpMaxHeight, float gravity, float airClearanceMargin)
+    float jumpMaxHeight, float gravity, float airClearanceMargin, float airHorizontalClearance, float airBodyHeight)
     {
-        Debug.Log($"PathFinding 호출 / LinkCount = {gD.LinkData.Count}");
+        //Debug.Log($"PathFinding 호출 / LinkCount = {gD.LinkData.Count}");
 
         Navi2DNode startNode = FindGroundNodeBelow(agentPos);       
         Navi2DNode targetNode = FindGroundNodeBelow(targetPos);        
@@ -124,12 +124,19 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                 {
                     continue;
                 }
-
-                foreach(Navi2DNode linkNeighbor in targetCandidates)
+               
+                foreach (Navi2DNode linkNeighbor in targetCandidates)
                 {
                     if(linkNeighbor == null) continue;
                     if(closed.Contains(linkNeighbor)) continue;
                     if(linkNeighbor.height < agentHeigth) continue;
+
+                    /*Debug.Log(
+    $"PathFinder Link 데이터 / " +
+    $"CeilingY={link.ceilingBottomY}, " +
+    $"CeilingMinX={link.ceilingMinX}, " +
+    $"CeilingMaxX={link.ceilingMaxX}"
+);*/
 
                     bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
                         current.worldPos,
@@ -137,14 +144,24 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                         moveSpeed,
                         jumpMaxHeight,
                         gravity,
-                        airClearanceMargin, 
+                        airClearanceMargin,
+                        airHorizontalClearance,
                         link.obstacleTopY,
-                        out  _); // _문법은 값은 필요 없다는 뜻.
+                        link.obstacleMinX,
+                        link.obstacleMaxX,
+                        link.ceilingBottomY,
+                        link.ceilingMinX,
+                        link.ceilingMaxX,
+                        airBodyHeight,                        
+                        out _); // _문법은 값은 필요 없다는 뜻.
 
-                    
+
                     if (!canAirMove) continue;
-                    if (current.gridPos == new Vector2Int(-1, -3))
-                        continue;
+
+                    /*Debug.Log(
+    $"Air 성공 : {current.gridPos} -> {linkNeighbor.gridPos}");*/
+
+
 
                     float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
 
@@ -161,8 +178,6 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                         {
                             open.Add(linkNeighbor);
                         }
-
-                        
 
                     }
 

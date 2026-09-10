@@ -11,16 +11,13 @@ public class Navi2DAgent : MonoBehaviour
 
     [Header("Agent 설정")]
     [SerializeField] private float MoveSpeed = 3f; //캐릭터 스테이터스
-    [SerializeField] private float jumpMaxHeight = 2f; // 실제 값 아님. 
+    [SerializeField] private float AirMoveSpeed = 5f;
+    [SerializeField] private float jumpMaxHeight = 3f; // 실제 값 아님. 
     [SerializeField] private float agentHeight = 1f; //스프라이트 값 가져오기
 
-    private float AirClearanceMargin
-    {
-        get
-        {
-            return col.bounds.extents.y * 0.2f;
-        }
-    }
+    private float AirClearanceMargin { get { return col.bounds.extents.y * 0.2f; } }
+    private float AirHorizontalClearance { get { return col.bounds.extents.x; } }
+    private float AirBodyHeight { get { return col.bounds.size.y; } }
 
     private Navi2DPathFinder pathFinder;
     private Rigidbody2D rb;
@@ -151,7 +148,14 @@ public class Navi2DAgent : MonoBehaviour
             jumpMaxHeight,
             gravity,
             AirClearanceMargin,
+            AirHorizontalClearance,
             step.linkData.obstacleTopY,
+            step.linkData.obstacleMinX,
+            step.linkData.obstacleMaxX,
+            step.linkData.ceilingBottomY,
+            step.linkData.ceilingMinX,
+            step.linkData.ceilingMaxX,
+            AirBodyHeight,
             out Vector2 airVelocity);
 
         if (step.linkData == null)
@@ -264,7 +268,16 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
-        path = pathFinder.PathFinding(FootPosition, targetPosition, agentHeight, MoveSpeed, jumpMaxHeight, gravity, AirClearanceMargin);
+        path = pathFinder.PathFinding(
+            FootPosition,
+            targetPosition,
+            agentHeight,
+            MoveSpeed,
+            jumpMaxHeight,
+            gravity,
+            AirClearanceMargin,
+            AirHorizontalClearance,
+            AirBodyHeight);
 
         if (path == null || path.Count == 0)
         {

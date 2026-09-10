@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.Experimental.Animations;
 
 //런타임시 부분 재계산 기능 필요
 //맵이 쉽게 바뀌는 게 아니므로 시작하기 전에 이걸 seriailzable로 해서 값 자체를 미리 저장한 후 게임으로 보내기 -> 부분재계산이 가장 좋음.
@@ -115,9 +113,19 @@ public class Navi2DGridata : MonoBehaviour
             List<Navi2DNode> aCandidates = GetLinkCandidates(aNode,link.CandidateRange);
             List<Navi2DNode> bCandidates = GetLinkCandidates(bNode,link.CandidateRange);
 
-            float obstacleTopY = GetLinkObstacleTopY(aNode, bNode);
+            GetLinkObstacleData(
+                aNode,
+                bNode,
+                out float obstacleTopY,
+                out float obstacleMinX,
+                out float obstacleMaxX,
+                out float ceilingBottomY,
+                out float ceilingMinX,
+                out float ceilingMaxX);
 
 
+
+            //Debug.Log($"Link 장애물 : " + $"TopY={obstacleTopY}, " + $"MinX={obstacleMinX}, " + $"MaxX={obstacleMaxX}");
             /*
             foreach (Navi2DNode node in aCandidates)
             {
@@ -131,11 +139,12 @@ public class Navi2DGridata : MonoBehaviour
             Debug.Log($"Link : {aNode.gridPos} <-> {bNode.gridPos} / " +  $"ObstacleTopY : {obstacleTopY}");
             */
 
-            linkData.Add(new Navi2DLinkData(aNode, bNode,aCandidates,bCandidates,obstacleTopY));
-           
+
+            linkData.Add(new Navi2DLinkData(aNode, bNode, aCandidates, bCandidates, obstacleTopY, obstacleMinX, obstacleMaxX, ceilingBottomY, ceilingMinX, ceilingMaxX));
+
         }
 
-       
+
     }
 
 
@@ -213,41 +222,95 @@ public class Navi2DGridata : MonoBehaviour
 
 
 
-    private float GetLinkObstacleTopY(Navi2DNode aNode, Navi2DNode bNode)
+    private void GetLinkObstacleData(
+        Navi2DNode aNode,
+        Navi2DNode bNode, 
+        out float obstacleTopY,
+        out float obstacleMinX,
+        out float obstacleMaxX,
+        out float ceilingBottomY,
+        out float ceilingMinX,
+        out float ceilingMaxX)
     {
+
+
         int minX = Mathf.Min(aNode.gridPos.x, bNode.gridPos.x);
         int maxX = Mathf.Max(aNode.gridPos.x, bNode.gridPos.x);
 
         float baseY = Mathf.Min(aNode.worldPos.y,bNode.worldPos.y);
-        float obstacleTopY = Mathf.Max(aNode.worldPos.y, bNode.worldPos.y);
+        obstacleTopY = baseY;
 
-        for(int x = minX+1; x< maxX;x++)
+        obstacleMinX = float.PositiveInfinity;
+        obstacleMaxX = float.NegativeInfinity;
+
+        ceilingBottomY = float.PositiveInfinity;
+        ceilingMinX = float.PositiveInfinity;
+        ceilingMaxX = float.NegativeInfinity;
+
+        float halfCellWidth = boundsTile.layoutGrid.cellSize.x * 0.5f;
+
+        for (int x = minX+1; x< maxX;x++)
         {
             Navi2DNode closestSurface = null;
 
             foreach (var node in nodeData.Values)
             {
-               if(node.gridPos.x!=x) continue;
-               if(node.worldPos.y <baseY) continue;
+                if (node.gridPos.x != x) continue;
+                if (node.worldPos.y < baseY) continue;
 
-               if(closestSurface == null || node.worldPos.y < closestSurface.worldPos.y)
+                if (!float.IsInfinity(node.height))
+                {
+                    float nodeCeilingBottomY = node.worldPos.y + node.height;
+
+                    float ceilingCellMinX = node.worldPos.x - halfCellWidth;
+
+                    float ceilingCellMaxX = node.worldPos.x + halfCellWidth;
+
+                    if (nodeCeilingBottomY < ceilingBottomY)
+                    {
+                        ceilingBottomY = nodeCeilingBottomY;
+                        ceilingMinX = ceilingCellMinX;
+                        ceilingMaxX = ceilingCellMaxX;
+                    }
+                    else if (Mathf.Approximately(nodeCeilingBottomY, ceilingBottomY))
+                    {
+                        if (ceilingCellMinX < ceilingMinX)
+                            ceilingMinX = ceilingCellMinX;
+
+                        if (ceilingCellMaxX > ceilingMaxX)
+                            ceilingMaxX = ceilingCellMaxX;
+                    }
+                }
+
+                if (closestSurface == null || node.worldPos.y < closestSurface.worldPos.y)
                 {
                     closestSurface = node;
                 }
-
             }
 
+
             if (closestSurface == null) continue;
+            if (closestSurface.worldPos.y <= baseY) continue;
 
             if(closestSurface.worldPos.y > obstacleTopY)
             {
                 obstacleTopY = closestSurface.worldPos.y;
             }
-            //Debug.Log($"Obstacle Node : " + $"gridY={closestSurface.gridPos.y}, " + $"worldY={closestSurface.worldPos.y}");
+
+            float cellMinX = closestSurface.worldPos.x - halfCellWidth;
+            float cellMaxX = closestSurface.worldPos.x + halfCellWidth;
+
+            if (cellMinX < obstacleMinX)
+            {
+                obstacleMinX = cellMinX;
+            }
+
+            if(cellMaxX > obstacleMaxX)
+            {
+                obstacleMaxX = cellMaxX;
+            }
         }
-
-
-        return obstacleTopY;
+        return;
     }
 
 

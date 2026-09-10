@@ -41,8 +41,47 @@ public class Navi2DLinkData
     public List<Navi2DNode> bCandidates;
 
     public float obstacleTopY;
+    public float obstacleMinX;
+    public float obstacleMaxX;
 
-    public Navi2DLinkData(Navi2DNode aNode, Navi2DNode bNode, List<Navi2DNode> aCandidates, List<Navi2DNode> bCandidates, float obstacleTopY)
+    public float ceilingBottomY;
+    public float ceilingMinX;
+    public float ceilingMaxX;
+
+
+    public Navi2DLinkData(
+    Navi2DNode aNode,
+    Navi2DNode bNode,
+    List<Navi2DNode> aCandidates,
+    List<Navi2DNode> bCandidates,
+    float obstacleTopY,
+    float obstacleMinX,
+    float obstacleMaxX,
+    float ceilingBottomY,
+    float ceilingMinX,
+    float ceilingMaxX)
+    {
+        this.aNode = aNode;
+        this.bNode = bNode;
+
+        this.aCandidates = aCandidates;
+        this.bCandidates = bCandidates;
+
+        this.obstacleTopY = obstacleTopY;
+        this.obstacleMinX = obstacleMinX;
+        this.obstacleMaxX = obstacleMaxX;
+
+        this.ceilingBottomY = ceilingBottomY;
+        this.ceilingMinX = ceilingMinX;
+        this.ceilingMaxX = ceilingMaxX;
+    }
+    /*
+    public Navi2DLinkData(
+        Navi2DNode aNode,
+        Navi2DNode bNode,
+        List<Navi2DNode> aCandidates,
+        List<Navi2DNode> bCandidates,
+        float obstacleTopY)
     {
         this.aNode = aNode;
         this.bNode = bNode;       
@@ -51,5 +90,7 @@ public class Navi2DLinkData
         this.bCandidates = bCandidates;
 
         this.obstacleTopY = obstacleTopY;
-    }
+        ceilingMinX = float.PositiveInfinity;
+        ceilingMaxX = float.NegativeInfinity;
+    }*/
 }
