@@ -7,4 +7,5 @@ public enum PlayerId
     Knight = 1000,
     Wizard = 1001,
     Rogue = 1002,
+    arhcer = 1003,
 }

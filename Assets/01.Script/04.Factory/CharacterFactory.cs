@@ -4,6 +4,7 @@ public class CharacterFactory : MonoBehaviour
 {
     [SerializeField] private CharacterFacade characterPrefab;
     [SerializeField] private Transform testSpawnPoint; // 테스트용
+    
     public CharacterFacade Create(PlayerData playerData, Vector3 spawnPosition)
     {
         if (characterPrefab == null)
@@ -26,9 +27,26 @@ public class CharacterFactory : MonoBehaviour
 
         CharacterFacade character = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
 
-        character.Initialize(playerData); // 왠지 내가 다른 파일 잘못 건드린 것 같아서 아래에는 테스트용 임시 데이터 사용
+        character.Initialize(playerData);
 
         return character;
+    }
+    
+    public CharacterFacade Create(int playerId, Vector3 spawnPosition)
+    {
+        if (DataManager.instance == null)
+        {
+            Debug.LogError("DataManager가 없습니다.");
+            return null;
+        }
+
+        if (!DataManager.instance.TryGetPlayerData(playerId, out PlayerData playerData))
+        {
+            Debug.LogError($"플레이어 데이터를 찾을 수 없습니다. ID: {playerId}");
+            return null;
+        }
+
+        return Create(playerData, spawnPosition);
     }
 
     [ContextMenu("생성 테스트")]
@@ -40,17 +58,9 @@ public class CharacterFactory : MonoBehaviour
             return;
         }
 
-        Vector3 spawnPosition = testSpawnPoint != null ? testSpawnPoint.position : Vector3.zero;
+        Vector3 spawnPosition = testSpawnPoint != null ? testSpawnPoint.position : Vector3.zero; // 지정한 스폰포인트가 없을 시 0,0,0에서 생성
 
-        PlayerData testData = new PlayerData // 테스트용 임시 데이터, 캐릭터 스탯 등은 Status의 생성자 수치를 적용
-        {
-            id = -1,
-            codeName = "TestPlayer",
-            displayName = "테스트 플레이어",
-            description = "팩토리 생성 테스트용"
-        };
-
-        CharacterFacade character = Create(testData, spawnPosition);
+        CharacterFacade character = Create(1000, spawnPosition);
 
         if (character == null)
         {

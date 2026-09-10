@@ -225,13 +225,13 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         int currentLevel = Status.Level;
         long hpGorwth = characterLevelUpProvider.GetMaxHpGrowth(currentLevel);
         int attackGrowth = characterLevelUpProvider.GetAttackGrowth(currentLevel);
-        long defenseGrowth = characterLevelUpProvider.GetDefenseGrowth(currentLevel);
+        long defenceGrowth = characterLevelUpProvider.GetDefenceGrowth(currentLevel);
 
         Status.IncreaseMaxHp(hpGorwth);
         Status.IncreaseAttack(attackGrowth);
-        Status.IncreaseDefense(defenseGrowth);
+        Status.IncreaseDefence(defenceGrowth);
 
-        Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenseGrowth}");
+        Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenceGrowth}");
     }
 
     public bool UseSkillSlash()

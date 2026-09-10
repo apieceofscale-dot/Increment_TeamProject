@@ -45,7 +45,7 @@ public class CharacterJobAdvancedment : MonoBehaviour
             Debug.Log($"직업 변경: {data.displayName} (ID: {data.id})", this);
             return true;
         }
-        Debug.LogWarning($"직업 ID {id}잘못 입력", this);
+        Debug.LogWarning($"직업 ID {id} | 잘못 입력", this);
         return false;
     }
 

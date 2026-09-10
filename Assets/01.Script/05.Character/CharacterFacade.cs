@@ -21,11 +21,13 @@ public class CharacterFacade : MonoBehaviour
     {
         if (playerData == null)
         {
-            Debug.LogError("플레이어 데이터 없음");
+            Debug.LogError("플레이어 데이터 없음", this);
             return;
         }
 
         Data = playerData;
+        Status.Initialize(playerData);
+
         if (characterControllers == null)
             characterControllers = GetComponent<CharacterControllers>();
 
