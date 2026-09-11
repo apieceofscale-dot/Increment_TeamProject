@@ -220,13 +220,7 @@ public class Navi2DAgent : MonoBehaviour
         if (!IsGrounded())
             return;
 
-        if (step.linkData == null)
-        {
-            Debug.LogError($"AirMove Step에 LinkData가 없습니다. " + $"{step.fromNode.gridPos} -> {step.toNode.gridPos}");
-            return;
-        }
-
-        bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
+        bool canAirMove = pathFinder.TryCalculatePlatformJumpVelocity(
             FootPosition,           
             step.toNode.worldPos,
             maxAirHorizontalSpeed,
@@ -234,12 +228,6 @@ public class Navi2DAgent : MonoBehaviour
             gravity,
             AirClearanceMargin,
             AirHorizontalClearance,
-            step.linkData.obstacleTopY,
-            step.linkData.obstacleMinX,
-            step.linkData.obstacleMaxX,
-            step.linkData.ceilingBottomY,
-            step.linkData.ceilingMinX,
-            step.linkData.ceilingMaxX,
             AirBodyHeight,
             out Vector2 airVelocity);
                

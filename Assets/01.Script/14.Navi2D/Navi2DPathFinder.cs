@@ -176,14 +176,22 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                         if (canMove)
                             moveCost = (departure - current.worldPos).sqrMagnitude +
                                 (linkNeighbor.worldPos - departure).sqrMagnitude;
+                        else
+                        {
+                            // A lower platform may be too far away for a plain drop.
+                            moveType = Navi2DMoveType.Traverse;
+                            canMove = TryCalculatePlatformJumpVelocity(current.worldPos,
+                                linkNeighbor.worldPos, airMoveSpeed, jumpMaxHeight, gravity,
+                                airClearanceMargin, airHorizontalClearance, airBodyHeight, out _);
+                        }
                     }
 
                     else
                     {
-                        // 일단 기존 평행 이동은 그대로 유지
+                        // Jump across a gap, with or without an obstacle between platforms.
                         moveType = Navi2DMoveType.Traverse;
 
-                        canMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
+                        canMove = TryCalculatePlatformJumpVelocity(
                             current.worldPos,
                             linkNeighbor.worldPos,
                             airMoveSpeed,
@@ -191,12 +199,6 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                             gravity,
                             airClearanceMargin,
                             airHorizontalClearance,
-                            link.obstacleTopY,
-                            link.obstacleMinX,
-                            link.obstacleMaxX,
-                            link.ceilingBottomY,
-                            link.ceilingMinX,
-                            link.ceilingMaxX,
                             airBodyHeight,
                             out _);
                     }
@@ -329,6 +331,16 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         if (gD.IsAirArcClear(start, velocity, duration, gravity, halfWidth, bodyHeight)) return true;
         velocity = Vector2.zero;
         return false;
+    }
+
+    public bool TryCalculatePlatformJumpVelocity(Vector2 start, Vector2 target,
+        float airSpeed, float maxRise, float gravity, float clearance,
+        float halfWidth, float bodyHeight, out Vector2 velocity)
+    {
+        return Navi2DAirMoveCalculator.TryCalculatePlatformJumpVelocity(
+            start, target, airSpeed, maxRise, gravity, clearance,
+            (candidate, duration) => gD.IsAirArcClear(start, candidate, duration,
+                gravity, halfWidth, bodyHeight), out velocity);
     }
 
     public bool TryCalculateJumpUpVelocity(Vector2 start, Vector2 target,
