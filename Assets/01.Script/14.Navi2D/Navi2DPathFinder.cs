@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 //점프에 가로길이 추가해야함 -> 캐릭터 가로길이가 2인데, 점프길이가 1이면 걍 걸어가기.
@@ -14,8 +13,16 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         gD = GetComponent<Navi2DGridata>();
     }
 
-    public List<Navi2DPathStep> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float airMoveSpeed,
-    float jumpMaxHeight, float gravity, float airClearanceMargin, float airHorizontalClearance, float airBodyHeight)
+    public List<Navi2DPathStep> PathFinding(
+        Vector2 agentPos,
+        Vector2 targetPos,
+        float agentHeigth,
+        float airMoveSpeed,
+        float jumpMaxHeight,
+        float gravity,
+        float airClearanceMargin,
+        float airHorizontalClearance,
+        float airBodyHeight)
     {
         //Debug.Log($"PathFinding 호출 / LinkCount = {gD.LinkData.Count}");
 
@@ -105,6 +112,8 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
             }
 
 
+
+
             foreach (Navi2DLinkData link in gD.LinkData)
             {
                 List<Navi2DNode> targetCandidates = null;
@@ -134,42 +143,77 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                      * $"CeilingY={link.ceilingBottomY}, " +
                      * $"CeilingMinX={link.ceilingMinX}, " +
                      * $"CeilingMaxX={link.ceilingMaxX}");*/
+                    float deltaY = linkNeighbor.worldPos.y - current.worldPos.y;
 
-                    bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
-                        current.worldPos,
-                        linkNeighbor.worldPos,
-                        airMoveSpeed,
-                        jumpMaxHeight,
-                        gravity,
-                        airClearanceMargin,
-                        airHorizontalClearance,
-                        link.obstacleTopY,
-                        link.obstacleMinX,
-                        link.obstacleMaxX,
-                        link.ceilingBottomY,
-                        link.ceilingMinX,
-                        link.ceilingMaxX,
-                        airBodyHeight,                        
-                        out _); // _문법은 값은 필요 없다는 뜻.
+                    bool canMove;
 
-
-                    if (!canAirMove) continue;
-
-                    /*Debug.Log($"Air 성공 : {current.gridPos} -> {linkNeighbor.gridPos}");*/
-
-
-
+                    Navi2DMoveType moveType;
                     float moveCost = Vector2.SqrMagnitude(current.worldPos - linkNeighbor.worldPos);
+
+                    if (deltaY > 0.1f)
+                    {
+                        // 위쪽 발판으로 이동
+                        moveType = Navi2DMoveType.JumpUp;
+
+                        canMove = TryCalculateJumpUpVelocity(
+                            current.worldPos,
+                            linkNeighbor.worldPos,
+                            airMoveSpeed,
+                            jumpMaxHeight,
+                            gravity,
+                            airClearanceMargin,
+                            airHorizontalClearance,
+                            airBodyHeight,
+                            out _);
+                    }
+                    else if (deltaY < -0.1f)
+                    {
+                        moveType = Navi2DMoveType.Drop;
+
+                        canMove = TryPlanDrop(current, current.worldPos, linkNeighbor.worldPos,
+                            airMoveSpeed, gravity, airHorizontalClearance, airBodyHeight,
+                            out Vector2 departure, out _);
+                        if (canMove)
+                            moveCost = (departure - current.worldPos).sqrMagnitude +
+                                (linkNeighbor.worldPos - departure).sqrMagnitude;
+                    }
+
+                    else
+                    {
+                        // 일단 기존 평행 이동은 그대로 유지
+                        moveType = Navi2DMoveType.Traverse;
+
+                        canMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
+                            current.worldPos,
+                            linkNeighbor.worldPos,
+                            airMoveSpeed,
+                            jumpMaxHeight,
+                            gravity,
+                            airClearanceMargin,
+                            airHorizontalClearance,
+                            link.obstacleTopY,
+                            link.obstacleMinX,
+                            link.obstacleMaxX,
+                            link.ceilingBottomY,
+                            link.ceilingMinX,
+                            link.ceilingMaxX,
+                            airBodyHeight,
+                            out _);
+                    }
+
+                    if (!canMove)
+                        continue;
+
 
                     float newCost = cost[current] + moveCost;
 
                     if (!cost.ContainsKey(linkNeighbor) || newCost < cost[linkNeighbor])
                     {
                         cost[linkNeighbor] = newCost;
+
+
                        
-
-                        cameFrom[linkNeighbor] = new Navi2DPathStep(current, linkNeighbor, Navi2DMoveType.AirMove, link);
-
+                        cameFrom[linkNeighbor] = new Navi2DPathStep(current, linkNeighbor, moveType, link);
                         if (!open.Contains(linkNeighbor))
                         {
                             open.Add(linkNeighbor);
@@ -177,7 +221,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
 
                     }
 
-                    
+
                 }
             }
         }
@@ -221,6 +265,80 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
 
         return leftDistance <= rightDistance ? leftNode : rightNode;
 
+    }
+
+    public bool TryPlanDrop(Navi2DNode source, Vector2 start, Vector2 target,
+        float airSpeed, float gravity, float halfWidth, float bodyHeight,
+        out Vector2 departure, out Vector2 velocity)
+    {
+        departure = Vector2.zero;
+        velocity = Vector2.zero;
+        if (source == null || target.y >= source.worldPos.y - 0.1f) return false;
+        float bestCost = float.PositiveInfinity;
+        for (int direction = -1; direction <= 1; direction += 2)
+        {
+            if (!gD.TryGetDropDeparture(source, direction, halfWidth, out Vector2 candidate)) continue;
+            if (!gD.IsWalkSegmentClear(start, candidate, halfWidth, bodyHeight)) continue;
+            if (!TryCalculateDropMotion(candidate, target, airSpeed, gravity, 0f,
+                halfWidth, bodyHeight, out Vector2 candidateVelocity, out _)) continue;
+            float cost = (candidate - start).sqrMagnitude + (target - candidate).sqrMagnitude;
+            if (cost >= bestCost) continue;
+            bestCost = cost;
+            departure = candidate;
+            velocity = candidateVelocity;
+        }
+        return !float.IsPositiveInfinity(bestCost);
+    }
+
+    // A lower target can sit under the source platform. Fall beside its wall first,
+    // then steer inward only after the whole body can pass beneath the platform.
+    public bool TryCalculateDropMotion(Vector2 start, Vector2 target,
+        float airSpeed, float gravity, float initialVelocityY,
+        float halfWidth, float bodyHeight, out Vector2 steeringVelocity, out float steeringDelay)
+    {
+        steeringVelocity = Vector2.zero;
+        steeringDelay = 0f;
+        if (!Navi2DDropCalculator.TryCalculateDropVelocity(start,
+            new Vector2(start.x, target.y), airSpeed, gravity, initialVelocityY,
+            out _, out float totalTime)) return false;
+
+        const int samples = 32;
+        for (int i = 0; i <= samples; i++)
+        {
+            float delay = totalTime * i / (samples + 1f);
+            Vector2 fallVelocity = new Vector2(0f, initialVelocityY);
+            if (delay > 0f && !gD.IsAirArcClear(start, fallVelocity, delay, gravity,
+                halfWidth, bodyHeight)) continue;
+            Vector2 turnPosition = new Vector2(start.x,
+                start.y + initialVelocityY * delay - 0.5f * gravity * delay * delay);
+            if (!TryCalculateDropVelocity(turnPosition, target, airSpeed, gravity,
+                initialVelocityY - gravity * delay, halfWidth, bodyHeight, out Vector2 candidate)) continue;
+            steeringVelocity = candidate;
+            steeringDelay = delay;
+            return true;
+        }
+        return false;
+    }
+
+    public bool TryCalculateDropVelocity(Vector2 start, Vector2 target,
+        float airSpeed, float gravity, float initialVelocityY,
+        float halfWidth, float bodyHeight, out Vector2 velocity)
+    {
+        if (!Navi2DDropCalculator.TryCalculateDropVelocity(start, target, airSpeed,
+            gravity, initialVelocityY, out velocity, out float duration)) return false;
+        if (gD.IsAirArcClear(start, velocity, duration, gravity, halfWidth, bodyHeight)) return true;
+        velocity = Vector2.zero;
+        return false;
+    }
+
+    public bool TryCalculateJumpUpVelocity(Vector2 start, Vector2 target,
+        float airSpeed, float maxRise, float gravity, float clearance,
+        float halfWidth, float bodyHeight, out Vector2 velocity)
+    {
+        return Navi2DAirMoveCalculator.TryCalculateJumpUpVelocity(
+            start, target, airSpeed, maxRise, gravity, clearance, halfWidth,
+            (candidate, duration) => gD.IsAirArcClear(start, candidate, duration,
+                gravity, halfWidth, bodyHeight), out velocity);
     }
 
     public Navi2DNode FindGroundNodeBelow(Vector2 worldPos)

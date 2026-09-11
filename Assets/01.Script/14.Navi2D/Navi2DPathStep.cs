@@ -1,8 +1,11 @@
 using UnityEngine;
 public enum Navi2DMoveType
 {
-    walk,
-    AirMove
+    walk,       //
+    Traverse,   // 평행점프 
+    JumpUp,     // 위로 올라가기
+    Drop,       // 아래로 떨어지기
+    Ladder,     // 밧줄/사다리
 }
 
 

@@ -13,6 +13,6 @@ public class AgentTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        agent.Trace(player.position);
+        agent.Trace(player.position,5f);
     }
 }

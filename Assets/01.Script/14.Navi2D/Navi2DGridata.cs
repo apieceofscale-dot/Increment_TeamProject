@@ -315,6 +315,77 @@ public class Navi2DGridata : MonoBehaviour
 
 
 
+    public bool TryGetDropDeparture(Navi2DNode source, int direction, float halfWidth,
+        out Vector2 departure)
+    {
+        departure = Vector2.zero;
+        if (source == null || (direction != -1 && direction != 1)) return false;
+        Navi2DNode edge = source;
+        Vector2Int offset = direction > 0 ? Vector2Int.right : Vector2Int.left;
+        while (nodeData.TryGetValue(edge.gridPos + offset, out Navi2DNode next))
+            edge = next;
+
+        Vector3Int cell = new Vector3Int(edge.gridPos.x, edge.gridPos.y, 0);
+        if (direction > 0) cell += new Vector3Int(1, 0, 0);
+        float edgeX = boundsTile.CellToWorld(cell).x;
+        departure = new Vector2(edgeX + direction * (halfWidth + 0.02f), source.worldPos.y);
+        return true;
+    }
+
+    public bool IsWalkSegmentClear(Vector2 start, Vector2 end, float halfWidth, float bodyHeight)
+    {
+        return IsAirArcClear(start, end - start, 1f, 0f, halfWidth, bodyHeight);
+    }
+
+    // Check the whole body against actual tiles, including the landing platform.
+    // The parabola's extrema over each tile's X interval give continuous coverage.
+    public bool IsAirArcClear(Vector2 start, Vector2 velocity, float duration,
+        float gravity, float halfWidth, float bodyHeight)
+    {
+        const float contactTolerance = 0.005f;
+        float apexTime = gravity > 0f ? Mathf.Clamp(velocity.y / gravity, 0f, duration) : 0f;
+        float endX = start.x + velocity.x * duration;
+        float endY = start.y + velocity.y * duration - 0.5f * gravity * duration * duration;
+        float peakY = Mathf.Max(endY, start.y + velocity.y * apexTime - 0.5f * gravity * apexTime * apexTime);
+        Vector3Int first = boundsTile.WorldToCell(new Vector3(
+            Mathf.Min(start.x, endX) - halfWidth, Mathf.Min(start.y, endY), 0f));
+        Vector3Int last = boundsTile.WorldToCell(new Vector3(
+            Mathf.Max(start.x, endX) + halfWidth, peakY + bodyHeight, 0f));
+
+        for (int x = Mathf.Max(bounds.xMin, first.x - 1); x <= Mathf.Min(bounds.xMax - 1, last.x + 1); x++)
+        for (int y = Mathf.Max(bounds.yMin, first.y - 1); y <= Mathf.Min(bounds.yMax - 1, last.y + 1); y++)
+        {
+            Vector3Int cell = new Vector3Int(x, y, 0);
+            if (!HasMapTile(cell)) continue;
+            Vector3 min = boundsTile.CellToWorld(cell);
+            Vector3 max = boundsTile.CellToWorld(cell + new Vector3Int(1, 1, 0));
+            float left = min.x - halfWidth + contactTolerance;
+            float right = max.x + halfWidth - contactTolerance;
+            float enter = 0f;
+            float exit = duration;
+            if (Mathf.Abs(velocity.x) < 0.0001f)
+            {
+                if (start.x <= left || start.x >= right) continue;
+            }
+            else
+            {
+                float t1 = (left - start.x) / velocity.x;
+                float t2 = (right - start.x) / velocity.x;
+                enter = Mathf.Max(0f, Mathf.Min(t1, t2));
+                exit = Mathf.Min(duration, Mathf.Max(t1, t2));
+                if (enter >= exit) continue;
+            }
+            float y1 = start.y + velocity.y * enter - 0.5f * gravity * enter * enter;
+            float y2 = start.y + velocity.y * exit - 0.5f * gravity * exit * exit;
+            float topTime = Mathf.Clamp(apexTime, enter, exit);
+            float highestFoot = start.y + velocity.y * topTime - 0.5f * gravity * topTime * topTime;
+            if (Mathf.Min(y1, y2) < max.y - contactTolerance &&
+                highestFoot + bodyHeight > min.y + contactTolerance)
+                return false;
+        }
+        return true;
+    }
+
     private void OnDrawGizmos()
     {
         if(nodeData ==null) return;

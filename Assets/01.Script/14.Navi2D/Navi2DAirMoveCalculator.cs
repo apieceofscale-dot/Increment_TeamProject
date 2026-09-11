@@ -69,7 +69,7 @@ public static class Navi2DAirMoveCalculator
 
         if (selectedRise > jumpMaxHeight)
         {
-           // Debug.Log($"Air 실패 : JumpMax / rise={selectedRise}");
+           
             return false;
         }
 
@@ -147,10 +147,6 @@ public static class Navi2DAirMoveCalculator
                 float yAtminX = startPosition.y + velocityY *timeAtMinX - 0.5f *gravity * timeAtMinX *timeAtMinX;
                 if (yAtminX < requriedY)
                 {
-                    Debug.Log($"Air 실패 : ObstacleMinX / y={yAtminX}," +
-                        $" required={requriedY}," +
-                        $"selectedRise={selectedRise}," +
-                        $" obstacleRise={obstacleRise}" );
                     return false;
                 }
             }
@@ -160,8 +156,7 @@ public static class Navi2DAirMoveCalculator
                 float yAtMaxX = startPosition.y + velocityY * timeAtMaxX - 0.5f * gravity * timeAtMaxX * timeAtMaxX;
                 if (yAtMaxX < requriedY)
                 {
-                    Debug.Log($"Air 실패 : ObstacleMaxX / y={yAtMaxX}, required={requriedY}");
-                    return false;
+                     return false;
                 }
             }
 
@@ -215,6 +210,43 @@ public static class Navi2DAirMoveCalculator
 
         return true;
     }
-}
-    
 
+
+    public static bool TryCalculateJumpUpVelocity(
+        Vector2 startPosition,
+        Vector2 targetPosition,
+        float airMoveSpeed,
+        float jumpMaxHeight,
+        float gravity,
+        float jumpClearance,
+        float horizontalClearance,
+        System.Func<Vector2, float, bool> isArcClear,
+        out Vector2 jumpVelocity)
+    {
+        jumpVelocity = Vector2.zero;
+        float deltaX = targetPosition.x - startPosition.x;
+        float deltaY = targetPosition.y - startPosition.y;
+        float maxSpeed = Mathf.Abs(airMoveSpeed);
+        if (deltaY <= 0.1f || gravity <= 0f || maxSpeed <= 0f || isArcClear == null)
+            return false;
+
+        float minimumRise = deltaY + Mathf.Max(0.05f, jumpClearance);
+        if (minimumRise > jumpMaxHeight) return false;
+
+        // Try higher arcs too: the lowest arc can reach the target but hit its wall.
+        const int samples = 64;
+        for (int i = 0; i <= samples; i++)
+        {
+            float rise = Mathf.Lerp(minimumRise, jumpMaxHeight, (float)i / samples);
+            float vy = Mathf.Sqrt(2f * gravity * rise);
+            float time = (vy + Mathf.Sqrt(Mathf.Max(0f, vy * vy - 2f * gravity * deltaY))) / gravity;
+            Vector2 velocity = new Vector2(deltaX / time, vy);
+            if (Mathf.Abs(velocity.x) > maxSpeed) continue;
+            if (!isArcClear(velocity, time)) continue;
+
+            jumpVelocity = velocity;
+            return true;
+        }
+        return false;
+    }
+}

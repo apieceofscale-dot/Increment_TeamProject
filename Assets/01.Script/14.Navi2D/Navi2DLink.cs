@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+
 //빈 오브젝트 만들기->자식으로 2개 빈 오브젝트. 그 2개를 위치로.
 //링크는 어떤 방식이든 '걸어서'갈 수 없는 두 지점을 연결한다.
 public class Navi2DLink : MonoBehaviour // 나중에 이거 상속시켜서 사다리, 덫 만들기.
