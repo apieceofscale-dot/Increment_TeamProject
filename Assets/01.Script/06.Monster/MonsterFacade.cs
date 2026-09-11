@@ -1,14 +1,14 @@
 using System;
 using UnityEngine;
 
-public class MonsterFacade : MonoBehaviour, IBootStrapper
+public class MonsterFacade : MonoBehaviour
 {
     public static event Action<MonsterDiedInfo> MonsterDied;
 
     [SerializeField] MonsterController prefab;
     [SerializeField] ItemDropFacade itemDropFacade;
 
-    public int BootOrder => (int)BootLayer.Monster;
+    //public int BootOrder => (int)BootLayer.Monster;
 
     public void IBootStrapperInject(BootstrapContext context)
     {

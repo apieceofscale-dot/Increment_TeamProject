@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
 
-public class ItemFacade : MonoBehaviour, IBootStrapper
+public class ItemFacade : MonoBehaviour
 {
     public static event Action<ItemPickedUpInfo> ItemPickedUp;
 
     [SerializeField] ItemController prefab;
 
-    public int BootOrder => (int)BootLayer.Item;
+   // public int BootOrder => (int)BootLayer.Item;
 
     public void IBootStrapperInject(BootstrapContext context)
     {
