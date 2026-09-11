@@ -5,7 +5,7 @@ public static class Navi2DAirMoveCalculator
     public static bool TryCalculateAirVelocity(
         Vector2 startPosition,
         Vector2 targetPosition,
-        float moveSpeed,
+        float airMoveSpeed,
         float jumpMaxHeight,
         float gravity,
         float clearanceMargin,
@@ -21,7 +21,7 @@ public static class Navi2DAirMoveCalculator
     {              
         airVelocity = Vector2.zero;
 
-        float maxHorizontalSpeed = Mathf.Abs(moveSpeed);
+        float maxHorizontalSpeed = Mathf.Abs(airMoveSpeed);
         
         if (maxHorizontalSpeed <= 0f) return false;
         if (gravity <= 0f) return false; 
@@ -60,8 +60,7 @@ public static class Navi2DAirMoveCalculator
 
         float targetRise = Mathf.Max(0f, deltaY);
         float needRise = Mathf.Max(requiredRise, targetRise);
-        float selectedRise =
-    Mathf.Max(needRise, obstacleRise);
+        float selectedRise = Mathf.Max(needRise, obstacleRise);
 
         if (hasObstacle)
         {
@@ -93,6 +92,24 @@ public static class Navi2DAirMoveCalculator
         {
             float clearanceMinX = obstacleMinX - horizontalClearance;
             float clearanceMaxX = obstacleMaxX + horizontalClearance;
+            if (deltaX > 0f)
+            {
+                // 오른쪽으로 이동
+                if (startPosition.x >= clearanceMinX)
+                    return false;
+
+                if (targetPosition.x <= clearanceMaxX)
+                    return false;
+            }
+            else
+            {
+                // 왼쪽으로 이동
+                if (startPosition.x <= clearanceMaxX)
+                    return false;
+
+                if (targetPosition.x >= clearanceMinX)
+                    return false;
+            }
 
             float requriedY = obstacleTopY + clearanceMargin;
             float timeAtMinX = (clearanceMinX - startPosition.x) / velocityX;
@@ -103,12 +120,10 @@ public static class Navi2DAirMoveCalculator
                 float yAtminX = startPosition.y + velocityY *timeAtMinX - 0.5f *gravity * timeAtMinX *timeAtMinX;
                 if (yAtminX < requriedY)
                 {
-                    Debug.Log(
-       $"Air 실패 : ObstacleMinX / " +
-       $"y={yAtminX}, required={requriedY}, " +
-       $"selectedRise={selectedRise}, " +
-       $"obstacleRise={obstacleRise}"
-   );
+                    Debug.Log($"Air 실패 : ObstacleMinX / y={yAtminX}," +
+                        $" required={requriedY}," +
+                        $"selectedRise={selectedRise}," +
+                        $" obstacleRise={obstacleRise}" );
                     return false;
                 }
             }
@@ -180,19 +195,10 @@ public static class Navi2DAirMoveCalculator
                 }
             }
         }
-
-
-
-
         airVelocity = new Vector2(velocityX, velocityY);
 
         return true;
     }
-
-
-
-
-
 }
     
 

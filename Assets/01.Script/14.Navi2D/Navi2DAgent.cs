@@ -141,10 +141,17 @@ public class Navi2DAgent : MonoBehaviour
         if (!IsGrounded())
             return;
 
+        if (step.linkData == null)
+        {
+            Debug.LogError($"AirMove Step에 LinkData가 없습니다. " + $"{step.fromNode.gridPos} -> {step.toNode.gridPos}");
+            return;
+        }
+
         bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
-            step.fromNode.worldPos,
+            FootPosition,
+            //step.fromNode.worldPos,
             step.toNode.worldPos,
-            MoveSpeed,
+            AirMoveSpeed,
             jumpMaxHeight,
             gravity,
             AirClearanceMargin,
@@ -158,11 +165,15 @@ public class Navi2DAgent : MonoBehaviour
             AirBodyHeight,
             out Vector2 airVelocity);
 
-        if (step.linkData == null)
-        {
-            Debug.LogError($"AirMove Step에 LinkData가 없습니다. " + $"{step.fromNode.gridPos} -> {step.toNode.gridPos}");
-            return;
-        }
+       
+        Debug.Log(
+    $"[Air 실행] " +
+    $"가능={canAirMove}, " +
+    $"AirMax={AirMoveSpeed}, " +
+    $"Velocity={airVelocity}, " +
+    $"{step.fromNode.gridPos} -> {step.toNode.gridPos}"
+);
+
 
         if (!canAirMove)
         {
@@ -197,7 +208,7 @@ public class Navi2DAgent : MonoBehaviour
         isAirMoving =false;
         hasLeftGround = false;
         airTargetNode = null;
-
+        repathPending = false;
         RequestPath();
 
     }
@@ -218,6 +229,7 @@ public class Navi2DAgent : MonoBehaviour
         return false;
 
     }
+
 
 
     public void Trace(Vector2 targetPos) //FSM에서 실제로 호출해야 할 함수.
@@ -268,11 +280,13 @@ public class Navi2DAgent : MonoBehaviour
 
     public void RequestPath()
     {
+        Debug.Log(    $"[Path 요청] Walk={MoveSpeed}, Air={AirMoveSpeed}");
+
         path = pathFinder.PathFinding(
             FootPosition,
             targetPosition,
             agentHeight,
-            MoveSpeed,
+            AirMoveSpeed,
             jumpMaxHeight,
             gravity,
             AirClearanceMargin,

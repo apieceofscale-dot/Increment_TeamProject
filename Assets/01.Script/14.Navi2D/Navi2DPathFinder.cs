@@ -14,7 +14,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         gD = GetComponent<Navi2DGridata>();
     }
 
-    public List<Navi2DPathStep> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float moveSpeed,
+    public List<Navi2DPathStep> PathFinding(Vector2 agentPos, Vector2 targetPos, float agentHeigth, float airMoveSpeed,
     float jumpMaxHeight, float gravity, float airClearanceMargin, float airHorizontalClearance, float airBodyHeight)
     {
         //Debug.Log($"PathFinding 호출 / LinkCount = {gD.LinkData.Count}");
@@ -141,7 +141,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                     bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
                         current.worldPos,
                         linkNeighbor.worldPos,
-                        moveSpeed,
+                        airMoveSpeed,
                         jumpMaxHeight,
                         gravity,
                         airClearanceMargin,
@@ -235,27 +235,5 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         }
         return null;
     }
-
-
-    //Dictionary<Vector2Int,Navi2DNode> nodeData
-    /*
-    public class Navi2DNode
-    public Vector2Int gridPos;
-    public Vector2 worldPos;
-    public float height;
-    */
-
-
-
-
-    /*
-    
-    1. Navi2DNode에 이웃 개념 추가
-2. Bake 후 Node끼리 좌우 연결
-3. FindClosestNode()
-4. A* 구현
-5. Agent Height 필터 적용
-6. 경로 반환
-    */
 
 }
