@@ -1,10 +1,23 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
 {
     public CharacterStatus Status { get; private set; }
+    [SerializeField] private CharacterInventory characterInventory;
+    public CharacterInventory Inventory
+    {
+        get
+        {
+            if (characterInventory == null)
+                characterInventory = GetComponent<CharacterInventory>();
+
+            return characterInventory;
+        }
+    }
+
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
     public PlayerData Data { get; private set; }
@@ -262,5 +275,30 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public bool UseSkillAttackBuff()
     {
         return skillAttackBuff != null && skillAttackBuff.TryUse();
+    }
+
+    public bool AddEquipment(ItemStatus status, out Guid instanceId)
+    {
+        return Inventory.TryAddEquipment(status, out instanceId);
+    }
+
+    public bool RemoveEquipment(Guid InstanceId)
+    {
+        return Inventory.TryRemoveEquipment(InstanceId);
+    }
+
+    public bool TryGetEquipment(Guid instanceId, out CharacterInventoryEquipment equipment)
+    {
+        return Inventory.TryGetEquipment(instanceId, out equipment);
+    }
+
+    public int GetEquipmentCount(int itemId)
+    {
+        return Inventory.GetEquipmentCount(itemId);
+    }
+
+    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment()
+    {
+        return Inventory.GetEquipmentSnapshot();
     }
 }
