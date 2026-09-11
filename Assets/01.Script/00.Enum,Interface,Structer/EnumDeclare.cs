@@ -45,3 +45,4 @@ public enum StageState
     Cleared,
     Failed
 }
+

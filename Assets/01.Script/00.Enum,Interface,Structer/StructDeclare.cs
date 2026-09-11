@@ -10,6 +10,7 @@ public readonly struct BootstrapContext
         this.targets = targets ?? throw new ArgumentNullException(nameof(targets));
     }
 
+
     public T Get<T>() where T : class
     {
         foreach (IBootStrapper target in targets)
@@ -20,22 +21,7 @@ public readonly struct BootstrapContext
             }
         }
 
-        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}을(를) 씬에서 찾지 못했습니다");
-    }
-
-    public bool TryGet<T>(out T match) where T : class
-    {
-        foreach (IBootStrapper target in targets)
-        {
-            if (target is T found)
-            {
-                match = found;
-                return true;
-            }
-        }
-
-        match = null;
-        return false;
+        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}��(��) ������ ã�� ���߽��ϴ�");
     }
 }
 

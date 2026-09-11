@@ -127,7 +127,8 @@ public static class ExcelImporter
                             return;
                         }
                         value = clip;
-                    }               
+                }
+                object value = Convert.ChangeType(values[col], field.FieldType);
 
                 }
                 else
