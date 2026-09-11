@@ -3,17 +3,17 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputController : MonoBehaviour
 {
-    [SerializeField] private CharacterFacade characterFacade;
+    [SerializeField] private CharacterControllers characterControllers;
 
     private void Awake()
     {
-        if(characterFacade == null)
-            characterFacade = GetComponent<CharacterFacade>();
+        if (characterControllers == null)
+            characterControllers = GetComponent<CharacterControllers>();
     }
 
     private void Update()
     {
-        if (Keyboard.current == null || characterFacade == null)
+        if (Keyboard.current == null || characterControllers == null)
             return;
 
         HandleMovement();
@@ -37,7 +37,7 @@ public class PlayerInputController : MonoBehaviour
         if (Keyboard.current.dKey.isPressed)
             moveInput += 1f;
 
-        characterFacade.SetMoveInput(moveInput);
+        characterControllers.SetMoveInput(moveInput);
     }
 
     private void HandleJump()
@@ -45,7 +45,7 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.spaceKey.wasPressedThisFrame)
             return;
 
-        characterFacade.Jump();
+        characterControllers.Jump();
     }
 
     private void HandleAttack()
@@ -53,7 +53,7 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.jKey.wasPressedThisFrame)
             return;
 
-        bool isAttacked = characterFacade.Attack();
+        bool isAttacked = characterControllers.TryAttack();
 
         if (isAttacked)
             Debug.Log("공격");
@@ -65,9 +65,9 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.digit1Key.wasPressedThisFrame)
             return;
 
-        characterFacade.GainExp(100);
+        characterControllers.GainExp(100);
 
-        Debug.Log($"Lv.{characterFacade.Status.Level} / Exp : {characterFacade.Status.Exp} / Attack : {characterFacade.Status.Attack}");
+        Debug.Log($"Lv.{characterControllers.Status.Level} / Exp : {characterControllers.Status.Exp} / Attack : {characterControllers.Status.Attack}");
     }
 
     private void TestTakeDamage()
@@ -75,9 +75,9 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.digit2Key.wasPressedThisFrame)
             return;
 
-        characterFacade.TakeDamage(10);
+        characterControllers.Status.TakeDamage(10);
 
-        Debug.Log($"피해 받음 | HP : {characterFacade.Status.CurrentHp} / {characterFacade.Status.MaxHp}");
+        Debug.Log($"피해 받음 | HP : {characterControllers.Status.CurrentHp} / {characterControllers.Status.MaxHp}");
     }
 
     private void TestRecoverHp()
@@ -85,9 +85,9 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.digit3Key.wasPressedThisFrame)
             return;
 
-        characterFacade.RecoverHp(10);
+        characterControllers.Status.RecoverHp(10);
 
-        Debug.Log($"HP 회복 | HP : {characterFacade.Status.CurrentHp} / {characterFacade.Status.MaxHp}");
+        Debug.Log($"HP 회복 | HP : {characterControllers.Status.CurrentHp} / {characterControllers.Status.MaxHp}");
     }
 
     private void TestUseMp()
@@ -95,15 +95,15 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.digit4Key.wasPressedThisFrame)
             return;
 
-        bool isUsed = characterFacade.UseMp(10);
+        bool isUsed = characterControllers.Status.UseMp(10);
 
         if (isUsed)
         {
-            Debug.Log($"MP 소모 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
+            Debug.Log($"MP 소모 | MP : {characterControllers.Status.CurrentMp} / {characterControllers.Status.MaxMp}");
         }
         else
         {
-            Debug.Log($"MP 부족 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
+            Debug.Log($"MP 부족 | MP : {characterControllers.Status.CurrentMp} / {characterControllers.Status.MaxMp}");
         }
     }
 
@@ -112,44 +112,44 @@ public class PlayerInputController : MonoBehaviour
         if (!Keyboard.current.digit5Key.wasPressedThisFrame)
             return;
 
-        characterFacade.RecoverMp(20);
+        characterControllers.Status.RecoverMp(20);
 
-        Debug.Log($"MP 회복 | MP : {characterFacade.Status.CurrentMp} / {characterFacade.Status.MaxMp}");
+        Debug.Log($"MP 회복 | MP : {characterControllers.Status.CurrentMp} / {characterControllers.Status.MaxMp}");
     }
 
     private void UseTestSkill()
     {
         if (Keyboard.current.digit6Key.wasPressedThisFrame)
-            characterFacade.UseSkillSlash();
+            characterControllers.UseSkillSlash();
 
         if (Keyboard.current.digit7Key.wasPressedThisFrame)
-            characterFacade.UseSkillProjectile();
+            characterControllers.UseSkillProjectile();
 
         if (Keyboard.current.digit8Key.wasPressedThisFrame)
-            characterFacade.UseSkillAttackBuff();
+            characterControllers.UseSkillAttackBuff();
 
         if (Keyboard.current.digit9Key.wasPressedThisFrame)
-            characterFacade.ChangeNextJob();
+            characterControllers.ChangeNextJob();
 
         if (Keyboard.current.f1Key.wasPressedThisFrame)
         {
-            characterFacade.RestoreBasicAttack();
+            characterControllers.RestoreBasicAttack();
             Debug.Log("기존 기본 공격 선택");
         }
 
         if (Keyboard.current.f2Key.wasPressedThisFrame)
-            Debug.Log(characterFacade.SetSlashBasicAttack() ? "베기 대체 공격 선택" : "베기 연결 확인 필요");
-        
+            Debug.Log(characterControllers.SetSlashBasicAttack() ? "베기 대체 공격 선택" : "베기 연결 확인 필요");
+
         if (Keyboard.current.f3Key.wasPressedThisFrame)
-            Debug.Log(characterFacade.SetProjectileBasicAttack() ? "투사체 대체 공격 선택" : "투사체 연결 확인 필요");
-        
+            Debug.Log(characterControllers.SetProjectileBasicAttack() ? "투사체 대체 공격 선택" : "투사체 연결 확인 필요");
+
         if (Keyboard.current.f4Key.wasPressedThisFrame)
-            characterFacade.TestSkillLevelUp();
+            characterControllers.TestSkillLevelUp();
     }
 
     private void OnDisable()
     {
-        if (characterFacade != null)
-            characterFacade.SetMoveInput(0f);
+        if (characterControllers != null)
+            characterControllers.SetMoveInput(0f);
     }
 }

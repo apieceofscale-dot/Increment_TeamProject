@@ -9,16 +9,16 @@ public abstract class CharacterSkillBase : MonoBehaviour
     [SerializeField] private bool initiallyUnlocked = true;
     [SerializeField] private bool affectedByAttackSpeed;
 
-    protected CharacterFacade characterFacade;
+    protected CharacterControllers characterControllers;
     protected CharacterSkill skill;
 
     private bool executing;
     public CharacterSkill RuntimeSkill { get { EnsureInitialized(); return skill; } }
     public virtual bool CanReplaceBasicAttack => false;
-    public bool BelongsTo(CharacterFacade owner)
+    public bool BelongsTo(CharacterControllers owner)
     {
         EnsureInitialized();
-        return characterFacade == owner;
+        return characterControllers == owner;
     }
 
     protected virtual void Awake()
@@ -28,8 +28,8 @@ public abstract class CharacterSkillBase : MonoBehaviour
 
     private void EnsureInitialized()
     {
-        if (characterFacade == null)
-            characterFacade = GetComponentInParent<CharacterFacade>();
+        if (characterControllers == null)
+            characterControllers = GetComponentInParent<CharacterControllers>();
 
         if (skill == null)
             skill = new CharacterSkill(skillName, initialLevel, mpCost, cooldown, initiallyUnlocked, () => Time.time);
@@ -39,13 +39,13 @@ public abstract class CharacterSkillBase : MonoBehaviour
     {
         EnsureInitialized();
 
-        if (!isActiveAndEnabled || executing || characterFacade == null || characterFacade.Status == null || characterFacade.Status.CurrentHp <= 0)
+        if (!isActiveAndEnabled || executing || characterControllers == null || characterControllers.Status == null || characterControllers.Status.CurrentHp <= 0)
             return false;
 
         if (!skill.CanUse() || !CanUse())
             return false;
 
-        if (characterFacade.Status.CurrentMp < skill.MpCost)
+        if (characterControllers.Status.CurrentMp < skill.MpCost)
             return false;
 
         float interval = GetUseInterval();
@@ -53,7 +53,7 @@ public abstract class CharacterSkillBase : MonoBehaviour
         if (!skill.TryUse(interval))
             return false;
 
-        characterFacade.UseMp(skill.MpCost);
+        characterControllers.Status.UseMp(skill.MpCost);
         executing = true;
 
         try
@@ -71,7 +71,7 @@ public abstract class CharacterSkillBase : MonoBehaviour
     public float GetUseInterval()
     {
         EnsureInitialized();
-        float rate = affectedByAttackSpeed && characterFacade != null && characterFacade.Status != null ? Mathf.Clamp(characterFacade.Status.AttackSpeedRate, 0f, 1.5f) : 0f;
+        float rate = affectedByAttackSpeed && characterControllers != null && characterControllers.Status != null ? Mathf.Clamp(characterControllers.Status.AttackSpeedRate, 0f, 1.5f) : 0f;
         return Mathf.Max(0.01f, skill.Cooldown) / (1f + rate);
     }
 

@@ -7,6 +7,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public CharacterStatus Status { get; private set; }
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
+    public PlayerData Data { get; private set; }
 
     // 이동 및 점프 관련
     private Rigidbody2D rigid;
@@ -34,6 +35,20 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private CharacterJobAdvancedment jobAdvancedment;
     public int FacingDirection { get; private set; } = 1;
     public PlayerData CurrentJob => GetJobController().CurrentJob;
+
+    public void Initialize(PlayerData playerData)
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("플레이어 데이터 없음", this);
+            return;
+        }
+
+        Data = playerData;
+        Status.Initialize(playerData);
+
+        ChangeJob(playerData.id);
+    }
 
     private CharacterJobAdvancedment GetJobController()
     {
@@ -182,7 +197,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool SetBasicAttackReplacement(CharacterSkillBase replacement)
     {
-        if (replacement != null && (!replacement.CanReplaceBasicAttack || !replacement.BelongsTo(GetComponent<CharacterFacade>())))
+        if (replacement != null && (!replacement.CanReplaceBasicAttack))
             return false;
         basicAttackReplacement = replacement;
 
