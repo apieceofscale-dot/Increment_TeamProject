@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
+[RequireComponent(typeof(CharacterEquipment))]
 public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
 {
     public CharacterStatus Status { get; private set; }
@@ -15,6 +16,17 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
                 characterInventory = GetComponent<CharacterInventory>();
 
             return characterInventory;
+        }
+    }
+
+    private CharacterEquipment characterEquipment;
+    public CharacterEquipment Equipment
+    {
+        get
+        {
+            if (characterEquipment == null)
+                characterEquipment = GetComponent<CharacterEquipment>();
+            return characterEquipment;
         }
     }
 
@@ -277,6 +289,34 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return skillAttackBuff != null && skillAttackBuff.TryUse();
     }
 
+    // 장비착용 관련 호출
+    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot)
+    {
+        return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquip(instanceId, slot);
+    }
+
+    public bool UnequipEquipment(CharacterEquipmentSlot slot)
+    {
+        return Equipment != null && Equipment.TryUnequip(slot);
+    }
+
+    public bool IsEquipmentEquipped(Guid instanceId)
+    {
+        return Equipment != null && Equipment.IsEquipped(instanceId);
+    }
+
+    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item)
+    {
+        item = null;
+        return Equipment != null && Equipment.TryGetEquippedItem(slot, out item);
+    }
+
+    public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
+    {
+        return Equipment.GetSlotsSnapshot();
+    }
+
+    // 인벤토리 관련 호출용
     public bool AddEquipment(ItemStatus status, out Guid instanceId)
     {
         return Inventory.TryAddEquipment(status, out instanceId);

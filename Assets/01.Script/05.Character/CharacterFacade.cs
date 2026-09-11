@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class CharacterFacade : MonoBehaviour
     [SerializeField] private CharacterControllers characterControllers;
     public CharacterStatus Status => characterControllers.Status;
     public CharacterInventory Inventory => characterControllers.Inventory;
+    public CharacterEquipment Equipment => characterControllers.Equipment;
     public PlayerData Data { get; private set; }
 
     private void Awake()
@@ -57,29 +59,29 @@ public class CharacterFacade : MonoBehaviour
         return characterControllers.TryAttack();
     }
 
-    public bool ChangeJob(int id) 
+    public bool ChangeJob(int id)
     {
-        return characterControllers.ChangeJob(id); 
+        return characterControllers.ChangeJob(id);
     }
 
-    public bool ChangeNextJob() 
-    { 
-        return characterControllers.ChangeNextJob(); 
+    public bool ChangeNextJob()
+    {
+        return characterControllers.ChangeNextJob();
     }
 
-    public void RestoreBasicAttack() 
-    { 
-        characterControllers.RestoreBasicAttack(); 
+    public void RestoreBasicAttack()
+    {
+        characterControllers.RestoreBasicAttack();
     }
 
-    public bool SetSlashBasicAttack() 
-    { 
-        return characterControllers.SetSlashBasicAttack(); 
+    public bool SetSlashBasicAttack()
+    {
+        return characterControllers.SetSlashBasicAttack();
     }
 
-    public bool SetProjectileBasicAttack() 
-    { 
-        return characterControllers.SetProjectileBasicAttack(); 
+    public bool SetProjectileBasicAttack()
+    {
+        return characterControllers.SetProjectileBasicAttack();
     }
 
     public bool SetBasicAttackReplacement(CharacterSkillBase skill)
@@ -112,17 +114,17 @@ public class CharacterFacade : MonoBehaviour
         characterControllers.Status.RecoverMp(amount);
     }
 
-    public bool AddEquipment(ItemStatus status, out System.Guid instanceId) // 방어구 1개 추가, 성공 여부와 개별 ID 반환
+    public bool AddEquipment(ItemStatus status, out Guid instanceId) // 방어구 1개 추가, 성공 여부와 개별 ID 반환
     {
         return characterControllers.AddEquipment(status, out instanceId);
     }
 
-    public bool RemoveEquipment(System.Guid instanceId) // 개별 방어구 제거
+    public bool RemoveEquipment(Guid instanceId) // 개별 방어구 제거
     {
         return characterControllers.RemoveEquipment(instanceId);
     }
 
-    public bool TryGetEquipment(System.Guid instanceId, out CharacterInventoryEquipment equipment) // 개별 방어구 조회
+    public bool TryGetEquipment(Guid instanceId, out CharacterInventoryEquipment equipment) // 개별 방어구 조회
     {
         return characterControllers.TryGetEquipment(instanceId, out equipment);
     }
@@ -137,4 +139,28 @@ public class CharacterFacade : MonoBehaviour
         return characterControllers.GetInventoryEquipment();
     }
 
+    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // 방어구 착용
+    {
+        return characterControllers.EquipEquipment(instanceId, slot);
+    }
+
+    public bool UnequipEquipment(CharacterEquipmentSlot slot) // 방어구 해제
+    {
+        return characterControllers.UnequipEquipment(slot);
+    }
+
+    public bool IsEquipmentEquipped(Guid instanceId) // 방어구 착용했는지
+    {
+        return characterControllers.IsEquipmentEquipped(instanceId);
+    }
+
+    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item) // 착용한 방어구 조회
+    {
+        return characterControllers.TryGetEquippedItem(slot, out item);
+    }
+
+    public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
+    {
+        return characterControllers.GetEquipmentSlots();
+    }
 }

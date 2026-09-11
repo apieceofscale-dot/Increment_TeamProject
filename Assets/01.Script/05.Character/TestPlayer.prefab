@@ -262,6 +262,8 @@ GameObject:
   - component: {fileID: 261204065874194282}
   - component: {fileID: -5539174653337801884}
   - component: {fileID: 7833643248369954958}
+  - component: {fileID: 360148343145729899}
+  - component: {fileID: -6241320407809059203}
   m_Layer: 0
   m_Name: TestPlayer
   m_TagString: Player
@@ -326,7 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005bd48bb197ca040bdfb75789a32b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
-  characterControllers: {fileID: 0}
+  characterControllers: {fileID: 1920527207070155292}
 --- !u!70 &4668944163438133813
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -460,7 +462,7 @@ MonoBehaviour:
   damageMultiplier: 1.5
   monsterLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   blockingLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -489,6 +491,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f450d66f75f4d640b5bedfca1d01cdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterInventory
+--- !u!114 &360148343145729899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578696860319802453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b86dff9dcb86948aa64161457447ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEquipment
+  armorPartRules: []
+--- !u!114 &-6241320407809059203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578696860319802453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e293688e96e90c241b05b7bab1518f73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterEquipmentTester
+  characterControllers: {fileID: 1920527207070155292}
+  testArmorId: 10001
+  testBaseValue: 10
+  targetSlot: 0
 --- !u!1 &8052424388909427709
 GameObject:
   m_ObjectHideFlags: 0

@@ -71,7 +71,10 @@ public class CharacterInventory : MonoBehaviour
 
         foreach (Delegate handler in handlers.GetInvocationList())
         {
-            try { ((Action<Guid>) handler)(instanceId); }
+            try 
+            { 
+                ((Action<Guid>) handler)(instanceId); 
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
