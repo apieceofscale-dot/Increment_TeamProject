@@ -254,7 +254,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2675875742998363829}
   - component: {fileID: 1920527207070155292}
-  - component: {fileID: 8576798629424289130}
   - component: {fileID: 4813162430074982621}
   - component: {fileID: 4668944163438133813}
   - component: {fileID: 6512735885185557483}
@@ -313,19 +312,6 @@ MonoBehaviour:
   skillSlash: {fileID: 357542788659323390}
   skillProjectile: {fileID: 261204065874194282}
   skillAttackBuff: {fileID: 5415692169738909216}
---- !u!114 &8576798629424289130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7578696860319802453}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7982590880e852443be5af9784ac9061, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterFacade
-  characterControllers: {fileID: 0}
 --- !u!114 &4813162430074982621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +324,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 005bd48bb197ca040bdfb75789a32b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
-  characterFacade: {fileID: 0}
+  characterControllers: {fileID: 0}
 --- !u!70 &4668944163438133813
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

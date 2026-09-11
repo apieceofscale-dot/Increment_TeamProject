@@ -22,7 +22,7 @@ public class CharacterSkillAttackBuff : CharacterSkillBase
     private IEnumerator AttackBuff()
     {
         isBuffActive = true;
-        buffTarget = characterFacade.Status;
+        buffTarget = characterControllers.Status;
         appliedBonus = (int)(buffTarget.Attack * Mathf.Max(0f, attackIncreaseRate));
         buffTarget.IncreaseAttack(appliedBonus);
         yield return new WaitForSeconds(Mathf.Max(0.01f, duration));
