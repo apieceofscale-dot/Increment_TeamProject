@@ -166,13 +166,11 @@ public class Navi2DAgent : MonoBehaviour
             out Vector2 airVelocity);
 
        
-        Debug.Log(
-    $"[Air 실행] " +
-    $"가능={canAirMove}, " +
-    $"AirMax={AirMoveSpeed}, " +
-    $"Velocity={airVelocity}, " +
-    $"{step.fromNode.gridPos} -> {step.toNode.gridPos}"
-);
+        Debug.Log($"[Air 실행] " + 
+            $"가능={canAirMove}, " +
+            $"AirMax={AirMoveSpeed}, " +
+            $"Velocity={airVelocity}, " +
+            $"{step.fromNode.gridPos} -> {step.toNode.gridPos}");
 
 
         if (!canAirMove)

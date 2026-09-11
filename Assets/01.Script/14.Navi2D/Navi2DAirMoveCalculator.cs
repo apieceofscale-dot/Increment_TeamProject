@@ -88,6 +88,33 @@ public static class Navi2DAirMoveCalculator
 
         if (Mathf.Abs(velocityX) > maxHorizontalSpeed) return false;
 
+        bool isSameHeight = Mathf.Abs(deltaY) < 0.1f;
+
+        if (hasObstacle && isSameHeight)
+        {
+            float clearanceMinX = obstacleMinX - horizontalClearance;
+
+            float clearanceMaxX = obstacleMaxX + horizontalClearance;
+
+            if (deltaX > 0f)
+            {
+                if (startPosition.x >= clearanceMinX) return false;
+
+                if (targetPosition.x <= clearanceMaxX) return false;
+            }
+            else
+            {
+                if (startPosition.x <= clearanceMaxX) return false;
+
+                if (targetPosition.x >= clearanceMinX) return false;
+            }
+        }
+
+
+
+
+
+
         if (hasObstacle)
         {
             float clearanceMinX = obstacleMinX - horizontalClearance;
@@ -130,13 +157,10 @@ public static class Navi2DAirMoveCalculator
 
             if (timeAtMaxX >= 0f && timeAtMaxX <= flightTime)
             {
-                float yAtMaxX = startPosition.y + velocityY * timeAtMaxX - 0.5f *gravity * timeAtMaxX *timeAtMaxX;
+                float yAtMaxX = startPosition.y + velocityY * timeAtMaxX - 0.5f * gravity * timeAtMaxX * timeAtMaxX;
                 if (yAtMaxX < requriedY)
                 {
-                    Debug.Log(
-       $"Air 실패 : ObstacleMaxX / " +
-       $"y={yAtMaxX}, required={requriedY}"
-   );
+                    Debug.Log($"Air 실패 : ObstacleMaxX / y={yAtMaxX}, required={requriedY}");
                     return false;
                 }
             }
@@ -144,24 +168,19 @@ public static class Navi2DAirMoveCalculator
 
         }
 
-        
 
-        bool hasCeiling =
-    !float.IsInfinity(ceilingBottomY);
+
+        bool hasCeiling = !float.IsInfinity(ceilingBottomY);
 
         if (hasCeiling)
         {
-            float ceilingStartX =
-                ceilingMinX - horizontalClearance;
+            float ceilingStartX = ceilingMinX - horizontalClearance;
 
-            float ceilingEndX =
-                ceilingMaxX + horizontalClearance;
+            float ceilingEndX = ceilingMaxX + horizontalClearance;
 
-            float time1 =
-                (ceilingStartX - startPosition.x) / velocityX;
+            float time1 = (ceilingStartX - startPosition.x) / velocityX;
 
-            float time2 =
-                (ceilingEndX - startPosition.x) / velocityX;
+            float time2 = (ceilingEndX - startPosition.x) / velocityX;
 
             float enterTime = Mathf.Min(time1, time2);
             float exitTime = Mathf.Max(time1, time2);
@@ -186,10 +205,7 @@ public static class Navi2DAirMoveCalculator
 
                 if (headY > ceilingBottomY)
                 {
-                    Debug.Log(
-                        $"Air 실패 : Ceiling / " +
-                        $"head={headY}, ceiling={ceilingBottomY}"
-                    );
+                    Debug.Log($"Air 실패 : Ceiling / head={headY}, ceiling={ceilingBottomY}");
 
                     return false;
                 }

@@ -24,8 +24,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
 
         if (startNode == null || targetNode == null)
         {
-            Debug.LogWarning($"PathFinding 실패 - " + $"Start:{startNode?.gridPos.ToString() ?? "null"} / "
-                + $"Target:{targetNode?.gridPos.ToString() ?? "null"}");
+            Debug.LogWarning($"PathFinding 실패 - Start:{startNode?.gridPos.ToString() ?? "null"} / Target:{targetNode?.gridPos.ToString() ?? "null"}");
 
             return null;
         }
@@ -131,12 +130,10 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                     if(closed.Contains(linkNeighbor)) continue;
                     if(linkNeighbor.height < agentHeigth) continue;
 
-                    /*Debug.Log(
-    $"PathFinder Link 데이터 / " +
-    $"CeilingY={link.ceilingBottomY}, " +
-    $"CeilingMinX={link.ceilingMinX}, " +
-    $"CeilingMaxX={link.ceilingMaxX}"
-);*/
+                    /*Debug.Log(    $"PathFinder Link 데이터 / " +
+                     * $"CeilingY={link.ceilingBottomY}, " +
+                     * $"CeilingMinX={link.ceilingMinX}, " +
+                     * $"CeilingMaxX={link.ceilingMaxX}");*/
 
                     bool canAirMove = Navi2DAirMoveCalculator.TryCalculateAirVelocity(
                         current.worldPos,
@@ -158,8 +155,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
 
                     if (!canAirMove) continue;
 
-                    /*Debug.Log(
-    $"Air 성공 : {current.gridPos} -> {linkNeighbor.gridPos}");*/
+                    /*Debug.Log($"Air 성공 : {current.gridPos} -> {linkNeighbor.gridPos}");*/
 
 
 
