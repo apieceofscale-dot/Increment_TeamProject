@@ -7,6 +7,7 @@ public sealed class StageFacade : MonoBehaviour, IBootStrapper
     //[SerializeField] private bool autoStartOnBoot = true;
 
     private StageController stageController;
+    private StageFactory stageFactory;
     private MonsterFacade monsterFacade;
 
     public int BootOrder => (int)BootLayer.StageManager;
