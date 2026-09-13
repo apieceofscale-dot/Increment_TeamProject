@@ -1,23 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class DataManager : MonoBehaviour
+public partial class DataManager : MonoBehaviour, IBootStrapper
 {
     public static DataManager instance;
+    public int BootOrder => (int)BootLayer.DataManager;
 
-
-    private void Awake()
-    {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(gameObject);
-       
-        LoadAllOfDataGenerated();
-    }
     //자동구현
     partial void LoadAllOfDataGenerated();
-
     private void LoadData<T>(DataRepositary<T> repositary, List<T> dataList) where T : BaseData
     {
         repositary.Clear();
@@ -32,9 +22,7 @@ public partial class DataManager : MonoBehaviour
     }
 
 
-
-
-    
+    //팩토리 호출용    
     public bool TryGetMonsterData(int id, out MonsterData monsterData)//아래tryget랑 같은 방식으로 쓴거임. 여기에 out 없으니까 출력 안됨.
     {
         return monsterRepository.TryGet(id, out monsterData);
@@ -43,7 +31,7 @@ public partial class DataManager : MonoBehaviour
     {
         return playerRepository.TryGet(id, out playerData);
     }
-    public bool TryGetWeaponData(int id, out StageData stageData)
+    public bool TryGetStageData(int id, out StageData stageData)
     {
         return stageRepository.TryGet(id, out stageData);
     }
@@ -51,7 +39,23 @@ public partial class DataManager : MonoBehaviour
     {
         return itemRepository.TryGet(id, out itemData);
     }
-    
+
+
+
+    //부트 스트래퍼용.
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+    }
+
+    public void IBootStrapperInitialize()
+    {
+        LoadAllOfDataGenerated();
+    }
+
 }
 
 

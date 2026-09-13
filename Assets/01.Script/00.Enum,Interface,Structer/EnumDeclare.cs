@@ -25,7 +25,7 @@ public enum BootLayer //
 {
     DataManager = 2, // DataManager
     ObjectPool = 3, // MonsterObjectPoolManager, ItemObjectPoolManager
-    Navi2D = 4, // Navi2DGridData, Navi2DPathFinder
+    //Navi2D = 4, // Navi2DGridData, Navi2DPathFinder
     Factory = 5, // CharacterFactory, MonsterFactory, ItemFactory
     ItemManager = 6,// ItemDropFacade
     StageManager = 7, // StageFacade
