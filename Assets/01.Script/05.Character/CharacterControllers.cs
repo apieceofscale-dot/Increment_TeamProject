@@ -1,12 +1,38 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
+[RequireComponent(typeof(CharacterEquipment))]
 public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
 {
     public CharacterStatus Status { get; private set; }
+    [SerializeField] private CharacterInventory characterInventory;
+    public CharacterInventory Inventory
+    {
+        get
+        {
+            if (characterInventory == null)
+                characterInventory = GetComponent<CharacterInventory>();
+
+            return characterInventory;
+        }
+    }
+
+    private CharacterEquipment characterEquipment;
+    public CharacterEquipment Equipment
+    {
+        get
+        {
+            if (characterEquipment == null)
+                characterEquipment = GetComponent<CharacterEquipment>();
+            return characterEquipment;
+        }
+    }
+
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
+    public PlayerData Data { get; private set; }
 
     // 이동 및 점프 관련
     private Rigidbody2D rigid;
@@ -34,6 +60,20 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private CharacterJobAdvancedment jobAdvancedment;
     public int FacingDirection { get; private set; } = 1;
     public PlayerData CurrentJob => GetJobController().CurrentJob;
+
+    public void Initialize(PlayerData playerData)
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("플레이어 데이터 없음", this);
+            return;
+        }
+
+        Data = playerData;
+        Status.Initialize(playerData);
+
+        ChangeJob(playerData.id);
+    }
 
     private CharacterJobAdvancedment GetJobController()
     {
@@ -182,7 +222,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool SetBasicAttackReplacement(CharacterSkillBase replacement)
     {
-        if (replacement != null && (!replacement.CanReplaceBasicAttack || !replacement.BelongsTo(GetComponent<CharacterFacade>())))
+        if (replacement != null && (!replacement.CanReplaceBasicAttack))
             return false;
         basicAttackReplacement = replacement;
 
@@ -247,5 +287,58 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public bool UseSkillAttackBuff()
     {
         return skillAttackBuff != null && skillAttackBuff.TryUse();
+    }
+
+    // 장비착용 관련 호출
+    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot)
+    {
+        return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquip(instanceId, slot);
+    }
+
+    public bool UnequipEquipment(CharacterEquipmentSlot slot)
+    {
+        return Equipment != null && Equipment.TryUnequip(slot);
+    }
+
+    public bool IsEquipmentEquipped(Guid instanceId)
+    {
+        return Equipment != null && Equipment.IsEquipped(instanceId);
+    }
+
+    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item)
+    {
+        item = null;
+        return Equipment != null && Equipment.TryGetEquippedItem(slot, out item);
+    }
+
+    public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
+    {
+        return Equipment.GetSlotsSnapshot();
+    }
+
+    // 인벤토리 관련 호출용
+    public bool AddEquipment(ItemStatus status, out Guid instanceId)
+    {
+        return Inventory.TryAddEquipment(status, out instanceId);
+    }
+
+    public bool RemoveEquipment(Guid InstanceId)
+    {
+        return Inventory.TryRemoveEquipment(InstanceId);
+    }
+
+    public bool TryGetEquipment(Guid instanceId, out CharacterInventoryEquipment equipment)
+    {
+        return Inventory.TryGetEquipment(instanceId, out equipment);
+    }
+
+    public int GetEquipmentCount(int itemId)
+    {
+        return Inventory.GetEquipmentCount(itemId);
+    }
+
+    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment()
+    {
+        return Inventory.GetEquipmentSnapshot();
     }
 }
