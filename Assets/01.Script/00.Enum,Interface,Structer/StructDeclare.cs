@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+
 
 public readonly struct BootstrapContext
 {
@@ -173,3 +175,62 @@ public readonly struct EliteProgressInfo
         TimeLimit = timeLimit;
     }
 }
+
+// 맵 인스턴스 중 밖에서 쓸 것이라 예상되는 요소 
+//Elements to be used outside of the map instance (maybe)
+public readonly struct StageMapParts
+{
+
+    public readonly Transform Root;
+    // 맵을 어떻게 찍을 지 모르겠는데 타일맵 쓸 것으로 예상해서 포함했습니다.
+    //included this because I expected to use a tile map.    
+    public readonly Tilemap GroundTilemap;
+
+    // 이 맵 전용 길찾기
+    //Pathfinder specific to this map    
+    public readonly Navi2DPathFinder PathFinder;
+
+    public readonly Transform PlayerStart;
+    public readonly Transform[] MonsterSpawnPoints;
+    public readonly Transform BossSpawnPoint; // null if it is not a boss map
+
+    public StageMapParts(Transform root, Tilemap groundTilemap, Navi2DPathFinder pathFinder,
+            Transform playerStart, Transform[] monsterSpawnPoints, Transform bossSpawnPoint)
+    {
+        Root = root;
+        GroundTilemap = groundTilemap;
+        PathFinder = pathFinder;
+        PlayerStart = playerStart;
+        MonsterSpawnPoints = monsterSpawnPoints;
+        BossSpawnPoint = bossSpawnPoint;
+    }
+    public bool HasBossSpawnPoint => BossSpawnPoint != null;
+
+    // Character position when enter stage
+    public Vector3 PlayerStartPosition => PlayerStart.position;
+
+    // Concerning about boss spawn position...
+    public Vector3 BossSpawnPosition => BossSpawnPoint != null ? BossSpawnPoint.position : PlayerStart.position;
+
+
+}
+
+
+/// <summary>
+/// Result from StageFactory.Create 
+/// </summary>
+public readonly struct StageBuildResult
+{
+    public readonly StageDefinition Definition;
+    public readonly StageMapParts Map;
+
+    public readonly bool MapChanged;
+
+    public StageBuildResult(in StageDefinition definition, in StageMapParts map, bool mapChanged)
+    {
+        Definition = definition;
+        Map = map;
+        MapChanged = mapChanged;
+    }
+}
+
