@@ -1,23 +1,9 @@
 using System;
 using UnityEngine;
 
-public class ItemFacade : MonoBehaviour, IBootStrapper
+public class ItemFacade : MonoBehaviour
 {
     public static event Action<ItemPickedUpInfo> ItemPickedUp;
-
-    [SerializeField] ItemController prefab;
-
-    public int BootOrder => (int)BootLayer.Item;
-
-    public void IBootStrapperInject(BootstrapContext context)
-    {
-    }
-
-    public void IBootStrapperInitialize()
-    {
-        ItemPickedUp -= HandlePickedUp;
-        ItemPickedUp += HandlePickedUp;
-    }
 
     void OnEnable()
     {
@@ -35,52 +21,55 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
         ItemPickedUp?.Invoke(info);
     }
 
+    public bool TryGetEquipStat(int itemId, out ItemEquipStat stat)
+    {
+        if (DataManager.instance != null && DataManager.instance.TryGetItemData(itemId, out ItemData data))
+        {
+            stat = ItemEquipStat.FromData(data);
+            return true;
+        }
+
+        stat = default;
+        return false;
+    }
+
     public ItemController Spawn(int itemId, Vector3 position, Quaternion rotation, int upgradeLevel = 0, int starForce = 0)
     {
-        if (prefab == null)
+        if (ItemFactory.Instance == null)
         {
-            Debug.LogWarning("[ItemFacade] prefab is missing.");
+            Debug.LogWarning("[ItemFacade] ItemFactory is missing.");
             return null;
         }
 
-        var item = Instantiate(prefab, position, rotation);
-        item.BindSpawn(itemId, upgradeLevel, starForce);
-        item.OnSpawn();
-        return item;
+        return ItemFactory.Instance.Create(itemId, position, rotation, 1, upgradeLevel, starForce);
     }
 
     public ItemController Spawn(int itemId, int amount, Vector3 position)
     {
-        if (prefab == null)
+        if (ItemFactory.Instance == null)
         {
-            Debug.LogWarning("[ItemFacade] prefab is missing.");
+            Debug.LogWarning("[ItemFacade] ItemFactory is missing.");
             return null;
         }
 
-        var item = Instantiate(prefab, position, Quaternion.identity);
-        item.BindSpawn(itemId, 0, 0, amount);
-        item.OnSpawn();
-        return item;
+        return ItemFactory.Instance.Create(itemId, position, Quaternion.identity, amount);
     }
 
     public ItemController Spawn(ItemData data, Vector3 position, int stackAmount = 1)
     {
+        if (ItemFactory.Instance == null)
+        {
+            Debug.LogWarning("[ItemFacade] ItemFactory is missing.");
+            return null;
+        }
+
         if (data == null)
         {
             Debug.LogWarning("[ItemFacade] item data is missing.");
             return null;
         }
 
-        if (prefab == null)
-        {
-            Debug.LogWarning("[ItemFacade] prefab is missing.");
-            return null;
-        }
-
-        var item = Instantiate(prefab, position, Quaternion.identity);
-        item.Initialize(data, stackAmount);
-        item.OnSpawn();
-        return item;
+        return ItemFactory.Instance.Create(data.id, position, Quaternion.identity, stackAmount);
     }
 
     public void Despawn(ItemController item)

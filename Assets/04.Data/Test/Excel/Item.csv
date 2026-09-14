@@ -1,4 +1,4 @@
-id,codeName,description,displayName
-10000,HpPotion,something,HealingPotion
-10001,ManaPotion,nothing,ManaPotion
-10002,Portal,anyting,PortalScroll
+id,codeName,description,displayName,itemType,value,upgradeStep,animatorController,idleClip,runClip,attackClip,hitClip,deadClip,idleAudioClip,runAudioClip,attackAudioClip,hitAudioClip,deadAudioClip
+10000,HpPotion,something,HealingPotion,1,50,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+10001,ManaPotion,nothing,ManaPotion,1,30,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
+10002,Portal,anyting,PortalScroll,2,0,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
