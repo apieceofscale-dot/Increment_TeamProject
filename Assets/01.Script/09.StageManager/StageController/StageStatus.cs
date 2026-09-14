@@ -1,6 +1,13 @@
 using UnityEngine;
 
 
+// 정리 예정
+
+
+
+
+
+
 // 런타임 상태 보관
 public sealed class StageStatus
 {
