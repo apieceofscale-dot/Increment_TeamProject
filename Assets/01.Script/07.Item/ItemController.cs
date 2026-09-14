@@ -28,6 +28,16 @@ public class ItemController : MonoBehaviour, IPoolable
         quantity = Mathf.Max(1, stackAmount);
     }
 
+    public void Initialize(ItemData data, int stackAmount = 1)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        BindSpawn(data.id, 0, 0, stackAmount);
+    }
+
     public void InitializePoolObj(Action returnAction)
     {
         _returnToPool = returnAction;

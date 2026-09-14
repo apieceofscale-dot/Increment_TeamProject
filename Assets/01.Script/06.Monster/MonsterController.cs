@@ -45,6 +45,16 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         stageIndex = Mathf.Max(1, stage);
     }
 
+    public void Initialize(MonsterData data, int stage = 1)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        BindSpawn(data.id, stage);
+    }
+
     public void InitializePoolObj(Action returnAction)
     {
         _returnToPool = returnAction;
@@ -168,15 +178,14 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
-        if (target.TryGetComponent<CharacterFacade>(out var characterFacade))
+        if (!target.TryGetComponent<CharacterFacade>(out var characterFacade))
         {
-            characterFacade.TakeDamage(damage);
-            return;
+            target.TryGetComponentInParent<CharacterFacade>(out characterFacade);
         }
 
-        if (target.TryGetComponent<CharacterControllers>(out var character))
+        if (characterFacade != null)
         {
-            character.Status.TakeDamage(damage);
+            characterFacade.TakeDamage(damage);
         }
     }
 

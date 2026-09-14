@@ -54,6 +54,26 @@ public class MonsterFacade : MonoBehaviour, IBootStrapper
         return monster;
     }
 
+    public MonsterController Spawn(MonsterData data, Vector3 position, Quaternion rotation, int stageIndex = 1)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning("[MonsterFacade] monster data is missing.");
+            return null;
+        }
+
+        if (prefab == null)
+        {
+            Debug.LogWarning("[MonsterFacade] prefab is missing.");
+            return null;
+        }
+
+        var monster = Instantiate(prefab, position, rotation);
+        monster.Initialize(data, stageIndex);
+        monster.OnSpawn();
+        return monster;
+    }
+
     public void Despawn(MonsterController monster)
     {
         if (monster == null)

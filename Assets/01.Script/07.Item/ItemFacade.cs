@@ -63,6 +63,26 @@ public class ItemFacade : MonoBehaviour, IBootStrapper
         return item;
     }
 
+    public ItemController Spawn(ItemData data, Vector3 position, int stackAmount = 1)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning("[ItemFacade] item data is missing.");
+            return null;
+        }
+
+        if (prefab == null)
+        {
+            Debug.LogWarning("[ItemFacade] prefab is missing.");
+            return null;
+        }
+
+        var item = Instantiate(prefab, position, Quaternion.identity);
+        item.Initialize(data, stackAmount);
+        item.OnSpawn();
+        return item;
+    }
+
     public void Despawn(ItemController item)
     {
         if (item == null)
