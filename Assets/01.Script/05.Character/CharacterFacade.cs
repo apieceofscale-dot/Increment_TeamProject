@@ -142,6 +142,7 @@ public class CharacterFacade : MonoBehaviour
     public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // 방어구 착용
     {
         return characterControllers.EquipEquipment(instanceId, slot);
+        // Hat(머리)=0, Top(상의)=1, Bottom(하의)=2, Gloves(장갑)=3, Cape(망토)=4, Shoulder(어깨)=5, Belt(허리)=6, Shoes(신발)=7, Ring1(반지1)=8, Ring2(반지2)=9, Necklace(목걸이)=10
     }
 
     public bool UnequipEquipment(CharacterEquipmentSlot slot) // 방어구 해제
@@ -162,5 +163,56 @@ public class CharacterFacade : MonoBehaviour
     public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
     {
         return characterControllers.GetEquipmentSlots();
+    }
+
+    // 현재 착용 장비 전체의 합계를 교체, 생략한 항목은 0
+    public void SetEquipmentStats(
+        long maxHp = 0,
+        int maxMp = 0,
+        int recoverMpPerSec = 0,
+        float moveSpeed = 0f,
+        int strength = 0,
+        int dexterity = 0,
+        int intelligence = 0,
+        int luck = 0,
+        int attack = 0,
+        float attackSpeedRate = 0f,
+        int hitRate = 0,
+        float criticalRate = 0f,
+        float criticalDamage = 0f,
+        float damageByMainStat = 0f,
+        float damageOnBoss = 0f,
+        float damageOnNormal = 0f,
+        float armorPenetration = 0f,
+        float finalDamage = 0f,
+        long defence = 0,
+        int dodgeRate = 0)
+    {
+        characterControllers.SetEquipmentStats(
+            maxHp: maxHp,
+            maxMp: maxMp,
+            recoverMpPerSec: recoverMpPerSec,
+            moveSpeed: moveSpeed,
+            strength: strength,
+            dexterity: dexterity,
+            intelligence: intelligence,
+            luck: luck,
+            attack: attack,
+            attackSpeedRate: attackSpeedRate,
+            hitRate: hitRate,
+            criticalRate: criticalRate,
+            criticalDamage: criticalDamage,
+            damageByMainStat: damageByMainStat,
+            damageOnBoss: damageOnBoss,
+            damageOnNormal: damageOnNormal,
+            armorPenetration: armorPenetration,
+            finalDamage: finalDamage,
+            defence: defence,
+            dodgeRate: dodgeRate);
+    }
+
+    public void ClearEquipmentStats()
+    {
+        characterControllers.ClearEquipmentStats();
     }
 }
