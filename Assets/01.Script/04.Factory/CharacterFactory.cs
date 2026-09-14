@@ -1,27 +1,37 @@
 using UnityEngine;
 
-public class CharacterFactory : MonoBehaviour
+public class CharacterFactory : MonoBehaviour, IBootStrapper
 {
+    public int BootOrder { get; }
+
     [SerializeField] private CharacterControllers characterPrefab;
     [SerializeField] private Transform testSpawnPoint; // 테스트용
-    
-    public CharacterControllers Create(PlayerData playerData, Vector3 spawnPosition)
+
+    public void IBootStrapperInject(BootstrapContext context)
     {
+
+    }
+    public void IBootStrapperInitialize()
+    {
+
+    }
+    public CharacterControllers Create(int playerId, Vector3 spawnPosition)
+    {
+        if (DataManager.instance == null)
+        {
+            Debug.LogError("데이터 매니저 없음", this);
+            return null;
+        }
+
+        if (!DataManager.instance.TryGetPlayerData(playerId, out PlayerData playerData) || playerData == null)
+        {
+            Debug.LogError($"플레이어 데이터를 찾을 수 없음 ID: {playerId}", this);
+            return null;
+        }
+
         if (characterPrefab == null)
         {
-            Debug.LogError("캐릭터 프리팹 없음");
-            return null;
-        }
-
-        if (!characterPrefab.TryGetComponent(out CharacterControllers _))
-        {
-            Debug.LogError("캐릭터 프리팹에 컨트롤러 없음");
-            return null;
-        }
-
-        if (playerData == null)
-        {
-            Debug.LogError("플레이어 데이터 없음");
+            Debug.LogError("캐릭터 프리팹 없음", this);
             return null;
         }
 
@@ -30,23 +40,6 @@ public class CharacterFactory : MonoBehaviour
         character.Initialize(playerData);
 
         return character;
-    }
-    
-    public CharacterControllers Create(int playerId, Vector3 spawnPosition)
-    {
-        if (DataManager.instance == null)
-        {
-            Debug.LogError("DataManager가 없습니다.");
-            return null;
-        }
-
-        if (!DataManager.instance.TryGetPlayerData(playerId, out PlayerData playerData))
-        {
-            Debug.LogError($"플레이어 데이터를 찾을 수 없습니다. ID: {playerId}");
-            return null;
-        }
-
-        return Create(playerData, spawnPosition);
     }
 
     [ContextMenu("생성 테스트")]

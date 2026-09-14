@@ -6,7 +6,17 @@ using System.Collections.Generic;
 [RequireComponent(typeof(CharacterEquipment))]
 public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
 {
-    public CharacterStatus Status { get; private set; }
+    private CharacterStatus status;
+    public CharacterStatus Status
+    {
+        get
+        {
+            if (status == null)
+                status = new CharacterStatus();
+            return status;
+        }
+    }
+
     [SerializeField] private CharacterInventory characterInventory;
     public CharacterInventory Inventory
     {
@@ -27,6 +37,17 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             if (characterEquipment == null)
                 characterEquipment = GetComponent<CharacterEquipment>();
             return characterEquipment;
+        }
+    }
+
+    [SerializeField] private Animator animator;
+    public Animator Animator
+    {
+        get
+        {
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+            return animator;
         }
     }
 
@@ -79,7 +100,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         if (jobAdvancedment == null)
             jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
-    
+
         return jobAdvancedment;
     }
 
@@ -99,8 +120,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
         if (visualRoot != null)
             FacingDirection = visualRoot.localScale.x < 0f ? -1 : 1;
-        
-        Status = new CharacterStatus();
+
         characterLevelUpProvider = new CharacterLevelUpProvider();
         skillLevelUpProvider = new CharacterSkillLevelUpProvider();
     }
@@ -108,6 +128,21 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private void FixedUpdate()
     {
         Move();
+        UpdateAnimation();
+    }
+
+    private void UpdateAnimation()
+    {
+        Animator currentAnimator = Animator;
+
+        if (currentAnimator == null)
+            return;
+
+        bool isJump = !IsGrounded() || rigid.linearVelocity.y > 0.1f;
+        bool isRun = !isJump && Mathf.Abs(moveInput) > 0.01f;
+
+        currentAnimator.SetBool("isRun", isRun);
+        currentAnimator.SetBool("isJump", isJump);
     }
 
     public void GainExp(long amount)
@@ -121,15 +156,24 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void CheckLevelUp() // 레벨 수치 상승
     {
+        if (characterLevelUpProvider == null)
+            characterLevelUpProvider = new CharacterLevelUpProvider();
+
         while (true) // 보유 경험치량이 다음 레벨 업 요구 경험치 보다 많으면 반복해서 레벨업함
         {
             long requiredExp = characterLevelUpProvider.GetRequiredExp(Status.Level);
 
+            if (requiredExp <= 0)
+            {
+                Debug.LogWarning("요구 경험치는 0보다 커야됨", this);
+                break;
+            }
+
             if (Status.Exp < requiredExp)
                 break;
 
-            Status.UseExp(requiredExp);
-            Status.IncreaseLevel();
+            status.UseExp(requiredExp);
+            status.IncreaseLevel();
 
             ApplyLevelUpGrowth();
         }
@@ -150,6 +194,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         return groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer) != null;
     }
+
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
@@ -170,7 +215,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private void UpdateDirection()
     {
         if (moveInput == 0f)
+        {
             return;
+        }
 
         FacingDirection = moveInput > 0f ? 1 : -1;
 
@@ -179,7 +226,6 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
         Vector3 scale = visualRoot.localScale;
         scale.x = Mathf.Abs(scale.x) * (moveInput > 0f ? 1f : -1f);
-
         visualRoot.localScale = scale;
     }
 
@@ -229,9 +275,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return true;
     }
 
-    public void RestoreBasicAttack() 
+    public void RestoreBasicAttack()
     {
-        SetBasicAttackReplacement(null); 
+        SetBasicAttackReplacement(null);
     }
     public bool SetSlashBasicAttack()
     {
@@ -243,7 +289,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     }
 
     public bool UseTestSkill()
-    { 
+    {
         return UseSkillSlash();
     }
 
@@ -252,7 +298,14 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         if (skillSlash == null)
             return;
 
+        if (skillLevelUpProvider == null)
+            skillLevelUpProvider = new CharacterSkillLevelUpProvider();
+
         CharacterSkill runtime = skillSlash.RuntimeSkill;
+
+        if (runtime != null)
+            return;
+
         runtime.IncreaseLevel();
         runtime.SetMpCost(skillLevelUpProvider.GetMpCost(runtime.Level));
         runtime.SetCooldown(skillLevelUpProvider.GetCooldown(runtime.Level));
@@ -340,5 +393,56 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment()
     {
         return Inventory.GetEquipmentSnapshot();
+    }
+
+    // 현재 착용 장비 전체의 합계를 교체한다. 생략한 항목은 0이다.
+    public void SetEquipmentStats(
+        long maxHp = 0,
+        int maxMp = 0,
+        int recoverMpPerSec = 0,
+        float moveSpeed = 0f,
+        int strength = 0,
+        int dexterity = 0,
+        int intelligence = 0,
+        int luck = 0,
+        int attack = 0,
+        float attackSpeedRate = 0f,
+        int hitRate = 0,
+        float criticalRate = 0f,
+        float criticalDamage = 0f,
+        float damageByMainStat = 0f,
+        float damageOnBoss = 0f,
+        float damageOnNormal = 0f,
+        float armorPenetration = 0f,
+        float finalDamage = 0f,
+        long defence = 0,
+        int dodgeRate = 0)
+    {
+        Status.SetEquipmentStats(
+            maxHp: maxHp,
+            maxMp: maxMp,
+            recoverMpPerSec: recoverMpPerSec,
+            moveSpeed: moveSpeed,
+            strength: strength,
+            dexterity: dexterity,
+            intelligence: intelligence,
+            luck: luck,
+            attack: attack,
+            attackSpeedRate: attackSpeedRate,
+            hitRate: hitRate,
+            criticalRate: criticalRate,
+            criticalDamage: criticalDamage,
+            damageByMainStat: damageByMainStat,
+            damageOnBoss: damageOnBoss,
+            damageOnNormal: damageOnNormal,
+            armorPenetration: armorPenetration,
+            finalDamage: finalDamage,
+            defence: defence,
+            dodgeRate: dodgeRate);
+    }
+
+    public void ClearEquipmentStats()
+    {
+        Status.ClearEquipmentStats();
     }
 }
