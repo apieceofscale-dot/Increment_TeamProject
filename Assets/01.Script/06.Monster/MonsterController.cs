@@ -181,7 +181,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     {
         if (_naviAgent != null)
         {
-            _naviAgent.Trace(worldPosition);
+            _naviAgent.Trace(worldPosition,moveSpeed);
             return;
         }
 
@@ -204,7 +204,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
         if (!target.TryGetComponent<CharacterFacade>(out var characterFacade))
         {
-            target.TryGetComponentInParent<CharacterFacade>(out characterFacade);
+            //target.TryGetComponentInParent<CharacterFacade>(out characterFacade);
         }
 
         if (characterFacade != null)
