@@ -2,17 +2,17 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DynamicPlayerStatusBarView : MonoBehaviour
+public class PlayerStatusBarView : MonoBehaviour
 {
     
     [SerializeField] Image hpBar;
     [SerializeField] Image mpBar;
+    [SerializeField] TextMeshProUGUI level;
+    [SerializeField] TextMeshProUGUI job;
     
-    [SerializeField] TextMeshProUGUI attackRating;
-    [SerializeField] TextMeshProUGUI money;
 
 
-    //fill º¯°æ.
+  
     public void HpChanged(float nowHp,float maxHp)
     {
         hpBar.fillAmount = nowHp / maxHp;
@@ -20,15 +20,13 @@ public class DynamicPlayerStatusBarView : MonoBehaviour
     public void MpChanged(float nowMp, float maxMp)
     {
         mpBar.fillAmount = nowMp / maxMp;
-    }
-    
-    public void AttackRatingChanged(string attackRating)
+    }    
+    public void LevelChagned(int level)
     {
-        this.attackRating.text = attackRating;
+        this.level.text = level.ToString();
     }
-    public void MoneyChanged(int money)
+    public void JobChanged(string jobName)
     {
-        this.money.text = money.ToString();
+        this.job.text = jobName;
     }
-
 }
