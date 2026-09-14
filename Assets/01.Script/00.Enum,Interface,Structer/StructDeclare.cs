@@ -23,8 +23,25 @@ public readonly struct BootstrapContext
             }
         }
 
-        throw new InvalidOperationException($"[BootstrapContext] {typeof(T).Name}��(��) ������ ã�� ���߽��ϴ�");
+        throw new InvalidOperationException($"[BootstrapContext] Can't found {typeof(T).Name}. Check its IBootStrapper, or BootLayer order.");
     }
+
+    // 아직 구현 안 된 시스템 대기용, 완성되면 Get만
+    public bool TryGet<T>(out T result) where T : class
+    {
+        foreach (IBootStrapper target in targets)
+        {
+            if (target is T match)
+            {
+                result = match;
+                return true;
+            }
+        }
+
+        result = null;
+        return false;
+    }
+
 }
 
 public readonly struct DropTableEntry
@@ -66,6 +83,7 @@ public readonly struct StageDefinition
     public readonly int IndexInChapter;
     public readonly string StageCodeName;
     public readonly string DisplayName;
+    public readonly string SceneName;
     public readonly StageType Type;
     public readonly int MonsterId;
     public readonly int DropTableId;
@@ -82,8 +100,10 @@ public readonly struct StageDefinition
 
     public bool HasTimeLimit => TimeLimit > 0f;
 
+    public bool HasElite => EliteMonsterId > 0;
+
     public StageDefinition(
-        int stageId, int chapter, int indexInChapter, string stageCodeName, string displayName, StageType type,
+        int stageId, int chapter, int indexInChapter, string stageCodeName, string displayName, string sceneName, StageType type,
         int monsterId, int dropTableId, float statMultiplier,
         int clearKillCount, int maxAliveMonster, float spawnInterval, float timeLimit,
         int eliteMonsterId, int eliteDropTableId, float eliteTimeLimit,
@@ -94,6 +114,7 @@ public readonly struct StageDefinition
         IndexInChapter = indexInChapter;
         StageCodeName = stageCodeName;
         DisplayName = displayName;
+        SceneName = sceneName;
         Type = type;
         MonsterId = monsterId;
         DropTableId = dropTableId;
@@ -109,7 +130,6 @@ public readonly struct StageDefinition
         FailStageId = failStageId;
     }
 
-    public bool HasElite => EliteMonsterId > 0;
 }
 
 public readonly struct MonsterSpawnRequest

@@ -5,20 +5,25 @@ using UnityEngine;
 public sealed class MonsterSpawner : MonoBehaviour
 {
     private const float SpawnRadius = 1.5f;
-
     private const int AliveListCapacity = 16;
 
-    private MonsterFacade monsterFacade;
+    private MonsterFactory monsterFactory;
     private StageMapParts map;
+    private bool hasMap;
     private float spawnTimer;
 
     private readonly List<MonsterController> activeMonsters = new List<MonsterController>(AliveListCapacity);
 
-    public void Initialize(MonsterFacade facade)
-            => monsterFacade = facade ?? throw new ArgumentNullException(nameof(facade));
+    public void Initialize(MonsterFactory factory)
+           => monsterFactory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-    // Call when map changed
-    public void SetMap(in StageMapParts mapParts) => map = mapParts;
+
+    // Call when map changed (by stageController)
+    public void SetMap(in StageMapParts mapParts)
+    {
+        map = mapParts;
+        hasMap = true;
+    }
 
     public void ResetTimer() => spawnTimer = 0f;
 
@@ -27,21 +32,32 @@ public sealed class MonsterSpawner : MonoBehaviour
     /// </summary>
     public void DespawnAll()
     {
+        for (int i = activeMonsters.Count - 1; i >= 0; i--)
+        {
+            MonsterController monster = activeMonsters[i];
+            if (monster != null)
+            {
+                // 몬스터팩토리의 디스폰ㅁ?
+            }
+        }
 
+        activeMonsters.Clear();
+        spawnTimer = 0f;
     }
 
 
 
     public void TickSpawn(in StageDefinition definition, float deltaTime)
     {
+        if (!hasMap) return;
+
         spawnTimer -= deltaTime;
+        if (spawnTimer > 0f) return;
+
+        if (CountAlive() >= definition.MaxAliveMonster) return;
 
         spawnTimer = definition.SpawnInterval;
-
-        // MonsterFacade spawn here
-
         SpawnInternal(definition.MonsterId, definition, GetSpawnPosition(definition));
-
     }
 
     public MonsterController SpawnElite(in StageDefinition definition)
@@ -52,15 +68,14 @@ public sealed class MonsterSpawner : MonoBehaviour
     private MonsterController SpawnInternal(int monsterId, in StageDefinition definition, Vector3 position)
     {
 
-        MonsterController monster = monsterFacade.Spawn(
-            monsterId,
-            position,
-            Quaternion.identity,        // 2D 프로젝트라 회전은 쓰지 않습니다
-            definition.Chapter);
+        MonsterSpawnRequest request = new MonsterSpawnRequest(
+            monsterId, definition.Chapter, definition.StatMultiplier, definition.DropTableId, position);
 
-        if (monster == null) return null;
+        // 여기서 오브젝트 풀 혹은 몬스터팩토리 create 통해 activeMonsters 채우고, 몬스터 반환하기
+        // new() 대신 주석 윗줄 항목을 쓸 것  
+        MonsterController monster = new();
 
-        activeMonsters.Add(monster);
+
         return monster;
 
     }
@@ -81,6 +96,14 @@ public sealed class MonsterSpawner : MonoBehaviour
     // Spawn at random point
     private Vector3 GetSpawnPosition(in StageDefinition definition)
     {
+        // Transform[] points = map.MonsterSpawnPoints;
+
+        // // 스폰 위치 지정 필요할지말지 고민입니다
+        // if (points == null || points.Length == 0)
+        // {
+        //     Debug.LogWarning($"[MonsterSpawner] 스폰 포인트가 없습니다. stageId={definition.StageId}");
+        //     return map.Root != null ? map.Root.position : Vector3.zero;
+        // }
 
         Transform point = map.MonsterSpawnPoints[UnityEngine.Random.Range(0, map.MonsterSpawnPoints.Length)];
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 // 드랍 요청 모아서 프레임 단위로 처리
-public sealed class ItemDropManager : MonoBehaviour
+public sealed class ItemDropManager : MonoBehaviour, IBootStrapper
 {
     // 전부 임시 상수
     private const int MaxSpawnPerFrame = 16; //프레임당 생성할 아이템 오브젝트 수 상한
@@ -20,15 +20,39 @@ public sealed class ItemDropManager : MonoBehaviour
 
 
     private IDropTableSource dropTableSource;
-    private ItemFacade itemFacade;
+    private ItemFactory itemFactory;
+    private ItemDropFacade facade;
 
-    /// <summary>
-    /// ItemDropFacade가 호출해 참조 세팅
-    /// </summary>
-    public void Initialize(IDropTableSource source, ItemFacade facade)
+    public ItemDropFacade Facade => facade;
+
+
+    private bool warnedMissingFactory;
+    public int BootOrder => (int)BootLayer.ItemManager;
+
+
+
+    public void IBootStrapperInject(BootstrapContext context)
     {
-        dropTableSource = source ?? throw new System.ArgumentNullException(nameof(source));
-        itemFacade = facade ?? throw new System.ArgumentNullException(nameof(facade));
+        // ItemFactory가 완성되면 TryGet 대신 Get으로 변경할 것.
+        context.TryGet(out itemFactory);
+    }
+
+    public void IBootStrapperInitialize()
+    {
+        //***할일:  drop테이블을 csv로 이관한 다음에 이거 교체할 것.
+        dropTableSource = new TempDropTableSource();
+
+        if (itemFactory == null) Debug.LogWarning("[ItemDropManager] ItemFactory가 없습니다. ");
+
+        facade = GetComponent<ItemDropFacade>();
+        if (facade == null)
+        {
+            throw new System.InvalidOperationException(
+                "[ItemDropManager] ItemDropFacade가 없습니다.");
+        }
+        facade.Bind(this);
+
+
     }
 
     /// <summary>
@@ -57,6 +81,17 @@ public sealed class ItemDropManager : MonoBehaviour
 
     private void ProcessPendingRequests()
     {
+        if (itemFactory == null)
+        {
+            pendingRequests.Clear();
+            if (!warnedMissingFactory)
+            {
+                Debug.LogWarning("[ItemDropManager] ItemFactory가 없어 드랍 요청을 폐기");
+                warnedMissingFactory = true;
+            }
+            return;
+        }
+
         int spawnedThisFrame = 0;
 
         // 몬스터 한 마리의 드랍은 도중에 끊지 않고 통째로 처리
@@ -77,7 +112,7 @@ public sealed class ItemDropManager : MonoBehaviour
                 DropResult result = resolveBuffer[i];
                 Vector3 spawnPosition = GetScatteredPosition(request.Position, i, resolveBuffer.Count);
 
-                itemFacade.Spawn(result.ItemId, result.Amount, spawnPosition);
+                //itemFactory.Create??
 
                 spawnedThisFrame++;
             }
