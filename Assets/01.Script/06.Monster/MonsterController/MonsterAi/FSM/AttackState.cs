@@ -1,38 +1,22 @@
-using UnityEngine;
-
 public sealed class AttackState : IMonsterFsmState
 {
     public MonsterState State => MonsterState.Attack;
 
-    float _attackTimer;
-
     public void Enter(MonsterController monster)
     {
-        _attackTimer = 0f;
+        monster.AI.ResetAttackTimer();
     }
 
     public void Tick(MonsterController monster, float deltaTime)
     {
-        var target = monster.FindTarget();
-        if (target == null)
+        MonsterState next = monster.AI.EvaluateFromAttack();
+        if (next != MonsterState.Attack)
         {
-            monster.AI.ChangeState(MonsterState.Idle);
+            monster.AI.ChangeState(next);
             return;
         }
 
-        var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance > monster.Status.AttackRange)
-        {
-            monster.AI.ChangeState(MonsterState.Trace);
-            return;
-        }
-
-        _attackTimer -= deltaTime;
-        if (_attackTimer <= 0f)
-        {
-            monster.PerformAttack(target);
-            _attackTimer = monster.Status.AttackCooldown;
-        }
+        monster.AI.ExecuteAttack(deltaTime);
     }
 
     public void Exit(MonsterController monster) { }

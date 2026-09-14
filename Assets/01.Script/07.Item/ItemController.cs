@@ -16,15 +16,41 @@ public class ItemController : MonoBehaviour, IPoolable
     readonly ItemStatusProvider _statusProvider = ItemStatusProvider.Default;
 
     Action _returnToPool;
+    Animator _animator;
     bool _spawned;
+    ItemData _runtimeData;
 
     public ItemStatus Status => _status;
+
+    void Awake()
+    {
+        _animator = GetComponent<Animator>();
+        if (_animator == null)
+        {
+            _animator = GetComponentInChildren<Animator>();
+        }
+    }
 
     public void BindSpawn(int id, int upgrade, int star, int stackAmount = 1)
     {
         itemId = id;
         upgradeLevel = upgrade;
         starForce = star;
+        quantity = Mathf.Max(1, stackAmount);
+    }
+
+    public void Initialize(ItemData data, int stackAmount = 1)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        _runtimeData = data;
+        itemId = data.id;
+        type = data.itemType;
+        value = data.value;
+        upgradeStep = data.upgradeStep;
         quantity = Mathf.Max(1, stackAmount);
     }
 
@@ -35,6 +61,7 @@ public class ItemController : MonoBehaviour, IPoolable
 
     public void OnSpawn()
     {
+        ApplyVisuals(_runtimeData);
         _spawned = true;
         _statusProvider.ApplyTo(_status, itemId, type, value, upgradeStep, upgradeLevel, starForce);
         _status.ApplyStack(quantity);
@@ -43,6 +70,7 @@ public class ItemController : MonoBehaviour, IPoolable
     public void OnDespawn()
     {
         _spawned = false;
+        _runtimeData = null;
         _status.Clear();
     }
 
@@ -82,6 +110,12 @@ public class ItemController : MonoBehaviour, IPoolable
     public void ReturnToPool()
     {
         OnDespawn();
+        if (ItemFactory.Instance != null)
+        {
+            ItemFactory.Instance.Release(this);
+            return;
+        }
+
         if (_returnToPool != null)
         {
             _returnToPool.Invoke();
@@ -89,5 +123,18 @@ public class ItemController : MonoBehaviour, IPoolable
         }
 
         Destroy(gameObject);
+    }
+
+    void ApplyVisuals(ItemData data)
+    {
+        if (data == null || _animator == null)
+        {
+            return;
+        }
+
+        if (data.animatorController != null)
+        {
+            _animator.runtimeAnimatorController = data.animatorController;
+        }
     }
 }

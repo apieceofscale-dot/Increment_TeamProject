@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed class TraceState : IMonsterFsmState
 {
     public MonsterState State => MonsterState.Trace;
@@ -8,27 +6,14 @@ public sealed class TraceState : IMonsterFsmState
 
     public void Tick(MonsterController monster, float deltaTime)
     {
-        var target = monster.FindTarget();
-        if (target == null)
+        MonsterState next = monster.AI.EvaluateFromTrace();
+        if (next != MonsterState.Trace)
         {
-            monster.AI.ChangeState(MonsterState.Idle);
+            monster.AI.ChangeState(next);
             return;
         }
 
-        var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance > monster.Status.TraceRange)
-        {
-            monster.AI.ChangeState(MonsterState.Idle);
-            return;
-        }
-
-        if (distance <= monster.Status.AttackRange)
-        {
-            monster.AI.ChangeState(MonsterState.Attack);
-            return;
-        }
-
-        monster.MoveTowards(target.position, deltaTime);
+        monster.AI.ExecuteTrace();
     }
 
     public void Exit(MonsterController monster) { }
