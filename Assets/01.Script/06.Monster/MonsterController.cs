@@ -161,6 +161,18 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public Transform FindTarget()
     {
+        // StageManager가 캐릭터 참조를 들고 있으면 우선 사용한다.
+        StageController stage = FindFirstObjectByType<StageController>();
+        if (stage != null && stage.Character != null)
+        {
+            return stage.Character.transform;
+        }
+
+        return FindTargetByTag();
+    }
+
+    Transform FindTargetByTag()
+    {
         if (string.IsNullOrEmpty(targetTag))
         {
             return null;
@@ -168,7 +180,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
         try
         {
-            var target = GameObject.FindGameObjectWithTag(targetTag);
+            GameObject target = GameObject.FindGameObjectWithTag(targetTag);
             return target != null ? target.transform : null;
         }
         catch (UnityException)
@@ -179,13 +191,18 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void TraceTowards(Vector3 worldPosition)
     {
+        float speed = _status.MoveSpeed;
+
         if (_naviAgent != null)
         {
-            _naviAgent.Trace(worldPosition,moveSpeed);
+            _naviAgent.Trace(worldPosition, speed);
             return;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, worldPosition, _status.MoveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            worldPosition,
+            speed * Time.deltaTime);
     }
 
     public void PerformAttack(Transform target)
@@ -195,21 +212,25 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
-        var damage = Mathf.Max(1, _status.AttackDamage);
-        if (target.TryGetComponent<IDamageable>(out var damageable))
+        int damage = Mathf.Max(1, _status.AttackDamage);
+
+        if (target.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
             damageable.TakeDamage(damage);
             return;
         }
 
-        if (!target.TryGetComponent<CharacterFacade>(out var characterFacade))
+        // Unity에는 TryGetComponentInParent가 없다. GetComponentInParent를 사용한다.
+        // 플레이어 콜라이더가 자식 오브젝트에 붙어 있을 수 있어 부모까지 탐색한다.
+        CharacterFacade character = target.GetComponent<CharacterFacade>();
+        if (character == null)
         {
-            //target.TryGetComponentInParent<CharacterFacade>(out characterFacade);
+            character = target.GetComponentInParent<CharacterFacade>();
         }
 
-        if (characterFacade != null)
+        if (character != null)
         {
-            characterFacade.TakeDamage(damage);
+            character.TakeDamage(damage);
         }
     }
 
