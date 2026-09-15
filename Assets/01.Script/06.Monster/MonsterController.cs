@@ -161,6 +161,18 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public Transform FindTarget()
     {
+        // StageManager가 캐릭터 참조를 들고 있으면 우선 사용한다.
+        StageController stage = FindFirstObjectByType<StageController>();
+        if (stage != null && stage.Character != null)
+        {
+            return stage.Character.transform;
+        }
+
+        return FindTargetByTag();
+    }
+
+    Transform FindTargetByTag()
+    {
         if (string.IsNullOrEmpty(targetTag))
         {
             return null;
@@ -168,7 +180,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
         try
         {
-            var target = GameObject.FindGameObjectWithTag(targetTag);
+            GameObject target = GameObject.FindGameObjectWithTag(targetTag);
             return target != null ? target.transform : null;
         }
         catch (UnityException)
