@@ -62,6 +62,7 @@ public sealed class MonsterSpawner : MonoBehaviour
 
     public MonsterController SpawnElite(in StageDefinition definition)
     {
+        if (!hasMap) return null;
         return SpawnInternal(definition.EliteMonsterId, definition, GetSpawnPosition(definition));
     }
 
