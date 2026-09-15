@@ -49,6 +49,11 @@ public class CharacterInventory : MonoBehaviour
 
     public bool TryRemoveEquipment(Guid instanceId)
     {
+        CharacterEquipment equipment = GetComponent<CharacterEquipment>();
+
+        if (equipment != null && equipment.IsEquipped(instanceId))
+            return false;
+
         if (!equipmentItems.Remove(instanceId))
             return false;
 

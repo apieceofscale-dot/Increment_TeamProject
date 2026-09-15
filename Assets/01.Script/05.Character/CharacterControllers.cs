@@ -303,7 +303,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
         CharacterSkill runtime = skillSlash.RuntimeSkill;
 
-        if (runtime != null)
+        if (runtime == null)
             return;
 
         runtime.IncreaseLevel();
@@ -395,7 +395,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return Inventory.GetEquipmentSnapshot();
     }
 
-    // 현재 착용 장비 전체의 합계를 교체한다. 생략한 항목은 0이다.
+    // 현재 착용 장비 전체의 합계 교체
     public void SetEquipmentStats(
         long maxHp = 0,
         int maxMp = 0,
@@ -441,8 +441,160 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             dodgeRate: dodgeRate);
     }
 
+    // 강화/옵션 변경 후 착용 장비를 다시 조회 및 합산, 성공 여부 반환
+    public bool RefreshEquipmentStats()
+    {
+        return Equipment != null && Equipment.RefreshEquipmentStats();
+    }
+
     public void ClearEquipmentStats()
     {
         Status.ClearEquipmentStats();
+    }
+
+    public long Money { get; private set; }
+
+    public void SetMoney(long amount) // 최신 보유 재화만 전달하는 용
+    {
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException(nameof(amount));
+
+        Money = amount;
+    }
+
+    // 전달용 이벤트 (현재값, 최대값)
+    public event Action<long, long> HpChanged;
+    public event Action<int, int> MpChanged;
+    public event Action<int> LevelChanged;
+    public event Action<long> MoneyChanged;
+    public event Action<int> CombatPowerChanged;
+    public event Action<string> JobNameChanged;
+
+    // UI에서 현재값 조회용 프로퍼티
+    public long CurrentHp => Status.CurrentHp;
+    public long MaxHp => Status.MaxHp;
+    public int CurrentMp => Status.CurrentMp;
+    public int MaxMp => Status.MaxMp;
+    public int Level => Status.Level;
+    public int CombatPower => Status.Attack;
+
+    public string JobName
+    {
+        get
+        {
+            {
+                PlayerData job = CurrentJob;
+                return job == null ? string.Empty : (job.displayName ?? string.Empty);
+            }
+        }
+    }
+
+    // 변경됐는지 확인용 이전 값 저장 변수
+    private bool hasUiSnapshot; // 이전에 값을 한번이라도 기록했는지
+    private bool publishingUiChanges; // 지금 이벤트 발행하는 중인지
+    private long previousCurrentHp;
+    private long previousMaxHp;
+    private int previousCurrentMp;
+    private int previousMaxMp;
+    private int previousLevel;
+    private long previousMoney;
+    private int previousCombatPower;
+    private string previousJobName;
+
+    private void OnEnable()
+    {
+        hasUiSnapshot = false; // 재활성화 후 첫 확인에서는 모든 값을 알림
+
+        if (Equipment != null)
+            Equipment.RequestEquipmentStatsRefresh();
+    }
+
+    private void LateUpdate()
+    {
+        if (Equipment != null)
+            Equipment.RefreshEquipmentStatsIfNeeded();
+
+        PublishUiChanges(false); // 매 프레임 마지막에 변경된 값만 알림
+    }
+
+    public void RefreshUiEvents()
+    {
+        PublishUiChanges(true); // 요청시 변경 여부와 관계없이 전체 알림
+    }
+
+    private void PublishUiChanges(bool force)
+    {
+        if (publishingUiChanges)
+            return;
+
+        publishingUiChanges = true; // 발행 시작 표시
+
+        try
+        {
+            PublishUiChangesCore(force); // 실제 비교와 이벤트 호출
+        }
+        finally
+        {
+            publishingUiChanges = false; // 예외가 발생해도 발행 중 표시 해제
+        }
+    }
+
+    private void PublishUiChangesCore(bool force)
+    {
+        long hp = CurrentHp;
+        long maxHp = MaxHp;
+        int mp = CurrentMp;
+        int maxMp = MaxMp;
+        int level = Level;
+        long money = Money;
+        int combatPower = CombatPower;
+        string jobName = JobName;
+
+        bool all = force || !hasUiSnapshot; // 강제 갱신 또는 최초 확인이면 전체 알림
+
+        // 현재값과 이전값을 비교. HP/MP는 최대치 변경도 감지
+        bool changedHp = all || hp != previousCurrentHp || maxHp != previousMaxHp;
+        bool changedMp = all || mp != previousCurrentMp || maxMp != previousMaxMp;
+        bool changedLevel = all || level != previousLevel;
+        bool changedMoney = all || money != previousMoney;
+        bool changedCombatPower = all || combatPower != previousCombatPower;
+        bool changedJobName = all || jobName != previousJobName;
+
+        // 다음 프레임에서 비교할 수 있도록 이번 값을 저장
+        hasUiSnapshot = true;
+        previousCurrentHp = hp;
+        previousMaxHp = maxHp;
+        previousCurrentMp = mp;
+        previousMaxMp = maxMp;
+        previousLevel = level;
+        previousMoney = money;
+        previousCombatPower = combatPower;
+        previousJobName = jobName;
+
+        // 알림이 필요한 항목만 발행. ?.Invoke는 구독자가 있을 때만 호출
+        if (changedHp)
+            HpChanged?.Invoke(hp, maxHp);
+
+        if (changedMp)
+            MpChanged?.Invoke(mp, maxMp);
+
+        if (changedLevel)
+            LevelChanged?.Invoke(level);
+
+        if (changedMoney)
+            MoneyChanged?.Invoke(money);
+
+        if (changedCombatPower)
+            CombatPowerChanged?.Invoke(combatPower);
+
+        if (changedJobName)
+            JobNameChanged?.Invoke(jobName);
+    }
+
+    [SerializeField] private Sprite characterPortrait; // 초상화용 이미지
+
+    public Sprite GetCharacterPortrait()
+    {
+        return characterPortrait; // 미지정 상태에서는 null 반환
     }
 }
