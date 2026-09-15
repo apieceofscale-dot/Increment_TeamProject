@@ -1,39 +1,38 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class StageView : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI mapName;
-    [SerializeField] TextMeshProUGUI nowStage;
+    [SerializeField] TextMeshProUGUI nowMapName;
+    [SerializeField] TextMeshProUGUI ChallengeStageNum;
     [SerializeField] TextMeshProUGUI stageProcedureText;
     [SerializeField] Image stageProcedureBar;
     [SerializeField] Button challengeButton;
 
-    public void mapNameChanged(string mapName)
+    private void Awake()
     {
-        this.mapName.text = mapName;
-    }
-    public void nowStageChanged(int nowStageNum)
-    {
-        this.nowStage.text = nowStageNum.ToString();
+        challengeButton.onClick.AddListener(() =>OnChallengeBtnClicked?.Invoke());
     }
 
-    public void NowStageChanged(string stageName)
+    public event Action OnChallengeBtnClicked;
+
+    public void SetName(string nowMapName)
     {
-        this.stageProcedureText.text = stageName;
+        this.nowMapName.text = nowMapName;
     }
-
-    public void StageProcedureTextChanged(int stageNum, int totalStageNum)
+    public void SetChallengeStageNum(int nowStageNum /*, string nextStageName*/)
     {
-        this.stageProcedureText.text = $"Stage {stageNum.ToString()}/{totalStageNum.ToString()}";
-    }
-
-    public void StageProcedureBarChanged(int nowStageNum, int totalStageNum)
+        this.ChallengeStageNum.text = (nowStageNum + 1).ToString();        
+    }   
+    public void SetStageProcedureText(int nowStageNum, int totalStageNum)
     {
-        stageProcedureBar.fillAmount = nowStageNum / totalStageNum;
+        this.stageProcedureText.text = $"Stage {nowStageNum}/{totalStageNum}";
     }
-
-
+    public void SetStageProcedureBar(int nowStageNum, int totalStageNum)
+    {
+        stageProcedureBar.fillAmount = (float)nowStageNum / totalStageNum;
+    }
 
 }

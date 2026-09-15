@@ -4,22 +4,20 @@ using UnityEngine.UI;
 
 public class PortraitView : MonoBehaviour
 {
-
     [SerializeField] Image portrait;
     [SerializeField] TextMeshProUGUI attackRating;
     [SerializeField] TextMeshProUGUI gold;
     
-    public void PortraitChanged(Image portrait)
+    public void SetPortrait(Sprite portrait)
     {
-        this.portrait = portrait;
+        this.portrait.sprite = portrait;
     }
-    public void AttackRatingChanged(int attackRating)
+    public void SetAttackRating(float attackRating)
     {
-        this.attackRating.text = attackRating.ToString();
+        this.attackRating.text = attackRating.ToString("0");
     }
-    public void GoldChanged(int gold)
+    public void SetGold(int gold)
     {
         this.gold.text = gold.ToString();  
     }
- 
-}
+ }

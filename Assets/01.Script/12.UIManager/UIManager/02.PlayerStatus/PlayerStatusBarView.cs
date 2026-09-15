@@ -7,25 +7,27 @@ public class PlayerStatusBarView : MonoBehaviour
     
     [SerializeField] Image hpBar;
     [SerializeField] Image mpBar;
+    [SerializeField] Image expBar;
     [SerializeField] TextMeshProUGUI level;
     [SerializeField] TextMeshProUGUI job;
-    
-
-
   
-    public void HpChanged(float nowHp,float maxHp)
+    public void SetHpBar(float nowHp,float maxHp)
     {
         hpBar.fillAmount = nowHp / maxHp;
     }
-    public void MpChanged(float nowMp, float maxMp)
+    public void SetMpBar(float nowMp, float maxMp)
     {
         mpBar.fillAmount = nowMp / maxMp;
     }    
-    public void LevelChagned(int level)
+    public void SetExpBar(float nowExp, float maxExp)
+    {
+        expBar.fillAmount = nowExp / maxExp;
+    }
+    public void SetLevel(int level)
     {
         this.level.text = level.ToString();
     }
-    public void JobChanged(string jobName)
+    public void SetJobName(string jobName)
     {
         this.job.text = jobName;
     }
