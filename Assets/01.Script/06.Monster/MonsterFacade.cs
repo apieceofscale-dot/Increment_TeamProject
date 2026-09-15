@@ -5,23 +5,14 @@ public class MonsterFacade : MonoBehaviour
 {
     public static event Action<MonsterDiedInfo> MonsterDied;
 
-    [SerializeField] MonsterController prefab;
     [SerializeField] ItemDropFacade itemDropFacade;
 
-    //public int BootOrder => (int)BootLayer.Monster;
-
-    public void IBootStrapperInject(BootstrapContext context)
+    void Awake()
     {
         if (itemDropFacade == null)
         {
-            //context.TryGet(out itemDropFacade);
+            itemDropFacade = FindFirstObjectByType<ItemDropFacade>();
         }
-    }
-
-    public void IBootStrapperInitialize()
-    {
-        MonsterDied -= HandleMonsterDied;
-        MonsterDied += HandleMonsterDied;
     }
 
     void OnEnable()
@@ -42,16 +33,30 @@ public class MonsterFacade : MonoBehaviour
 
     public MonsterController Spawn(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 1)
     {
-        if (prefab == null)
+        if (MonsterFactory.Instance == null)
         {
-            Debug.LogWarning("[MonsterFacade] prefab is missing.");
+            Debug.LogWarning("[MonsterFacade] MonsterFactory is missing.");
             return null;
         }
 
-        var monster = Instantiate(prefab, position, rotation);
-        monster.BindSpawn(monsterId, stageIndex);
-        monster.OnSpawn();
-        return monster;
+        return MonsterFactory.Instance.Create(monsterId, position, rotation, stageIndex);
+    }
+
+    public MonsterController Spawn(MonsterData data, Vector3 position, Quaternion rotation, int stageIndex = 1)
+    {
+        if (MonsterFactory.Instance == null)
+        {
+            Debug.LogWarning("[MonsterFacade] MonsterFactory is missing.");
+            return null;
+        }
+
+        if (data == null)
+        {
+            Debug.LogWarning("[MonsterFacade] monster data is missing.");
+            return null;
+        }
+
+        return MonsterFactory.Instance.Create(data.id, position, rotation, stageIndex);
     }
 
     public void Despawn(MonsterController monster)

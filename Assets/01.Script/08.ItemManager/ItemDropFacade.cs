@@ -1,10 +1,15 @@
 using UnityEngine;
 
-public class ItemDropFacade : MonoBehaviour, IBootStrapper
+public class ItemDropFacade : MonoBehaviour
 {
     private ItemDropManager dropManager;
 
-    public int BootOrder => (int)BootLayer.ItemManager;
+    /// <summary>ItemDropManager가 부트 초기화 끝에 호출하고  외부에서 부르지 말 것.
+    public void Bind(ItemDropManager manager)
+    {
+        dropManager = manager;
+    }
+
 
     private ItemFacade itemFacade;
 
@@ -16,28 +21,6 @@ public class ItemDropFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    // 아이템파사드주입
-    public void IBootStrapperInject(BootstrapContext context)
-    {
-        itemFacade = context.Get<ItemFacade>();
-    }
-
-    public void IBootStrapperInitialize()
-    {
-        if (dropManager == null)
-        {
-            throw new System.InvalidOperationException(
-                "[ItemDropFacade] ItemDropManager가 같은 오브젝트에 없습니다.");
-        }
-
-        if (itemFacade == null)
-        {
-            throw new System.InvalidOperationException(
-                "[ItemDropFacade] ItemFacade를 주입받지 못했습니다. 씬에 ItemFacade가 있고 IBootStrapper를 구현했는지 확인하세요.");
-        }
-
-        dropManager.Initialize(new TempDropTableSource(), itemFacade);
-    }
 
 
     /// <summary>

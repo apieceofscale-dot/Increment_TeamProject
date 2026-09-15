@@ -21,18 +21,24 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     Action _returnToPool;
     SpriteRenderer _spriteRenderer;
+    Animator _animator;
+    Navi2DAgent _naviAgent;
     Color _baseSpriteColor = Color.white;
     bool _spawned;
     bool _deathNotified;
+    MonsterData _runtimeData;
 
     public MonsterStatus Status => _status;
     public MonsterAI AI => _ai;
     public bool IsDead => _status.IsDead;
+    public int DropTableId => dropItemId;
 
     void Awake()
     {
         _ai.Bind(this);
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _animator = GetComponentInChildren<Animator>();
+        _naviAgent = GetComponent<Navi2DAgent>();
         if (_spriteRenderer != null)
         {
             _baseSpriteColor = _spriteRenderer.color;
@@ -45,6 +51,25 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         stageIndex = Mathf.Max(1, stage);
     }
 
+    public void Initialize(MonsterData data, int stage = 1)
+    {
+        if (data == null)
+        {
+            return;
+        }
+
+        _runtimeData = data;
+        monsterId = data.id;
+        stageIndex = Mathf.Max(1, stage);
+        maxHp = data.maxHp;
+        attackDamage = data.attackDamage;
+        moveSpeed = data.moveSpeed;
+        traceRange = data.traceRange;
+        attackRange = data.attackRange;
+        attackCooldown = data.attackCooldown;
+        dropItemId = data.dropTableId > 0 ? data.dropTableId : data.id;
+    }
+
     public void InitializePoolObj(Action returnAction)
     {
         _returnToPool = returnAction;
@@ -52,6 +77,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnSpawn()
     {
+        ApplyVisuals(_runtimeData);
+
         var palette = _stageProvider.GetPalette(stageIndex);
         _deathNotified = false;
         _spawned = true;
@@ -78,6 +105,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     {
         _spawned = false;
         _deathNotified = false;
+        _runtimeData = null;
         _ai.Reset();
         _status.Clear();
         if (_spriteRenderer != null)
@@ -125,7 +153,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         _ai.ForceDead();
         MonsterFacade.NotifyDied(new MonsterDiedInfo
         {
-            MonsterId = monsterId,
+            MonsterId = dropItemId,
             Position = transform.position,
             Source = this
         });
@@ -149,9 +177,15 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
     }
 
-    public void MoveTowards(Vector3 worldPosition, float deltaTime)
+    public void TraceTowards(Vector3 worldPosition)
     {
-        transform.position = Vector3.MoveTowards(transform.position, worldPosition, _status.MoveSpeed * deltaTime);
+        if (_naviAgent != null)
+        {
+            _naviAgent.Trace(worldPosition,moveSpeed);
+            return;
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, worldPosition, _status.MoveSpeed * Time.deltaTime);
     }
 
     public void PerformAttack(Transform target)
@@ -168,21 +202,26 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
-        if (target.TryGetComponent<CharacterFacade>(out var characterFacade))
+        if (!target.TryGetComponent<CharacterFacade>(out var characterFacade))
         {
-            characterFacade.TakeDamage(damage);
-            return;
+            //target.TryGetComponentInParent<CharacterFacade>(out characterFacade);
         }
 
-        if (target.TryGetComponent<CharacterControllers>(out var character))
+        if (characterFacade != null)
         {
-            character.Status.TakeDamage(damage);
+            characterFacade.TakeDamage(damage);
         }
     }
 
     public void ReturnToPool()
     {
         OnDespawn();
+        if (MonsterFactory.Instance != null)
+        {
+            MonsterFactory.Instance.Release(this);
+            return;
+        }
+
         if (_returnToPool != null)
         {
             _returnToPool.Invoke();
@@ -190,5 +229,18 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
 
         Destroy(gameObject);
+    }
+
+    void ApplyVisuals(MonsterData data)
+    {
+        if (data == null || _animator == null)
+        {
+            return;
+        }
+
+        if (data.animatorController != null)
+        {
+            _animator.runtimeAnimatorController = data.animatorController;
+        }
     }
 }

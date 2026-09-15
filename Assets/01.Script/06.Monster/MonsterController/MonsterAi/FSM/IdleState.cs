@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public sealed class IdleState : IMonsterFsmState
 {
     public MonsterState State => MonsterState.Idle;
@@ -8,16 +6,10 @@ public sealed class IdleState : IMonsterFsmState
 
     public void Tick(MonsterController monster, float deltaTime)
     {
-        var target = monster.FindTarget();
-        if (target == null)
+        MonsterState next = monster.AI.EvaluateFromIdle();
+        if (next != MonsterState.Idle)
         {
-            return;
-        }
-
-        var distance = Vector3.Distance(monster.transform.position, target.position);
-        if (distance <= monster.Status.TraceRange)
-        {
-            monster.AI.ChangeState(MonsterState.Trace);
+            monster.AI.ChangeState(next);
         }
     }
 

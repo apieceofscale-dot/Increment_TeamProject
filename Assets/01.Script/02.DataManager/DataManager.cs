@@ -49,6 +49,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
             instance = this;
         else
             Destroy(gameObject);
+        //dataManager = context.Get<DataManager>(); 예시용으로 여기 적어둠. 이런식으로 찾으면 됨.
     }
 
     public void IBootStrapperInitialize()
