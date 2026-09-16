@@ -63,6 +63,8 @@ public readonly struct DropTableEntry
 public struct MonsterDiedInfo
 {
     public int MonsterId;
+    public int DropTableId;
+    public long ExpReward;
     public Vector3 Position;
     public MonsterController Source;
 }
@@ -252,5 +254,38 @@ public readonly struct StageBuildResult
         Map = map;
         MapChanged = mapChanged;
     }
+}
+
+public readonly struct StageChangedInfo
+{
+    public readonly int StageId;
+    public readonly int Chapter;
+    public readonly string MapName; // View.SetName
+    public readonly int NowStageNum; // 챕터 안에서의 현재 번호
+    public readonly int TotalStageNum; // 이 챕터의 전체 스테이지 수
+    public readonly StageType Type;
+    public readonly int ChallengeStageNum; // 도전(보스) 스테이지 번호. 없으면 0
+    public readonly bool CanChallenge;
+
+    public bool IsValid => StageId > 0; //스테이지 진입 전(기본값)인지
+
+
+    public StageChangedInfo(
+        int stageId, int chapter, string mapName,
+        int nowStageNum, int totalStageNum, StageType type,
+        int challengeStageNum, bool canChallenge)
+    {
+        StageId = stageId;
+        Chapter = chapter;
+        MapName = mapName;
+        NowStageNum = nowStageNum;
+        TotalStageNum = totalStageNum;
+        Type = type;
+        ChallengeStageNum = challengeStageNum;
+        CanChallenge = canChallenge;
+    }
+
+
+
 }
 

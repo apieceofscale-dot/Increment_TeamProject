@@ -40,11 +40,16 @@ public class StageController : MonoBehaviour, IBootStrapper
     private bool isTransitioning;
 
 
+    [SerializeField] private StageChangedEventChannelSO stageChangedChannel;
 
     public StageProgressInfo Progress => status.ToInfo();
     public EliteProgressInfo EliteProgress => status.ToEliteInfo();
     public CharacterFacade Character => character;
     public bool IsTransitioning => isTransitioning;
+
+    public StageFacade Facade => facade;
+
+    public StageChangedInfo StageInfo => BuildStageChangedInfo();
 
 
 
@@ -134,6 +139,34 @@ public class StageController : MonoBehaviour, IBootStrapper
         return true;
     }
 
+    public bool TryMoveToChallengeStage()
+    {
+        if (isTransitioning) return false;
+        if (status.Definition.StageId == 0) return false;   // 아직 스테이지에 들어간 적 없음
+
+        int chapter = status.Definition.Chapter;
+
+        if (!stageTable.TryGetChallengeStageId(chapter, out int challengeStageId))
+        {
+
+            //스테이지쪽에 도전맵있어어ㅑ함
+            Debug.LogWarning($"[StageController] 챕터 {chapter}에 도전맵(Boss 스테이지)이 없습니다.");
+            return false;
+        }
+
+
+
+        // 이미 도전맵이면 재진입시키지 않는다(진행도 초기화 방지)
+        if (challengeStageId == status.Definition.StageId) return false;
+
+        // 클리어 조건을 걸고 싶으면 아래 줄을 살린다 (기획 확정 전까지는 항상 도전 허용)
+        // if (!status.IsClearConditionMet) return false;
+
+        StartStage(challengeStageId);
+        return true;
+    }
+
+
 
     // 내부용 로직
 
@@ -174,7 +207,20 @@ public class StageController : MonoBehaviour, IBootStrapper
             }
 
             yield return SceneManager.LoadSceneAsync(definition.SceneName, LoadSceneMode.Additive);
+
+            Scene loaded = SceneManager.GetSceneByName(definition.SceneName);
+            if (!loaded.IsValid() || !loaded.isLoaded)
+            {
+                Debug.LogError(
+                    $"[StageController] 씬 로드 실패. sceneName={definition.SceneName} " +
+                    $"(Build Settings 등록 여부와 스펠링 확인하세요) stageId={definition.StageId}");
+                status.SetState(StageState.Failed);
+                isTransitioning = false;
+                yield break;
+            }
+
             loadedSceneName = definition.SceneName;
+
         }
 
         //  3.맵 요소 확보
@@ -194,6 +240,9 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         isTransitioning = false;
 
+
+        // 6. 진입 끝난 후 알리기
+        RaiseStageChanged();
     }
 
     // 로드된 씬 안에서만 StageMapProvider를 찾아서 로드 직후 1회만 돈다
@@ -239,4 +288,82 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
     }
+
+    // 스테이지는 드랍 테이블 id만 알고, 테이블 내용과 확률 판정은 아이템 쪽이 
+    private void HandleMonsterDied(MonsterDiedInfo info)
+    {
+        if (status.State != StageState.Battle) return;
+
+        bool wasElite = activeElite != null && ReferenceEquals(activeElite, info.Source);
+
+        // 드랍 —DropTableId가 아직 안 채워졌으면 MonsterId로 
+        // 몬스터 담당이 DropTableId를 채우면 폴백 제거
+        int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
+        dropFacade.RequestDrop(dropTableId, info.Position);
+
+        // 경험치
+        if (character != null && info.ExpReward > 0)
+        {
+            character.GainExp(info.ExpReward);
+        }
+
+        if (wasElite)
+        {
+            activeElite = null;
+            status.EndElite();
+            return;   // 엘리트는 킬 카운트에 넣지 않는다
+        }
+
+        status.AddKill();
+
+        if (!status.IsClearConditionMet && status.KillCount >= status.Definition.ClearKillCount)
+        {
+            status.CheckClearConditionMet();
+
+            // 보스는 Cleared로 고정해 무한 리스폰을 막는다.
+            // 파밍 스테이지는 Battle을 유지해 계속 파밍할 수 있게 둔다.
+            if (status.Definition.Type == StageType.Boss)
+            {
+                status.SetState(StageState.Cleared);
+                spawner.DespawnAll();
+            }
+        }
+    }
+
+    private StageChangedInfo BuildStageChangedInfo()
+    {
+        StageDefinition definition = status.Definition;
+        if (definition.StageId == 0) return default;
+
+        int totalStageNum = stageTable.GetChapterStageCount(definition.Chapter);
+
+        bool hasChallenge = stageTable.TryGetChallengeStageId(definition.Chapter, out int challengeStageId);
+        int challengeStageNum = 0;
+        if (hasChallenge && stageTable.TryGet(challengeStageId, out StageDefinition challenge))
+        {
+            challengeStageNum = challenge.IndexInChapter;
+        }
+
+        return new StageChangedInfo(
+            definition.StageId,
+            definition.Chapter,
+            definition.DisplayName,
+            definition.IndexInChapter,
+            totalStageNum,
+            definition.Type,
+            challengeStageNum,
+            hasChallenge && challengeStageId != definition.StageId);
+    }
+
+    private void RaiseStageChanged()
+    {
+        if (stageChangedChannel == null)
+        {
+            Debug.LogWarning("[StageController] StageChangedEventChannel이 인스펙터에 물려있지 않습니다.");
+            return;
+        }
+
+        stageChangedChannel.Raise(BuildStageChangedInfo());
+    }
+
 }
