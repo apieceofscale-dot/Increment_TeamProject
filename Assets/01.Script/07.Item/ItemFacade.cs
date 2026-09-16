@@ -26,18 +26,24 @@ public class ItemFacade : MonoBehaviour
     // -------------------------------------------------------------------------
     #region UI · Character 연동
 
-    /// <summary>장착 시 캐릭터에 더할 스탯 조회. CharacterEquipment에서 호출.</summary>
+    /// <summary>장착 시 캐릭터에 더할 스탯·부위 조회. CharacterEquipment에서 호출.</summary>
     public bool TryGetEquipStat(int itemId, out ItemEquipStat stat)
     {
         if (DataManager.instance != null
             && DataManager.instance.TryGetItemData(itemId, out ItemData data))
         {
             stat = ItemEquipStat.FromData(data);
-            return true;
+            return stat.Type == ItemType.Equipment && ItemArmorPartTable.IsEquipment(itemId);
         }
 
         stat = default;
         return false;
+    }
+
+    /// <summary>장비 id가 어느 슬롯 부위인지 조회.</summary>
+    public bool TryGetArmorPart(int itemId, out CharacterArmorPart part)
+    {
+        return ItemArmorPartTable.TryGetPart(itemId, out part);
     }
 
     /// <summary>강화/스타포스 옵션 포함 스폰.</summary>
