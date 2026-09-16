@@ -35,21 +35,34 @@ public sealed class StageFacade : MonoBehaviour
     public bool GoNextStage()
     {
         if (!IsReady()) return false;
-        //return stageController.TryGoNextStage();
+        return stageController.TryGoNextStage();
         //수정예정
-        return true;
     }
+
+    // 도전맵(보스맵) 이동, 이동이 시작됐을 때만 true
+    public bool MoveToChallengeStage()
+    {
+        if (!IsReady()) return false;
+        return stageController.TryMoveToChallengeStage();
+    }
+
 
     public bool SummonElite()
     {
         if (!IsReady()) return false;
-        // return stageController.TrySummonElite();
-        //수정예정
-        return true;
+        return stageController.TrySummonElite();
+
     }
 
 
     //UI용
+
+
+    //현재스테이지스냅샹, presenter초기화용 
+    public StageChangedInfo GetStageInfo()
+    {
+        return IsReady() ? stageController.StageInfo : default;
+    }
 
 
     // 진행 상황 ui표시용 
