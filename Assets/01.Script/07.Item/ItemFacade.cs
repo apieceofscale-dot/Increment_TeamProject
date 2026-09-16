@@ -30,10 +30,11 @@ public class ItemFacade : MonoBehaviour
     public bool TryGetEquipStat(int itemId, out ItemEquipStat stat)
     {
         if (DataManager.instance != null
-            && DataManager.instance.TryGetItemData(itemId, out ItemData data))
+            && DataManager.instance.TryGetItemData(itemId, out ItemData data)
+            && data.itemType == ItemType.Equipment)
         {
             stat = ItemEquipStat.FromData(data);
-            return stat.Type == ItemType.Equipment && ItemArmorPartTable.IsEquipment(itemId);
+            return true;
         }
 
         stat = default;
