@@ -32,3 +32,10 @@ public interface IDropTableSource
 {
     bool TryGetEntries(int dropTableId, out IReadOnlyList<DropTableEntry> entries);
 }
+
+
+
+public interface IUIViewInitialize
+{
+    public void InitializeView();
+}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//팩토리가 지금 프리팹 연결 책임을 들고 있는데, 이걸 AssetManager로 분리하여 들고 있어야 함. 
 public partial class DataManager : MonoBehaviour, IBootStrapper
 {
     public static DataManager instance;

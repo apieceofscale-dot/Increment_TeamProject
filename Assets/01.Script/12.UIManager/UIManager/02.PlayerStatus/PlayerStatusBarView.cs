@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerStatusBarView : MonoBehaviour
+public class PlayerStatusBarView : MonoBehaviour, IUIViewInitialize
 {
     
     [SerializeField] Image hpBar;
@@ -10,7 +10,11 @@ public class PlayerStatusBarView : MonoBehaviour
     [SerializeField] Image expBar;
     [SerializeField] TextMeshProUGUI level;
     [SerializeField] TextMeshProUGUI job;
-  
+
+    public void InitializeView()
+    {
+
+    }
     public void SetHpBar(float nowHp,float maxHp)
     {
         hpBar.fillAmount = nowHp / maxHp;

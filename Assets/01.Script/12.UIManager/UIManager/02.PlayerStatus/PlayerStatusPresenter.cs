@@ -11,15 +11,26 @@ public class PlayerStatusPresenter
     //참조 : 파사드에서 나온 직업 변경 이벤트
     //참조 : 파사드에서 나온 레벨업 이벤트.
 
-    private PlayerStatusPresenter(PlayerStatusBarView view, CharacterFacade model)//ui매니저에서 호출.
+    public PlayerStatusPresenter(PlayerStatusBarView view, CharacterFacade model)//ui매니저에서 호출.
     {
         this.view = view;
         this.model = model;
 
-        //체력변경 이벤트 +=HandleHpChanged
-        //~~~
+        /*
+        체력변경 이벤트 +=HandleHpChanged
+        마나 변경 이벤트 +=HandleMpChange
+        경험치 변경 이벤트 +=HandleExpChanged
+        직업 변경 이벤트 +=HandleJobChanged
+        레벨업 이벤트 +=HandleLevelChanged
+        */
 
-        //Initialize();
+        /*
+        view.SetPortrait(model.Portrait);
+        view.HpChanged(model.CurrentHp, model.MaxHp);
+        view.MpChanged(model.CurrentMp, model.MaxMp);
+        view.LevelChanged(model.Level);
+        view.JobChanged(model.JobName);
+        */
 
     }
 
@@ -46,12 +57,7 @@ public class PlayerStatusPresenter
         view.SetJobName(job);
     }
 
-    /*
-    private void Initialize()
-    {
-        
-    }
-    */
+    
 }
     
 

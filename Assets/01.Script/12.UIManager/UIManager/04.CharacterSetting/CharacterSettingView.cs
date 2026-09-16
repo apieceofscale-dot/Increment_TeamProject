@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterSettingView : MonoBehaviour
+public class CharacterSettingView : MonoBehaviour, IUIViewInitialize
 {
     [SerializeField] Button characterBtn; 
     [SerializeField] TextMeshProUGUI characterText;
@@ -12,25 +12,63 @@ public class CharacterSettingView : MonoBehaviour
     [SerializeField] TextMeshProUGUI equipmentText;
     [SerializeField] GameObject equipmentPopUp;
 
-
     [SerializeField] Button skillBtn;
     [SerializeField] TextMeshProUGUI skillText;
     [SerializeField] GameObject skillPopUp;
 
+    [SerializeField] Button enchantBtn;
+    [SerializeField] TextMeshProUGUI enchantText;
+    [SerializeField] GameObject enchantPopUp;
 
-    [SerializeField] Button weaponBtn;
-    [SerializeField] TextMeshProUGUI weaponText;
-    [SerializeField] GameObject weaponPopUp;
+    [SerializeField] GameObject dim;
+    [SerializeField] Button dimBtn;
+
+
+    public void InitializeView()
+    {
+        dimBtn.onClick.AddListener(SetAllPopUpFalse);
+        characterBtn.onClick.AddListener(OpenCharacterPopup);
+        equipmentBtn.onClick.AddListener(OpenEquipmentPopup);
+        skillBtn.onClick.AddListener(OpenSkillPopup);
+        enchantBtn.onClick.AddListener(OpenEnchantPopup);
+
+        SetAllPopUpFalse();
+
+    }
 
 
 
-    public void InitializePopUp()//PlayerHud Start에서 선언.
+    public void SetAllPopUpFalse()//PlayerHud Start에서 선언.
     {
         characterPopUp.SetActive(false);
         equipmentPopUp.SetActive(false);
         skillPopUp.SetActive(false);
-        weaponPopUp.SetActive(false);
+        enchantPopUp.SetActive(false);
+        dim.SetActive(false);
+    } 
+
+    private void OpenCharacterPopup()
+    {
+        characterPopUp.SetActive(true);
+        dim.SetActive(true);
     }
+    private void OpenEquipmentPopup()
+    {
+        equipmentPopUp.SetActive(true);
+        dim.SetActive(true);
+    }
+    private void OpenSkillPopup()
+    {
+        skillPopUp.SetActive(true);
+        dim.SetActive(true);
+    }
+
+    private void OpenEnchantPopup()
+    {
+        enchantPopUp.SetActive(true) ;
+        dim.SetActive(true) ;
+    }
+
 
     
 

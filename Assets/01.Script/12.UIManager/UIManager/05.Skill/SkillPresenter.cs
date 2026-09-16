@@ -17,7 +17,10 @@ public class SkillPresenter
 
         //파사드의 슬롯 이벤트 += HandleSkillChanged;
         //파사드의 쿨타임 이벤트 배열 +=HandleCoolTime
+
+        // SyncSkillSlots(); 이건 세이브를 만들었을 때 사용할 것. 없으면 영원히 주석처리.
     }
+
 
     private void HandleSkillClicked(int slotIndex)
     {
@@ -43,6 +46,18 @@ public class SkillPresenter
     private void HandleCoolTime(int slotIndex,float timeLeft, float totalTime)
     {
         view.SetCooltime(slotIndex, timeLeft, totalTime);
+    }
+
+
+
+    private void SyncSkillSlots()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            
+            // SkillData data = model.GetEquippedSkill(i);
+            // view.SetSkill(i, data.Sprite, data.SkillName);
+        }
     }
 
 }

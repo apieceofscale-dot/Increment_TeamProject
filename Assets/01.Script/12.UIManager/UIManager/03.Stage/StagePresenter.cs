@@ -16,6 +16,7 @@ public class StagePresenter
         view.OnChallengeBtnClicked += HandleChallengeStageMove;
 
         //스테이지 이동 이벤트 +=HandleStageChange;
+
         //HandleStageChange(model.NowMapName, model.NowStageNum, model.TotalStageNum); //이건 초기화용함수
         
     }

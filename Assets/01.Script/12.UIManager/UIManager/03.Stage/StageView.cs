@@ -3,17 +3,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class StageView : MonoBehaviour
+public class StageView : MonoBehaviour, IUIViewInitialize
 {
     [SerializeField] TextMeshProUGUI nowMapName;
     [SerializeField] TextMeshProUGUI ChallengeStageNum;
     [SerializeField] TextMeshProUGUI stageProcedureText;
     [SerializeField] Image stageProcedureBar;
     [SerializeField] Button challengeButton;
-
-    private void Awake()
+  
+    public void InitializeView()
     {
-        challengeButton.onClick.AddListener(() =>OnChallengeBtnClicked?.Invoke());
+        challengeButton.onClick.AddListener(() => OnChallengeBtnClicked?.Invoke());
     }
 
     public event Action OnChallengeBtnClicked;

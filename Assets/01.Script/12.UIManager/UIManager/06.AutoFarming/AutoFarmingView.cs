@@ -3,18 +3,18 @@ using System;
 using UnityEngine.UI;
 
 
-public class AutoFarmingView : MonoBehaviour
+public class AutoFarmingView : MonoBehaviour, IUIViewInitialize
 {
     [SerializeField] private Toggle autoFarmingToggle;
     [SerializeField] private GameObject effect;
 
     public event Action<bool> OnAutoFarmingChanged;
 
-    private void Awake()
+
+    public void InitializeView()
     {
         autoFarmingToggle.onValueChanged.AddListener(HandleToggleChanged);
     }
-
     private void HandleToggleChanged(bool isOn)
     {
         SetEffect(isOn);
