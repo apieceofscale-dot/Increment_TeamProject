@@ -8,6 +8,8 @@ public class ItemData : BaseData
     public int value = 1;
     public int upgradeStep = 1;
 
+    public Sprite icon;
+
     public RuntimeAnimatorController animatorController;
     public AnimationClip idleClip;
     public AnimationClip runClip;
@@ -33,6 +35,8 @@ public class ItemData : BaseData
         clone.itemType = itemType;
         clone.value = value;
         clone.upgradeStep = upgradeStep;
+
+        clone.icon = icon;
 
         clone.animatorController = animatorController;
         clone.idleClip = idleClip;
