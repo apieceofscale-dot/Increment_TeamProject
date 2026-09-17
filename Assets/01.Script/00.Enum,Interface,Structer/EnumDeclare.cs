@@ -54,18 +54,27 @@ public enum CharacterEquipmentSlot // 장비가 착용될 슬롯
 {
     Hat = 0,
     Top = 1,
-    Gloves = 2,
-    Shoes = 3,
-    Necklace = 4,
-    Ring = 5
+    Bottom = 2,
+    Gloves = 3,
+    Cape = 4,
+    Shoulder = 5,
+    Belt = 6,
+    Shoes = 7,
+    Ring1 = 8,
+    Ring2 = 9,
+    Necklace = 10
 }
 
 public enum CharacterArmorPart // 장비 부위 종류
 {
     Hat = 0,
     Top = 1,
-    Gloves = 2,
-    Shoes = 3,
-    Necklace = 4,
-    Ring = 5
+    Bottom = 2,
+    Gloves = 3,
+    Cape = 4,
+    Shoulder = 5,
+    Belt = 6,
+    Shoes = 7,
+    Ring = 8,
+    Necklace = 9
 }
