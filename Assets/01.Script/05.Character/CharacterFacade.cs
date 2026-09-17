@@ -149,7 +149,7 @@ public class CharacterFacade : MonoBehaviour
         return Controller.GetEquipmentSlots();
     }
 
-    public event Action InventroyChanged // 인벤토리 내 미착용 장비 목록이 달라지는 것을 알림
+    public event Action InventoryChanged // 인벤토리 내 미착용 장비 목록이 달라지는 것을 알림
     {
         add
         {
@@ -346,6 +346,21 @@ public class CharacterFacade : MonoBehaviour
     public void ClearEquipmentStats()
     {
         Controller.ClearEquipmentStats();
+    }
+    #endregion
+
+    #region 자동사냥
+    public void SetAutoFarming(bool enabled) // 자동사냥 ON/OFF
+    {
+        Controller.SetAutoFarming(enabled); 
+    }
+
+    public bool IsAutoFarming => Controller.IsAutoFarming;
+    public string AutoFarmingState => Controller.AutoFarmingState;
+
+    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter)
+    {
+        Controller.SetAutoFarmingTargetFilter(filter);
     }
     #endregion
 

@@ -196,6 +196,8 @@ GameObject:
   - component: {fileID: 7833643248369954958}
   - component: {fileID: 360148343145729899}
   - component: {fileID: -6241320407809059203}
+  - component: {fileID: 928933550070573220}
+  - component: {fileID: 7082280804679611285}
   m_Layer: 0
   m_Name: TestPlayer
   m_TagString: Player
@@ -232,6 +234,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab19079c7fe4c747b41e22bca8dbaea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterControllers
+  skillSlots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   characterInventory: {fileID: 7833643248369954958}
   animator: {fileID: 0}
   jumpForce: 8
@@ -249,6 +258,7 @@ MonoBehaviour:
   skillSlash: {fileID: 357542788659323390}
   skillProjectile: {fileID: 261204065874194282}
   skillAttackBuff: {fileID: 5415692169738909216}
+  characterPortrait: {fileID: 0}
 --- !u!114 &4813162430074982621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,6 +354,7 @@ MonoBehaviour:
   initialLevel: 1
   initiallyUnlocked: 1
   affectedByAttackSpeed: 0
+  skillIcon: {fileID: 0}
   attackPoint: {fileID: 4684922624461042475}
   attackRadius: 2
   damageMultiplier: 2
@@ -368,6 +379,7 @@ MonoBehaviour:
   initialLevel: 1
   initiallyUnlocked: 1
   affectedByAttackSpeed: 0
+  skillIcon: {fileID: 0}
   attackIncreaseRate: 0.5
   duration: 5
 --- !u!114 &261204065874194282
@@ -388,6 +400,7 @@ MonoBehaviour:
   initialLevel: 1
   initiallyUnlocked: 1
   affectedByAttackSpeed: 0
+  skillIcon: {fileID: 0}
   projectilePrefab: {fileID: 1554741016544258009, guid: 1bc7871263600c2438c5f14f41488fe5, type: 3}
   firePoint: {fileID: 4684922624461042475}
   projectileSpeed: 8
@@ -437,6 +450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEquipment
   armorPartRules: []
+  equipmentStatEntries: []
 --- !u!114 &-6241320407809059203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,6 +467,33 @@ MonoBehaviour:
   testArmorId: 10001
   testBaseValue: 10
   targetSlot: 0
+--- !u!114 &928933550070573220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578696860319802453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5888c4a6318b62844a3e20dfef99da5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterAutoFarming
+  searchRadius: 15
+  searchInterval: 0.4
+  startAutomatically: 0
+--- !u!114 &7082280804679611285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578696860319802453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7355d51a1d530246afd11ed9b9d0d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Navi2DAgent
 --- !u!1 &8052424388909427709
 GameObject:
   m_ObjectHideFlags: 0

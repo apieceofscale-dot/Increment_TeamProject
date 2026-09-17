@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static StageChangedInfo;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 [RequireComponent(typeof(CharacterEquipment))]
@@ -250,6 +249,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Status.Initialize(playerData);
 
         ChangeJob(playerData.id);
+        RefreshEquipmentStats();
     }
 
     private CharacterJobAdvancedment GetJobController()
@@ -307,7 +307,16 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void FixedUpdate()
     {
-        Move();
+        if (IsAutoFarming)
+            AutoFarming.Tick();
+
+        if (!IsAutoFarming)
+        {
+            if (Status.CurrentHp > 0)
+                Move();
+            else
+                rigid.linearVelocity = new Vector2(0f, rigid.linearVelocity.y);
+        }
         UpdateAnimation();
     }
 
@@ -319,7 +328,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             return;
 
         bool isJump = !IsGrounded() || rigid.linearVelocity.y > 0.1f;
-        bool isRun = !isJump && Mathf.Abs(moveInput) > 0.01f;
+        bool isRun = !isJump && Mathf.Abs(rigid.linearVelocity.x) > 0.01f;
 
         currentAnimator.SetBool("isRun", isRun);
         currentAnimator.SetBool("isJump", isJump);
@@ -361,6 +370,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void SetMoveInput(float input)
     {
+        if (IsAutoFarming)
+            return;
+
         moveInput = Mathf.Clamp(input, -1f, 1f);
         UpdateDirection();
     }
@@ -386,6 +398,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void Jump()
     {
+        if (IsAutoFarming || Status.CurrentHp <= 0)
+            return;
+
         if (!IsGrounded())
             return;
 
@@ -407,6 +422,76 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Vector3 scale = visualRoot.localScale;
         scale.x = Mathf.Abs(scale.x) * (moveInput > 0f ? 1f : -1f);
         visualRoot.localScale = scale;
+    }
+
+    private CharacterAutoFarming autoFarming;
+    private CharacterAutoFarming AutoFarming
+    {
+        get
+        {
+            if (autoFarming == null)
+                autoFarming = GetComponent<CharacterAutoFarming>();
+
+            return autoFarming;
+        }
+    }
+    public bool IsAutoFarming => AutoFarming != null && AutoFarming.IsRunning;
+    public string AutoFarmingState => AutoFarming != null ? AutoFarming.CurrentState : "Idle";
+    public bool AutoFarmingConfigured => groundCheck != null && attackPoint != null && groundLayer.value != 0 && monsterLayer.value != 0;
+    public bool AutoFarmingGrounded => IsGrounded() && rigid != null && Mathf.Abs(rigid.linearVelocity.y) < 0.1f;
+    public LayerMask AutoFarmingGroundMask => groundLayer;
+    public LayerMask AutoFarmingMonsterMask => monsterLayer;
+
+    public void SetAutoFarming(bool enabled)
+    {
+        if (AutoFarming != null)
+            AutoFarming.SetAutoFarming(enabled);
+        else if (enabled)
+            Debug.LogWarning("자동사냥 컴포넌트 추가", this);
+    }
+
+    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter)
+    {
+        if (AutoFarming != null)
+            AutoFarming.TargetFilter = filter;
+    }
+
+    internal void StopAutoFarmingMovement()
+    {
+        moveInput = 0f;
+        if (rigid != null)
+            rigid.linearVelocity = new Vector2(0f, rigid.linearVelocity.y);
+    }
+
+    public void FaceAutoFarmingTarget(float worldx)
+    {
+        float delta = worldx - transform.position.x;
+
+        if (Mathf.Abs(delta) < 0.01f)
+            return;
+
+        FacingDirection = delta > 0f ? 1 : -1;
+
+        if (visualRoot == null)
+            return;
+
+        Vector3 scale = visualRoot.localScale;
+        scale.x = Mathf.Abs(scale.x) * FacingDirection;
+        visualRoot.localScale = scale;
+    }
+
+    public bool CanAutoFarmingAttack(Collider2D target)
+    {
+        if (target == null || !target.enabled || !target.gameObject.activeInHierarchy || attackPoint == null)
+            return false;
+
+        Vector2 origin = attackPoint.position;
+        Vector2 closest = target.ClosestPoint(origin);
+
+        if ((closest - origin).sqrMagnitude > attackRange * attackRange)
+            return false;
+
+        return Physics2D.Linecast(origin, target.bounds.center, groundLayer).collider == null;
     }
 
     public bool TryAttack()

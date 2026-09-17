@@ -168,7 +168,7 @@ public class CharacterEquipment : MonoBehaviour
                 slot = CharacterEquipmentSlot.Necklace;
                 break;
             case CharacterArmorPart.Ring:
-                slot = CharacterEquipmentSlot.Ring;
+                slot = CharacterEquipmentSlot.Ring1;
                 break;
             default:
                 return false;
@@ -291,7 +291,7 @@ public class CharacterEquipment : MonoBehaviour
             case CharacterArmorPart.Shoes:
                 return slot == CharacterEquipmentSlot.Shoes;
             case CharacterArmorPart.Ring:
-                return slot == CharacterEquipmentSlot.Ring;
+                return slot == CharacterEquipmentSlot.Ring1;
             case CharacterArmorPart.Necklace:
                 return slot == CharacterEquipmentSlot.Necklace;
             default:
