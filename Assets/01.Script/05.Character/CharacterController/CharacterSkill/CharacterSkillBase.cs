@@ -8,6 +8,8 @@ public abstract class CharacterSkillBase : MonoBehaviour
     [SerializeField, Min(1)] private int initialLevel = 1;
     [SerializeField] private bool initiallyUnlocked = true;
     [SerializeField] private bool affectedByAttackSpeed;
+    [SerializeField] private Sprite skillIcon;
+    public Sprite SkillIcon => skillIcon;
 
     protected CharacterControllers characterControllers;
     protected CharacterSkill skill;
@@ -18,6 +20,7 @@ public abstract class CharacterSkillBase : MonoBehaviour
     public bool BelongsTo(CharacterControllers owner)
     {
         EnsureInitialized();
+
         return characterControllers == owner;
     }
 
@@ -72,6 +75,7 @@ public abstract class CharacterSkillBase : MonoBehaviour
     {
         EnsureInitialized();
         float rate = affectedByAttackSpeed && characterControllers != null && characterControllers.Status != null ? Mathf.Clamp(characterControllers.Status.AttackSpeedRate, 0f, 1.5f) : 0f;
+        
         return Mathf.Max(0.01f, skill.Cooldown) / (1f + rate);
     }
 

@@ -1,11 +1,167 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using static StageChangedInfo;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 [RequireComponent(typeof(CharacterEquipment))]
 public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
 {
+    #region
+    public const int SkillSlotCount = 6;
+
+    [SerializeField] private CharacterSkillBase[] skillSlots = new CharacterSkillBase[SkillSlotCount];
+
+    public sealed class SkillCooldownChannel
+    {
+        public event Action<SkillCooldownInfo> Changed;
+        internal void Raise(SkillCooldownInfo data) { Changed?.Invoke(data); }
+    }
+
+    // 장착 교체 해제 때 전달
+    public event Action<SkillSlotInfo> SkillSlotChanged;
+    private SkillCooldownChannel[] skillCooldownChannels;
+    private IReadOnlyList<SkillCooldownChannel> skillCooldownEvents;
+    private readonly bool[] wasSkillCooling = new bool[SkillSlotCount];
+    private readonly CharacterSkillBase[] observedSkills = new CharacterSkillBase[SkillSlotCount];
+
+    // 스킬 컬렉션 길이는 6으로 고정함
+    public IReadOnlyList<SkillCooldownChannel> SkillCooldownEvents
+    {
+        get { EnsureSkillSlots(); return skillCooldownEvents; }
+    }
+
+    private void EnsureSkillSlots()
+    {
+        if (skillSlots == null)
+            skillSlots = new CharacterSkillBase[SkillSlotCount];
+        else if (skillSlots.Length != SkillSlotCount)
+            Array.Resize(ref skillSlots, SkillSlotCount);
+
+        if (skillCooldownChannels != null)
+            return;
+        
+        skillCooldownChannels = new SkillCooldownChannel[SkillSlotCount];
+
+        for (int i = 0; i < SkillSlotCount; i++)
+            skillCooldownChannels[i] = new SkillCooldownChannel();
+
+        skillCooldownEvents = Array.AsReadOnly(skillCooldownChannels);
+    }
+
+    // 잘못 연결한 다른 캐릭터의 스킬 및 같은 컴포넌트 중복 제거
+    private void ValidateInitialSkillSlots()
+    {
+        EnsureSkillSlots();
+        var seen = new HashSet<CharacterSkillBase>();
+
+        for (int i = 0; i < SkillSlotCount; i++)
+        {
+            CharacterSkillBase entry = skillSlots[i];
+            if (entry != null && (!entry.BelongsTo(this) || !seen.Add(entry)))
+            {
+                Debug.LogWarning($"스킬 슬롯 {i}: 소유 캐릭터 또는 중복 연결을 확인하세요.", this);
+                skillSlots[i] = null;
+            }
+        }
+    }
+
+    private static bool IsValidSkillSlot(int slotIndex)
+    {
+        return slotIndex >= 0 && slotIndex < SkillSlotCount;
+    }
+
+    // UI 최초 표시나 재생성 시 호출. 현재 상태 동기화 필요
+    public SkillSlotInfo GetEquippedSkill(int slotIndex) //
+    {
+        EnsureSkillSlots();
+
+        if (!IsValidSkillSlot(slotIndex))
+            throw new ArgumentOutOfRangeException(nameof(slotIndex));
+
+        CharacterSkillBase entry = skillSlots[slotIndex];
+
+        return new SkillSlotInfo(slotIndex, entry != null, entry != null ? entry.SkillIcon : null, entry != null ? entry.RuntimeSkill.SkillName : string.Empty);
+    }
+
+    public SkillCooldownInfo GetSkillCooldown(int slotIndex)
+    {
+        EnsureSkillSlots();
+
+        if (!IsValidSkillSlot(slotIndex))
+            throw new ArgumentOutOfRangeException(nameof(slotIndex));
+
+        CharacterSkillBase entry = skillSlots[slotIndex];
+
+        if (entry == null)
+            return new SkillCooldownInfo(slotIndex, 0f, 0f);
+
+        CharacterSkill runtime = entry.RuntimeSkill;
+
+        return new SkillCooldownInfo(slotIndex, runtime.RemainingCooldown, runtime.LastUsedCooldown);
+    }
+
+    public bool EquipSkill(int slotIndex, CharacterSkillBase entry)
+    {
+        EnsureSkillSlots();
+
+        if (!IsValidSkillSlot(slotIndex) || entry == null || !entry.BelongsTo(this))
+            return false;
+        
+        for (int i = 0; i < SkillSlotCount; i++)
+            if (i != slotIndex && skillSlots[i] == entry)
+                return false;
+        
+        if (skillSlots[slotIndex] == entry)
+            return true;
+
+        skillSlots[slotIndex] = entry;
+        PublishSkillSlot(slotIndex);
+
+        return true;
+    }
+
+    public bool UnequipSkill(int slotIndex)
+    {
+        EnsureSkillSlots();
+        if (!IsValidSkillSlot(slotIndex) || skillSlots[slotIndex] == null) return false;
+        skillSlots[slotIndex] = null;
+        PublishSkillSlot(slotIndex);
+        return true;
+    }
+
+    public bool UseSkill(int slotIndex)
+    {
+        EnsureSkillSlots();
+
+        if (!isActiveAndEnabled || !IsValidSkillSlot(slotIndex))
+            return false;
+
+        CharacterSkillBase entry = skillSlots[slotIndex];
+
+        if (entry == null || !entry.BelongsTo(this) || !entry.TryUse())
+            return false;
+
+        PublishSkillCooldown(slotIndex); // 성공 직후 UI에 즉시 알림
+
+        return true;
+    }
+
+    private void PublishSkillSlot(int slotIndex)
+    {
+        observedSkills[slotIndex] = skillSlots[slotIndex];
+        SkillSlotChanged?.Invoke(GetEquippedSkill(slotIndex)); // 아이콘/이름부터 설정
+        PublishSkillCooldown(slotIndex); // 교체한 스킬의 진행 상태도 함께 동기화
+    }
+
+    private void PublishSkillCooldown(int slotIndex)
+    {
+        SkillCooldownInfo data = GetSkillCooldown(slotIndex);
+        wasSkillCooling[slotIndex] = data.TimeLeft > 0f;
+        skillCooldownChannels[slotIndex].Raise(data);
+    }
+    #endregion
+
     private CharacterStatus status;
     public CharacterStatus Status
     {
@@ -116,13 +272,37 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void Awake()
     {
+        ValidateInitialSkillSlots();
+
         rigid = GetComponent<Rigidbody2D>();
         jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
+
         if (visualRoot != null)
             FacingDirection = visualRoot.localScale.x < 0f ? -1 : 1;
 
         characterLevelUpProvider = new CharacterLevelUpProvider();
         skillLevelUpProvider = new CharacterSkillLevelUpProvider();
+    }
+
+    private void Update()
+    {
+        EnsureSkillSlots();
+        for (int i = 0; i < SkillSlotCount; i++)
+        {
+            if (!ReferenceEquals(observedSkills[i], skillSlots[i]) || (!ReferenceEquals(skillSlots[i], null) && skillSlots[i] == null))
+            {
+                if (skillSlots[i] == null)
+                    skillSlots[i] = null;
+
+                PublishSkillSlot(i);
+
+                continue;
+            }
+            SkillCooldownInfo data = GetSkillCooldown(i);
+
+            if (data.TimeLeft > 0f || wasSkillCooling[i])
+                PublishSkillCooldown(i);
+        }
     }
 
     private void FixedUpdate()
@@ -341,6 +521,76 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         return skillAttackBuff != null && skillAttackBuff.TryUse();
     }
+
+    #region 장비 팝업 연결
+    public event Action InventoryChanged
+    {
+        add
+        {
+            Inventory.ListChanged += value;
+            Equipment.ListChanged += value;
+        }
+
+        remove
+        {
+            if (Inventory != null)
+                Inventory.ListChanged -= value;
+
+            if (Equipment != null)
+                Equipment.ListChanged -= value;
+        }
+    }
+
+    public event Action EquipmentChanged
+    {
+        add
+        {
+            Equipment.ListChanged += value;
+        }
+
+        remove
+        {
+            if (Equipment != null)
+                Equipment.ListChanged -= value;
+        }
+    }
+
+    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // 팝업용 미착용 목록 복사본
+    {
+        var result = new List<CharacterInventoryEquipment>();
+
+        if (Inventory == null)
+            return result.AsReadOnly();
+
+        foreach (CharacterInventoryEquipment item in Inventory.GetEquipmentSnapshot())
+            if (!IsEquipmentEquipped(item.InstanceId))
+                result.Add(item);
+
+        return result.AsReadOnly();
+    }
+
+    public bool TryGetItemData(int itemId, out ItemData data) // 공용 원본 데이터 조회
+    {
+        data = default;
+
+        return DataManager.instance != null && DataManager.instance.TryGetItemData(itemId, out data);
+    }
+
+    public void EquipItem(Guid instanceId) 
+    { 
+        TryEquipItem(instanceId); 
+    }
+
+    public bool TryEquipItem(Guid instanceId)
+    {
+        return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquipItem(instanceId);
+    }
+
+    public bool UnequipItem(CharacterEquipmentSlot slot)// 장착칸 클릭 시 호출
+    {
+        return UnequipEquipment(slot);
+    }
+    #endregion
 
     // 장비착용 관련 호출
     public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot)

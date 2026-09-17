@@ -122,6 +122,114 @@ public class CharacterFacade : MonoBehaviour
     }
     #endregion
 
+    #region 장비 및 장비 UI용
+    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // 방어구 착용
+    {
+        return Controller.EquipEquipment(instanceId, slot);
+        // Hat(머리)=0, Top(상의)=1, Bottom(하의)=2, Gloves(장갑)=3, Cape(망토)=4, Shoulder(어깨)=5, Belt(허리)=6, Shoes(신발)=7, Ring1(반지1)=8, Ring2(반지2)=9, Necklace(목걸이)=10
+    }
+
+    public bool UnequipEquipment(CharacterEquipmentSlot slot) // 방어구 해제
+    {
+        return Controller.UnequipEquipment(slot);
+    }
+
+    public bool IsEquipmentEquipped(Guid instanceId) // 방어구 착용했는지
+    {
+        return Controller.IsEquipmentEquipped(instanceId);
+    }
+
+    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item) // 착용한 방어구 조회
+    {
+        return Controller.TryGetEquippedItem(slot, out item);
+    }
+
+    public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
+    {
+        return Controller.GetEquipmentSlots();
+    }
+
+    public event Action InventroyChanged // 인벤토리 내 미착용 장비 목록이 달라지는 것을 알림
+    {
+        add
+        {
+            Controller.InventoryChanged += value;
+        }
+        remove
+        {
+            if (Controller != null)
+                Controller.InventoryChanged -= value;
+        }
+    }
+
+    public event Action EquipmentChanged // 장착 칸 갱신용
+    {
+        add
+        {
+            Controller.EquipmentChanged += value;
+        }
+        remove
+        {
+            if (Controller != null)
+                Controller.EquipmentChanged -= value;
+        }
+    }
+
+    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // 착용 장비를 제외한 읽기 전용 복사본
+    {
+        return Controller.GetEquipmentInventory();
+    }
+
+    public bool TryGetItemData(int itemId, out ItemData data)
+    {
+        return Controller.TryGetItemData(itemId, out data);
+    }
+
+    public void EquipItem(Guid instanceId) //  부위 자동 착용/교체
+    {
+        Controller.EquipItem(instanceId);
+    }
+
+    public bool TryEquipItem(Guid instanceId) // 성공/실패 표시가 필요할 때 사용
+    {
+        return Controller.TryEquipItem(instanceId);
+    }
+
+    public bool UnequipItem(CharacterEquipmentSlot slot) // 장착칸 클릭, 성공하면 아이템이 미착용 목록에 다시 표시
+    {
+        return Controller.UnequipItem(slot);
+    }
+    #endregion
+
+    #region 스킬 UI 및 스킬 장착용
+    public int SkillSlotCount => CharacterControllers.SkillSlotCount; // 6개, 인덱스는 0~5
+
+    // 이벤트를 직접 발행하지 않고 구독 창구만 제공
+    public event Action<SkillSlotInfo> SkillSlotChanged
+    {
+        add { Controller.SkillSlotChanged += value; }
+        remove
+        {
+            if (Controller != null)
+                Controller.SkillSlotChanged -= value;
+        }
+    }
+
+    // 슬롯별 이벤트 6개
+    public IReadOnlyList<CharacterControllers.SkillCooldownChannel> SkillCooldownEvents => Controller.SkillCooldownEvents;
+
+    // 프리젠터 초기화 시 0~5를 조회하여 아이콘/이름과 남은 쿨타임을 동기화
+    public SkillSlotInfo GetEquippedSkill(int slotIndex) => Controller.GetEquippedSkill(slotIndex);
+    public SkillCooldownInfo GetSkillCooldown(int slotIndex) => Controller.GetSkillCooldown(slotIndex);
+
+    // 같은 캐릭터의 스킬 컴포넌트를 장착
+    public bool EquipSkill(int slotIndex, CharacterSkillBase skill) => Controller.EquipSkill(slotIndex, skill);
+    public bool UnequipSkill(int slotIndex) => Controller.UnequipSkill(slotIndex);
+
+    // UI 버튼은 번호만 전달
+    public bool UseSkill(int slotIndex) => Controller.UseSkill(slotIndex);
+    #endregion
+
     #region 몬스터 및 전투용
     public void TakeDamage(long damage)
     {
@@ -180,34 +288,6 @@ public class CharacterFacade : MonoBehaviour
     public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment() // 읽기 전용 목록 복사본
     {
         return Controller.GetInventoryEquipment();
-    }
-    #endregion
-
-    #region 장비 및 장비 UI용
-    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // 방어구 착용
-    {
-        return Controller.EquipEquipment(instanceId, slot);
-        // Hat(머리)=0, Top(상의)=1, Bottom(하의)=2, Gloves(장갑)=3, Cape(망토)=4, Shoulder(어깨)=5, Belt(허리)=6, Shoes(신발)=7, Ring1(반지1)=8, Ring2(반지2)=9, Necklace(목걸이)=10
-    }
-
-    public bool UnequipEquipment(CharacterEquipmentSlot slot) // 방어구 해제
-    {
-        return Controller.UnequipEquipment(slot);
-    }
-
-    public bool IsEquipmentEquipped(Guid instanceId) // 방어구 착용했는지
-    {
-        return Controller.IsEquipmentEquipped(instanceId);
-    }
-
-    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item) // 착용한 방어구 조회
-    {
-        return Controller.TryGetEquippedItem(slot, out item);
-    }
-
-    public IReadOnlyDictionary<CharacterEquipmentSlot, Guid> GetEquipmentSlots()
-    {
-        return Controller.GetEquipmentSlots();
     }
     #endregion
 

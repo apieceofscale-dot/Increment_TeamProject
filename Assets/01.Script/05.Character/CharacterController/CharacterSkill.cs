@@ -7,6 +7,7 @@ public class CharacterSkill
     public int Level { get; private set; }
     public int MpCost { get; private set; }
     public float Cooldown { get; private set; }
+    public float LastUsedCooldown { get; private set; }
     public bool IsUnlocked { get; private set; }
 
     private readonly Func<float> clock;
@@ -37,7 +38,9 @@ public class CharacterSkill
         if (!CanUse())
             return false;
 
+        LastUsedCooldown = Math.Max(0.01f, effectiveCooldown);
         readyTime = clock() + Math.Max(0.01f, effectiveCooldown);
+
         return true;
     }
 
