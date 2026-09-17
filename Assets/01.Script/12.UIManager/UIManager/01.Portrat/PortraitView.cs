@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PortraitView : MonoBehaviour
+public class PortraitView : MonoBehaviour, IUIViewInitialize
 {
     [SerializeField] Image portrait;
     [SerializeField] TextMeshProUGUI attackRating;
@@ -19,5 +19,10 @@ public class PortraitView : MonoBehaviour
     public void SetGold(int gold)
     {
         this.gold.text = gold.ToString();  
+    }
+
+    public void InitializeView()
+    {
+        //빈 게 맞음 통일성을 위해 넣어둠.
     }
  }

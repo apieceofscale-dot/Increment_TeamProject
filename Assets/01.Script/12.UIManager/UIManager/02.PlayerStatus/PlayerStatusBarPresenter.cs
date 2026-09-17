@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerStatusPresenter
+public class PlayerStatusBarPresenter
 {
     private PlayerStatusBarView view;
     private readonly CharacterFacade model;
@@ -11,7 +11,7 @@ public class PlayerStatusPresenter
     //참조 : 파사드에서 나온 직업 변경 이벤트
     //참조 : 파사드에서 나온 레벨업 이벤트.
 
-    public PlayerStatusPresenter(PlayerStatusBarView view, CharacterFacade model)//ui매니저에서 호출.
+    public PlayerStatusBarPresenter(PlayerStatusBarView view, CharacterFacade model)//ui매니저에서 호출.
     {
         this.view = view;
         this.model = model;

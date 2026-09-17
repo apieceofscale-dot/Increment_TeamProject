@@ -32,7 +32,8 @@ public enum BootLayer //
     SoundManager = 8,
     SaveManager = 9,
     UIManager = 10,
-    Codex = 11,
+    GameSessionManager = 12,
+    Codex = 13,
 }
 
 public enum StageType

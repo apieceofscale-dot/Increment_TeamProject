@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnchatPopupView : MonoBehaviour
+public class EnchatPopupView : MonoBehaviour, IUIViewInitialize
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -12,5 +12,10 @@ public class EnchatPopupView : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void InitializeView()
+    {
+
     }
 }

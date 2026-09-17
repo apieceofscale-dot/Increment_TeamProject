@@ -1,4 +1,7 @@
 using UnityEngine;
+//살짝 아쉽습니다. 왜나면 분명히 모든 캐릭터의 목록을 불러 올 수 있는
+//딕셔너리에 넣어두면 그것 만으로도 불러 올 수 있는데, 안 그러면 자신이 여기서 모든 api 를 제공해야 하거든요
+//무엇보다 호출자가 ID자체에 대해 알아야 합니다. 하지만 딕셔너리를 쓰고 oderby 해놓으면 그럴 필요가 없어요.
 
 public class CharacterFactory : MonoBehaviour, IBootStrapper
 {

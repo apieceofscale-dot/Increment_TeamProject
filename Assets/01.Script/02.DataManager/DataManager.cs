@@ -45,12 +45,9 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
     //부트 스트래퍼용.
     public void IBootStrapperInject(BootstrapContext context)
-    {
-        if (instance == null)
-            instance = this;
-        else
-            Destroy(gameObject);
-        //dataManager = context.Get<DataManager>(); 예시용으로 여기 적어둠. 이런식으로 찾으면 됨.
+    {        
+        instance = this;
+     
     }
 
     public void IBootStrapperInitialize()

@@ -8,7 +8,7 @@ public class StagePresenter
 
     //스테이지 이동 이벤트 참조. 혹은 so참조
 
-    public StagePresenter(StageFacade model, StageView view)
+    public StagePresenter(StageView view, StageFacade model)
     {
         this.model = model;
         this.view = view;

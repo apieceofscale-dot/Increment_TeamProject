@@ -8,7 +8,7 @@ public class SkillPresenter
     // 파사드의 스킬 슬롯에 장착이벤트 참조. so나.
     // 파사드의 쿨타임 관련 6개 짜리 이벤트 배열 참조. so나.
 
-    public SkillPresenter(CharacterFacade model, SkillView view)
+    public SkillPresenter(SkillView view, CharacterFacade model)
     {
         this.model = model;
         this.view = view;

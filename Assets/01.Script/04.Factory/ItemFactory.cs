@@ -18,22 +18,13 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
 
     readonly Dictionary<int, ItemController> prefabById = new Dictionary<int, ItemController>();
 
-    public int BootOrder => (int)BootLayer.Factory;
-
-    void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
+    public int BootOrder => (int)BootLayer.Factory;   
 
     public void IBootStrapperInject(BootstrapContext context)
     {
+
+        Instance = this;
+
         if (poolManager == null)
         {
             context.TryGet(out poolManager);
