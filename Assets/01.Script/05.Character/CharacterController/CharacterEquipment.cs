@@ -14,6 +14,7 @@ public class CharacterEquipment : MonoBehaviour
     private readonly Dictionary<CharacterEquipmentSlot, Guid> slots = CreateSlots();
 
     public event Action<CharacterEquipmentSlot, Guid, Guid> SlotChanged;
+    public event Action ListChanged;
 
     private CharacterInventory Inventory
     {
@@ -142,6 +143,40 @@ public class CharacterEquipment : MonoBehaviour
         return result;
     }
 
+    public bool TryEquipItem(Guid instanceId)
+    {
+        if (Inventory == null || !Inventory.TryGetEquipment(instanceId, out CharacterInventoryEquipment item) || !TryGetPart(item.ItemId, out CharacterArmorPart part))
+            return false;
+
+        CharacterEquipmentSlot slot;
+
+        switch (part)
+        {
+            case CharacterArmorPart.Hat:
+                slot = CharacterEquipmentSlot.Hat;
+                break;
+            case CharacterArmorPart.Top:
+                slot = CharacterEquipmentSlot.Top;
+                break;
+            case CharacterArmorPart.Gloves:
+                slot = CharacterEquipmentSlot.Gloves;
+                break;
+            case CharacterArmorPart.Shoes:
+                slot = CharacterEquipmentSlot.Shoes;
+                break;
+            case CharacterArmorPart.Necklace:
+                slot = CharacterEquipmentSlot.Necklace;
+                break;
+            case CharacterArmorPart.Ring:
+                slot = CharacterEquipmentSlot.Ring1;
+                break;
+            default:
+                return false;
+        }
+
+        return TryEquip(instanceId, slot);
+    }
+
     public bool TryEquip(Guid instanceId, CharacterEquipmentSlot slot)
     {
         if (!slots.ContainsKey(slot) || instanceId == Guid.Empty || Inventory == null)
@@ -161,6 +196,13 @@ public class CharacterEquipment : MonoBehaviour
 
         Guid previous = slots[slot];
         slots[slot] = instanceId;
+
+        if (!RefreshEquipmentStats()) // 바뀐 착용상태 기준으로 스탯 합산
+        {
+            slots[slot] = previous; // 실패 시 원래장비로 복원
+            return false;
+        }
+
         NotifySlotChanged(slot, previous, instanceId);
 
         return true;
@@ -172,6 +214,13 @@ public class CharacterEquipment : MonoBehaviour
             return false;
 
         slots[slot] = Guid.Empty;
+
+        if (!RefreshEquipmentStats())
+        {
+            slots[slot] = previous;
+            return false;
+        }
+
         NotifySlotChanged(slot, previous, Guid.Empty);
 
         return true;
@@ -237,29 +286,42 @@ public class CharacterEquipment : MonoBehaviour
                 return slot == CharacterEquipmentSlot.Hat;
             case CharacterArmorPart.Top:
                 return slot == CharacterEquipmentSlot.Top;
-            case CharacterArmorPart.Bottom:
-                return slot == CharacterEquipmentSlot.Bottom;
             case CharacterArmorPart.Gloves:
                 return slot == CharacterEquipmentSlot.Gloves;
-            case CharacterArmorPart.Cape:
-                return slot == CharacterEquipmentSlot.Cape;
-            case CharacterArmorPart.Shoulder:
-                return slot == CharacterEquipmentSlot.Shoulder;
-            case CharacterArmorPart.Belt:
-                return slot == CharacterEquipmentSlot.Belt;
             case CharacterArmorPart.Shoes:
                 return slot == CharacterEquipmentSlot.Shoes;
             case CharacterArmorPart.Ring:
-                return slot == CharacterEquipmentSlot.Ring1 || slot == CharacterEquipmentSlot.Ring2;
+                return slot == CharacterEquipmentSlot.Ring1;
             case CharacterArmorPart.Necklace:
                 return slot == CharacterEquipmentSlot.Necklace;
             default:
                 return false;
         }
     }
+    private void NotifyListChanged()
+    {
+        Action handlers = ListChanged;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            { 
+                ((Action)handler)(); 
+            }
+            catch (Exception exception) 
+            { 
+                Debug.LogException(exception, this); 
+            }
+        }
+    }
 
     private void NotifySlotChanged(CharacterEquipmentSlot slot, Guid previous, Guid current)
     {
+        NotifyListChanged();
+
         var handlers = SlotChanged;
 
         if (handlers == null)

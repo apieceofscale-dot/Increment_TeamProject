@@ -10,6 +10,7 @@ public class CharacterInventory : MonoBehaviour
 
     public int EquipmentCount => equipmentItems.Count;
     public event Action<Guid> EquipmentChanged;
+    public event Action ListChanged;
 
     public bool TryAddEquipment(ItemStatus source, out Guid instanceId)
     {
@@ -67,8 +68,29 @@ public class CharacterInventory : MonoBehaviour
         return new List<CharacterInventoryEquipment>(equipmentItems.Values).AsReadOnly();
     }
 
+    private void NotifyListChanged()
+    {
+        Action handlers = ListChanged;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            {
+                ((Action)handler)(); 
+            }
+            catch(Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+    }
+
     private void NotifyEquipmentChanged(Guid instanceId)
     {
+        NotifyListChanged();
         Action<Guid> handlers = EquipmentChanged;
 
         if (handlers == null)

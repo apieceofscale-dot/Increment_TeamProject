@@ -284,8 +284,32 @@ public readonly struct StageChangedInfo
         ChallengeStageNum = challengeStageNum;
         CanChallenge = canChallenge;
     }
-
-
-
 }
 
+public readonly struct SkillSlotInfo //UI용 복사 데이터
+{
+    public int SlotIndex { get; }
+    public bool IsEquipped { get; }
+    public Sprite Sprite { get; }
+    public string SkillName { get; }
+    public SkillSlotInfo(int slotIdnex, bool equipped, Sprite sprite, string name)
+    {
+        SlotIndex = slotIdnex;
+        IsEquipped = equipped;
+        Sprite = sprite;
+        SkillName = name ?? string.Empty;
+    }
+}
+
+public readonly struct SkillCooldownInfo // 스킬 UI용 남은 시간 및 시전 시 확정된 전체 시간
+{
+    public int SlotIndex { get; }
+    public float TimeLeft { get; }
+    public float TotalTime { get; }
+    public SkillCooldownInfo(int slotIndex, float timeLeft, float totalTime)
+    {
+        SlotIndex = slotIndex;
+        TimeLeft = timeLeft;
+        TotalTime = totalTime;
+    }
+}
