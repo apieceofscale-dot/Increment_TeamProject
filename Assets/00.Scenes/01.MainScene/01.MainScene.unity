@@ -148,7 +148,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 439675771}
   m_Father: {fileID: 1800547619}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &9118536
@@ -163,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6eb7ff268e3c18d41b68a1d7e2fa2512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameSessionManager
-  spawnPosition: {fileID: 0}
+  spawnPosition: {fileID: 439675771}
 --- !u!1 &30993552
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,7 +209,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9506d180eea98a54da914bd443042458, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemFactory
-  prefabEntries: []
+  prefabEntries:
+  - id: 0
+    prefab: {fileID: 0}
   poolManager: {fileID: 0}
 --- !u!1 &186185353
 GameObject:
@@ -343,6 +346,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9b8b0823c860ea4695b4d0356c88f45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BootStrapper
+--- !u!1 &439675770
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 439675771}
+  m_Layer: 0
+  m_Name: spawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &439675771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 439675770}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10.56, y: 5.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9118535}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &680623499
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,9 +732,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd56ddb070638c049bccd8e095eeb8e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  playerHudPrefab: {fileID: 0}
-  mainHudPrefab: {fileID: 0}
-  systemHudPrefab: {fileID: 0}
+  playerHudPrefab: {fileID: 244960211959371237, guid: 50e24aa0882617b40a49143cb5687cf1, type: 3}
+  mainHudPrefab: {fileID: 2393753443450700813, guid: d44b051b2a231794f9f38b441ed15eb7, type: 3}
+  systemHudPrefab: {fileID: 6517033473387919654, guid: 5953af2db8a3bee4ca7f8be4d179f383, type: 3}
 --- !u!1 &1934682247
 GameObject:
   m_ObjectHideFlags: 0
