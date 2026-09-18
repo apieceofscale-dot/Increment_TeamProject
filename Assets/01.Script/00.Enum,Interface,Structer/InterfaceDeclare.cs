@@ -11,6 +11,9 @@ public interface IBootStrapper
 public interface IPoolable
 {
     void InitializePoolObj(Action returnAction);
+    //ex)
+    // poolable.poolable.InitializePoolObj(() => ReturnObject(go));
+    //
     void OnSpawn();
     void OnDespawn();
 }

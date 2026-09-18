@@ -112,7 +112,7 @@ public class MonsterFactory : MonoBehaviour, IBootStrapper
         var prefabs = new List<MonsterController>(prefabById.Values);
         if (prefabs.Count > 0)
         {
-            poolManager.MakeFirstPools(prefabs);
+            //poolManager.MakeFirstPools(prefabs,30);
         }
     }
 

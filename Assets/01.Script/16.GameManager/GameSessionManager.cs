@@ -3,6 +3,7 @@ using UnityEngine;
 public class GameSessionManager : MonoBehaviour, IBootStrapper
 {
     [SerializeField] Transform spawnPosition;
+    //스테이지 완료so 구독.
 
     public int BootOrder => (int)BootLayer.GameSessionManager;
         

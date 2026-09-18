@@ -14,12 +14,13 @@ public class PortraitPresenter
         this.view = view;
         this.model = model;
 
-        //골드 변경 이벤트 += HandleGoldChanged;
-        //전투력 변경 이벤트 += HandleAttackRating;
+        model.MoneyChanged += HandleGoldChanged;
+        model.CombatPowerChanged += HandleAttackRating;
 
-        //HandlePortrait(model.portrait); 초기화.
-        //HandleAttackRating(model.attkRating)
-        HandleGoldChanged((int)model.Money);
+
+        HandlePortrait(model.GetCharacterPortrait());
+        HandleGoldChanged(model.Money);
+        HandleAttackRating(model.CombatPower);
 
     }
 
@@ -32,12 +33,12 @@ public class PortraitPresenter
 
 
     //아래는 이벤트 필요합니다. 
-    public void HandleAttackRating(float attackRating)
+    public void HandleAttackRating(int attackRating)
     {
         view.SetAttackRating(attackRating);
     } 
 
-    public void HandleGoldChanged(int gold)
+    public void HandleGoldChanged(long gold)
     {
         view.SetGold(gold);
     }

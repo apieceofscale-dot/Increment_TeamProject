@@ -104,7 +104,7 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
         var prefabs = new List<ItemController>(prefabById.Values);
         if (prefabs.Count > 0)
         {
-            poolManager.MakeFirstPools(prefabs);
+            //poolManager.MakeFirstPools(prefabs);
         }
     }
 

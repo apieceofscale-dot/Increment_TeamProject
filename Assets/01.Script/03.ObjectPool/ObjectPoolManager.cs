@@ -1,17 +1,11 @@
-
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-
-
-//제네릭화 -> 자식 스크립트로 비 제네릭 몬스터/미사일 풀링 매니저 따로 만들기.
 
 public class ObjectPoolManager<T> : MonoBehaviour where T : Component
 {
     public static ObjectPoolManager<T> instance;
 
-    List<T> objList; //스테이지 매니저가 초기화
+    
     //실제 오브젝트 저장 위치
     Dictionary<T, Queue<T>> pools = new Dictionary<T, Queue<T>>();
     //즉 string->이름, Queue ->저장 형태가 됨. 
@@ -36,25 +30,19 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
             return;
         }
 
-        objList = new List<T>();
+       
     }
 
-    public void MakeFirstPools(List<T> stageManagerList) // func to get List from StageManager, and called by this too
+    public void MakeFirstPools(T prefab, int count = 30) //Prewarming()
     {
-        foreach (T obj in stageManagerList)
-        {
-            objList.Add(obj); //? 이거 게임 오브젝트 아닌가?
-        }
+        if (prefab == null)
+            return;
 
-        poolSize = 30;
-        foreach (T obj in objList)
-        {
-            ObjectPoolMaker(obj, poolSize);
-        }
+        ObjectPoolMaker(prefab, count);
     }
 
 
-    public void ObjectPoolMaker(T prefab, int n)
+    public void ObjectPoolMaker(T prefab, int n) //creatPool()
     {
         if (pools.ContainsKey(prefab))
             return;
@@ -165,10 +153,10 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         go.gameObject.SetActive(false);
         go.transform.SetParent(poolsParents[originPrefab]); //저장 위치 찾아가기.
         pools[originPrefab].Enqueue(go);
-        activedObjects.Remove(go);
+        //activedObjects.Remove(go);
     }
 
-    public void ReturnAllobject()
+    public void ReturnAllobjects()
     {
         T[] objects = new T[activedObjects.Count];
         activedObjects.CopyTo(objects);

@@ -229,8 +229,7 @@ public static class Navi2DAirMoveCalculator
             airMoveSpeed, jumpMaxHeight, gravity, jumpClearance, isArcClear, out jumpVelocity);
     }
 
-    // Platform-to-platform jump: an obstacle is not required to create an arc.
-    // The callback checks the body against the actual map for every candidate.
+   
     public static bool TryCalculatePlatformJumpVelocity(
         Vector2 startPosition, Vector2 targetPosition, float maxHorizontalSpeed,
         float jumpMaxHeight, float gravity, float clearance,
@@ -250,13 +249,13 @@ public static class Navi2DAirMoveCalculator
         float horizontalTime = Mathf.Abs(deltaX) / maxSpeed;
         if (horizontalTime > minimumFlightTime)
         {
-            // Increase flight time to respect the horizontal speed limit.
+            
             float requiredVy = deltaY / horizontalTime + 0.5f * gravity * horizontalTime;
             minimumRise = Mathf.Max(minimumRise, requiredVy * requiredVy / (2f * gravity));
         }
         if (minimumRise > jumpMaxHeight) return false;
 
-        // Try higher arcs too: the lowest arc can reach the target but hit its wall.
+      
         const int samples = 64;
         for (int i = 0; i <= samples; i++)
         {
@@ -264,7 +263,7 @@ public static class Navi2DAirMoveCalculator
             float vy = Mathf.Sqrt(2f * gravity * rise);
             float time = (vy + Mathf.Sqrt(Mathf.Max(0f, vy * vy - 2f * gravity * deltaY))) / gravity;
             Vector2 velocity = new Vector2(deltaX / time, vy);
-            // Permit float roundoff at the exact maximum range, then cap the result.
+          
             if (Mathf.Abs(velocity.x) > maxSpeed + 0.0001f) continue;
             velocity.x = Mathf.Clamp(velocity.x, -maxSpeed, maxSpeed);
             if (!isArcClear(velocity, time)) continue;

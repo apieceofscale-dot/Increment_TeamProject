@@ -89,6 +89,8 @@ public class UIManager : MonoBehaviour, IBootStrapper
     public void BindGameplayUI(CharacterFacade characterFacade, StageFacade stageFacade)
     {
         playerHud.SetActive(true);
+        mainHud.SetActive(false);
+
 
         this.characterFacade = characterFacade;
         this.stageFacade = stageFacade;
@@ -152,7 +154,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
         if (view == null)
         {
-            Debug.LogError("$\"[UIManager] {typeof(T).Name}?? ??? ?? ???????.\"");
+            throw new InvalidOperationException($"[UIManager] {hud.name}에 {typeof(T).Name}이 없습니다.");
         }
 
        

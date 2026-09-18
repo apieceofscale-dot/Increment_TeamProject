@@ -178,7 +178,6 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
                                 (linkNeighbor.worldPos - departure).sqrMagnitude;
                         else
                         {
-                            // A lower platform may be too far away for a plain drop.
                             moveType = Navi2DMoveType.Traverse;
                             canMove = TryCalculatePlatformJumpVelocity(current.worldPos,
                                 linkNeighbor.worldPos, airMoveSpeed, jumpMaxHeight, gravity,
@@ -188,7 +187,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
 
                     else
                     {
-                        // Jump across a gap, with or without an obstacle between platforms.
+                        
                         moveType = Navi2DMoveType.Traverse;
 
                         canMove = TryCalculatePlatformJumpVelocity(
@@ -292,8 +291,7 @@ public class Navi2DPathFinder : MonoBehaviour  //closestReachableNode 만들기
         return !float.IsPositiveInfinity(bestCost);
     }
 
-    // A lower target can sit under the source platform. Fall beside its wall first,
-    // then steer inward only after the whole body can pass beneath the platform.
+ 
     public bool TryCalculateDropMotion(Vector2 start, Vector2 target,
         float airSpeed, float gravity, float initialVelocityY,
         float halfWidth, float bodyHeight, out Vector2 steeringVelocity, out float steeringDelay)

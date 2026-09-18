@@ -16,31 +16,33 @@ public class PlayerStatusBarPresenter
         this.view = view;
         this.model = model;
 
-        /*
-        체력변경 이벤트 +=HandleHpChanged
-        마나 변경 이벤트 +=HandleMpChange
-        경험치 변경 이벤트 +=HandleExpChanged
-        직업 변경 이벤트 +=HandleJobChanged
-        레벨업 이벤트 +=HandleLevelChanged
-        */
 
-        /*
-        view.SetPortrait(model.Portrait);
-        view.HpChanged(model.CurrentHp, model.MaxHp);
-        view.MpChanged(model.CurrentMp, model.MaxMp);
-        view.LevelChanged(model.Level);
-        view.JobChanged(model.JobName);
-        */
+        model.HpChanged += HandleHpChanged;
+        model.MpChanged += HandleMpChanged;
+        model.LevelChanged += HandleLevelChanged;
+        model.JobNameChanged += HandleJobChanged;
+
+
+        //경험치 변경 이벤트 +=HandleExpChanged
+
+        HandleHpChanged(model.CurrentHp, model.MaxHp);
+        HandleMpChanged(model.CurrentMp, model.MaxMp);
+        HandleLevelChanged(model.Level);
+        HandleJobChanged(model.JobName);
+
+        //view.LevelChanged(model.Level);
+
+
 
     }
 
     //여긴 너무 많으니 되도록이면 구조체를 선언해주세요.
 
-    private void HandleHpChanged(float nowHp, float totalHp)
+    private void HandleHpChanged(long nowHp, long totalHp)
     {
         view.SetHpBar(nowHp, totalHp);
     }
-    private void HandleMpChange(float nowMp, float totalMp)
+    private void HandleMpChanged(int nowMp, int totalMp)
     {
         view.SetMpBar(nowMp, totalMp);
     }
