@@ -13,17 +13,11 @@ public sealed class MonsterSpawner : MonoBehaviour
     private float spawnTimer;
 
 
-    private Transform targetTransform;
-    private bool warnedMissingTarget;
 
     private readonly List<MonsterController> activeMonsters = new List<MonsterController>(AliveListCapacity);
 
     public void Initialize(MonsterFactory factory)
            => monsterFactory = factory ?? throw new ArgumentNullException(nameof(factory));
-
-
-    public void SetTarget(Transform target) => targetTransform = target;
-
 
 
 
@@ -112,15 +106,6 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         if (monster == null) return null;
 
-
-        // SetTarget이 추가되면 아래 살리기
-
-        // monster.SetTarget(targetTransform); 
-        if (targetTransform == null && !warnedMissingTarget)
-        {
-            Debug.LogWarning("[MonsterSpawner] 타겟(캐릭터)이 없습니다. SetCharacter 호출 순서를 확인하세요.");
-            warnedMissingTarget = true;   // 매 스폰마다 찍으면 콘솔이 막힌다 (규칙 34)
-        }
 
         activeMonsters.Add(monster);
         return monster;
