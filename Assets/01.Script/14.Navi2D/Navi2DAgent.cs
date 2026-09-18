@@ -147,6 +147,67 @@ public class Navi2DAgent : MonoBehaviour
 
 
     }
+
+    public void StopMovement() //fsm에서 추적상태 벗어날 때 쓸 api 
+    {
+        isTracing = false;
+        
+        path = null;
+        currentPathIndex = 0;
+        lastTargetNode = null;
+        airTargetNode = null;
+        repathPending = false;
+                
+        isAirMoving = false;
+        hasLeftGround = false;
+        isApproachingDrop = false;
+        isWaitingToSteerDrop = false;
+
+        dropDeparture = Vector2.zero;
+        dropDirection = 0f;
+        dropApproachTimeLeft = 0f;
+        dropSteeringY = 0f;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(
+                0f,
+                rb.linearVelocity.y);
+        }
+    }
+
+
+
+    public void ResetMovement() //몬스터 풀링 초기화 할 때 호출할 api
+    {
+        StopMovement();
+
+        targetPosition = Vector2.zero;
+        moveSpeed = 0f;
+        maxAirHorizontalSpeed = 0f;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private void FollowPath() //walk에서 MoveToNode 를 재호출 하니 while문으로 고치기.
     {
         if (path == null || path.Count == 0) return;

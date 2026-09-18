@@ -1,7 +1,7 @@
 using UnityEngine;
 
-public class PortraitPresenter : MonoBehaviour
-{
+public class PortraitPresenter
+{ 
     PortraitView view;
     CharacterFacade model;
 
