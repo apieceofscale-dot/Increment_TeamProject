@@ -126,7 +126,6 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
         character = characterFacade;
-        spawner.SetTarget(character.transform);   // 스폰되는 몬스터가 쫓아갈??예정...이 부분은 일반몹/엘리트/보스가 조금씩 달라서 고민 -> 그냥 일괄 추격으로. 
     }
 
     //[임시]! 캐릭터 팩토리가 캐릭터파사드를 반환하도록 바뀌면 이 오버로드 삭제
