@@ -58,6 +58,75 @@ public class ItemFacade : MonoBehaviour
         return ItemArmorPartTable.TryGetPart(itemId, out part);
     }
 
+    /// <summary>UI·장비 팝업용 SO 조회.</summary>
+    public bool TryGetItemData(int itemId, out ItemData data)
+    {
+        if (DataManager.instance != null && DataManager.instance.TryGetItemData(itemId, out data))
+        {
+            return true;
+        }
+
+        data = null;
+        return false;
+    }
+
+    /// <summary>아이템 초상화(아이콘). SO icon 미할당 시 null.</summary>
+    public bool TryGetItemIcon(int itemId, out Sprite icon)
+    {
+        if (TryGetItemData(itemId, out ItemData data) && data.icon != null)
+        {
+            icon = data.icon;
+            return true;
+        }
+
+        icon = null;
+        return false;
+    }
+
+    /// <summary>강화/스타포스 반영 EffectiveValue.</summary>
+    public bool TryGetEffectiveValue(int itemId, int upgradeLevel, int starForce, out int effectiveValue)
+    {
+        effectiveValue = 0;
+        if (!TryGetItemData(itemId, out ItemData data))
+        {
+            return false;
+        }
+
+        effectiveValue = ItemValueEvaluator.Evaluate(
+            data.itemType,
+            data.value,
+            data.upgradeStep,
+            upgradeLevel,
+            starForce);
+        return true;
+    }
+
+    /// <summary>강화 UI 미리보기 (비용은 임시 공식).</summary>
+    public bool TryGetUpgradePreview(int itemId, int currentUpgradeLevel, int starForce, out ItemUpgradePreview preview)
+    {
+        preview = default;
+        if (!TryGetItemData(itemId, out ItemData data))
+        {
+            return false;
+        }
+
+        int currentLevel = UnityEngine.Mathf.Max(0, currentUpgradeLevel);
+        int nextLevel = currentLevel + 1;
+
+        preview = new ItemUpgradePreview
+        {
+            ItemId = itemId,
+            CurrentUpgradeLevel = currentLevel,
+            NextUpgradeLevel = nextLevel,
+            CurrentEffectiveValue = ItemValueEvaluator.Evaluate(
+                data.itemType, data.value, data.upgradeStep, currentLevel, starForce),
+            NextEffectiveValue = ItemValueEvaluator.Evaluate(
+                data.itemType, data.value, data.upgradeStep, nextLevel, starForce),
+            UpgradeCost = ItemUpgradeCostProvider.Default.GetCost(currentLevel),
+        };
+        return true;
+    }
+
     /// <summary>강화/스타포스 옵션 포함 스폰.</summary>
     public ItemController Spawn(int itemId, Vector3 position, Quaternion rotation, int upgradeLevel = 0, int starForce = 0)
     {
@@ -114,7 +183,9 @@ public class ItemFacade : MonoBehaviour
     // TODO(ItemDropManager): ProcessPendingRequests → itemFactory.Create 주석 해제 (손효림)
     // TODO(Character): ItemPickedUp 구독 → 인벤/회복/재화 (이동준)
     // TODO(Character): TryGetEquipStat / TryGetArmorPart → CharacterEquipment 장착 연결
-    // TODO(UI): 장착·인벤 슬롯 버튼 → Facade API 연결 (마지막)
+    // TODO(Character): TryUpgrade(instanceId) — 재화 차감·인벤 upgradeLevel 저장 (이동준)
+    // TODO(UI): EnchatPopupPresenter.RefreshForItem → TryGetUpgradePreview 연결
+    // TODO(UI): 장착·인벤 슬롯 → TryGetItemIcon / EquipItem (EquipmentPopup)
 
     #endregion
 

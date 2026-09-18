@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
     private CharacterFacade characterFacade;  
     private StageFacade stageFacade;
+    private ItemFacade itemFacade;
 
     GameObject playerHud;
     GameObject mainHud;
@@ -24,7 +25,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
     PortraitPresenter portraitPresenter;
     PlayerStatusBarPresenter playerStatusBarPresenter;
     StagePresenter stagePresenter;
-    //캐릭터 세팅은 프리젠터 없음
+    //?????? ?????? ???????? ????
     SkillPresenter skillPresenter;  
     AutoFarmingPresenter autoFarmingPresenter;
 
@@ -40,7 +41,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-        //빈 게 맞음.
+        //?? ?? ????.
     }
     public void IBootStrapperInitialize()
     {
@@ -84,7 +85,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
        
     }
 
-    // 이 함수를 main ui-> 캐릭터 생성 -> 스테이지 생성 -> 이후 받으면 됨.
+    // ?? ????? main ui-> ?????? ???? -> ???????? ???? -> ???? ?????? ??.
     public void BindGameplayUI(CharacterFacade characterFacade, StageFacade stageFacade)
     {
         playerHud.SetActive(true);
@@ -113,19 +114,23 @@ public class UIManager : MonoBehaviour, IBootStrapper
         PortraitView portraitView = GetView<PortraitView>(playerHud);
         PlayerStatusBarView playerStatusBarView = GetView<PlayerStatusBarView>(playerHud);
         StageView stageView = GetView<StageView>(playerHud);
-        //CharacterSettingView characterSettingView = GetView<CharacterSettingView>(); 이건 없음.
+        //CharacterSettingView characterSettingView = GetView<CharacterSettingView>(); ??? ????.
         SkillView skillView = GetView<SkillView>(playerHud);            
         AutoFarmingView autoFarmingView = GetView<AutoFarmingView>(playerHud);
 
 
         EquipmentPopupView equipmentPopupView = GetView<EquipmentPopupView>(playerHud);
-        //나머지 나중에 선언.
+        EnchatPopupView enchatPopupView = GetView<EnchatPopupView>(playerHud);
 
+        if (itemFacade == null)
+        {
+            itemFacade = FindFirstObjectByType<ItemFacade>();
+        }
 
         MainView mainView = GetView<MainView>(mainHud);
 
 
-        // Presenter 연결은 어차피 new자동화가 안되서 걍 하나씩 씀.
+        // Presenter ?????? ?????? new?????? ???? ?? ????? ??.
         portraitPresenter = new PortraitPresenter (portraitView,characterFacade);
         playerStatusBarPresenter = new PlayerStatusBarPresenter(playerStatusBarView, characterFacade);
         stagePresenter = new StagePresenter(stageView, stageFacade);
@@ -135,9 +140,9 @@ public class UIManager : MonoBehaviour, IBootStrapper
         characterPopupPresenter = new CharacterPopupPresenter();
         equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
         skillPopupPresenter = new SkillPopupPresenter();
-        enchatPopupPresenter = new EnchatPopupPresenter();
+        enchatPopupPresenter = new EnchatPopupPresenter(enchatPopupView, characterFacade, itemFacade);
 
-       // mainPresenter = new MainPresenter(mainPresenter,)팩토리를 알아야 하는데?
+       // mainPresenter = new MainPresenter(mainPresenter,)?????? ???? ?????
     }
 
     private T GetView<T>(GameObject hud) where T : MonoBehaviour
@@ -147,7 +152,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
         if (view == null)
         {
-            Debug.LogError("$\"[UIManager] {typeof(T).Name}을 찾을 수 없습니다.\"");
+            Debug.LogError("$\"[UIManager] {typeof(T).Name}?? ??? ?? ???????.\"");
         }
 
        
