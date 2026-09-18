@@ -4,9 +4,10 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 
 /// <summary>
-/// 1. 캐릭터 만들어서 보관
-/// 2,. 스테이지 씬을 로드/언로드
-///3. 몬스터 사망 받아서 킬 집계 / 경험치 / 드랍요청
+/// 스테이지 진입 이후의 일을 합니다
+/// 1. 캐릭터 생성x 세션이 넘겨준 캐릭터 보관o
+/// 2,. 스테이지 씬을 로드/언로드 + 맵 요소 확보
+///3. 몬스터 스폰 지시/사망 받기 -> 집계/경험치/드랍 요청 진행
 /// </summary>
 
 public class StageController : MonoBehaviour, IBootStrapper
@@ -19,7 +20,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
 
     // 부트 주입
-    private CharacterFactory characterFactory;
+    //private CharacterFactory characterFactory;
     private MonsterFactory monsterFactory;
     private ItemDropManager itemDropManager;
 
@@ -28,11 +29,13 @@ public class StageController : MonoBehaviour, IBootStrapper
     private ItemDropFacade dropFacade;
     private MonsterSpawner spawner;
     private StageFacade facade;
+
+    // 세션 통해서 받을것
     private CharacterFacade character;
 
 
     private readonly StageStatus status = new StageStatus();
-    private readonly TempStageTable stageTable = new TempStageTable();
+    private readonly TempStageTable stageTable = new TempStageTable(); // 스테이지csv생기면 데이터매니저 조회로 교체해야 하는데...
 
 
     private MonsterController activeElite;
@@ -42,20 +45,37 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     [SerializeField] private StageChangedEventChannelSO stageChangedChannel;
 
+    //스테이지 진입이 실제로 끝났을 때(씬로드 맵확보 상태초기화 완료후 ) 발행
+    // 세션은 이 이벤트 받고 ui붙
+    public event Action<StageFacade> OnStageReady;
+
+
+    public StageFacade Facade => facade;
     public StageProgressInfo Progress => status.ToInfo();
     public EliteProgressInfo EliteProgress => status.ToEliteInfo();
+    public StageChangedInfo StageInfo => BuildStageChangedInfo();
     public CharacterFacade Character => character;
     public bool IsTransitioning => isTransitioning;
 
-    public StageFacade Facade => facade;
 
-    public StageChangedInfo StageInfo => BuildStageChangedInfo();
+    // ui버튼 활성 판단용, 실제 이동은 TryGoNextStage가 다시 검사
+    public bool CanGoNextStage
+    {
+        get
+        {
+            if (isTransitioning) return false;
+            if (!status.IsClearConditionMet) return false;
 
+            int nextStageId = status.Definition.NextStageId;
+            if (nextStageId == status.Definition.StageId) return false;   // 마지막 스테이지
 
+            return stageTable.TryGet(nextStageId, out _);
+        }
+    }
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-        characterFactory = context.Get<CharacterFactory>();
+
         monsterFactory = context.Get<MonsterFactory>();
         itemDropManager = context.Get<ItemDropManager>();
     }
@@ -81,28 +101,58 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
         facade.Bind(this);
 
-        CreateCharacter(startPlayerId);
-
-
         MonsterFacade.MonsterDied += HandleMonsterDied;
-
-        if (autoStartOnBoot)
-        {
-            StartStage(startStageId);
-        }
     }
 
     private void OnDestroy()
     {
         MonsterFacade.MonsterDied -= HandleMonsterDied;
+        OnStageReady = null;
     }
 
 
-    // 외부 호출 (StageFacade통해)
+    // 외부 호출 api
 
-    /// <summary>스테이지를 시작하고 씬이 다르면 씬 전환까지 처리</summary>
-    public void StartStage(int stageId)
+    // 세션이 캐릭터를 만든 뒤 1회 호출, 전환마다 다시 부를 필요 x. 캐릭터는 ddol
+    public void SetCharacter(CharacterFacade characterFacade)
     {
+        if (characterFacade == null)
+        {
+            Debug.LogError("[StageController] SetCharacter에 null이 들어왔습니다.");
+            return;
+        }
+
+        character = characterFacade;
+    }
+
+    //[임시]! 캐릭터 팩토리가 캐릭터파사드를 반환하도록 바뀌면 이 오버로드 삭제
+    public void SetCharacter(CharacterControllers controllers)
+    {
+        if (controllers == null)
+        {
+            Debug.LogError("[StageController] SetCharacter에 null이 들어왔습니다.");
+            return;
+        }
+
+        CharacterFacade characterFacade = controllers.GetComponent<CharacterFacade>();
+        if (characterFacade == null)
+        {
+            Debug.LogError("[StageController] 캐릭터 프리팹에 CharacterFacade가 없습니다.");
+            return;
+        }
+
+        SetCharacter(characterFacade);
+    }
+
+    /// 세션, 세이브, 스테이지 선택 ui가 쓰는 진입점
+    public void EnterStage(int stageId)
+    {
+        if (character == null)
+        {
+            Debug.LogError("[StageController] SetCharacter가 먼저 호출되어야 합니다. stageId=" + stageId);
+            return;
+        }
+
         if (isTransitioning)
         {
             Debug.LogWarning("[StageController] 전환 중에는 스테이지를 바꿀 수 없습니다.");
@@ -116,22 +166,24 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
         StartCoroutine(StartStageRoutine(definition));
-
     }
+
+
+
 
     // 스테이지 넘김 조건 체크 
     public bool TryGoNextStage()
     {
-        if (!status.IsClearConditionMet) return false;
-        if (status.Definition.NextStageId == status.Definition.StageId) return false;
+        if (!CanGoNextStage) return false;
 
-        StartStage(status.Definition.NextStageId);
+        EnterStage(status.Definition.NextStageId);
         return true;
     }
 
     // 엘리트 소환 조건 체크
     public bool TrySummonElite()
     {
+        if (isTransitioning) return false;
         if (!status.ToEliteInfo().CanSummon) return false;
 
         activeElite = spawner.SpawnElite(status.Definition);
@@ -164,7 +216,7 @@ public class StageController : MonoBehaviour, IBootStrapper
         // 클리어 조건을 걸고 싶으면 아래 줄을 살린다 (기획 확정 전까지는 항상 도전 허용)
         // if (!status.IsClearConditionMet) return false;
 
-        StartStage(challengeStageId);
+        EnterStage(challengeStageId);
         return true;
     }
 
@@ -172,24 +224,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     // 내부용 로직
 
-    private void CreateCharacter(int playerId)
-    {
 
-        //스테이지가 바뀔 때는ㄴ위치만 플레이어스타트로 옮기면 된다
-        CharacterControllers controllers = characterFactory.Create(playerId, Vector3.zero);
-        if (controllers == null)
-        {
-            Debug.LogError($"[StageController] 캐릭터 생성 실패. playerId={playerId}");
-            return;
-        }
-
-        // 파사드말고 컨트롤러 ok
-        character = controllers.GetComponent<CharacterFacade>();
-        if (character == null)
-        {
-            Debug.LogError("[StageController] 캐릭터 프리팹에 CharacterFacade가 없습니다.");
-        }
-    }
     private IEnumerator StartStageRoutine(StageDefinition definition)
     {
         isTransitioning = true;
@@ -226,16 +261,23 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
         //  3.맵 요소 확보
+        if (!TryFindMapProvider(loadedSceneName, out StageMapProvider provider))
+        {
+            Debug.LogError($"[StageController] 씬에 StageMapProvider가 없습니다. sceneName={loadedSceneName}");
+            status.SetState(StageState.Failed);
+            isTransitioning = false;
+            yield break;
+        }
 
-        // StageMapParts map = provider.ToParts();
-        // spawner.SetMap(map);
-        // spawner.ResetTimer();
+        StageMapParts map = provider.ToParts();
+        spawner.SetMap(map);
+        spawner.ResetTimer();
 
         // 4. z캐릭터 배치
-        // if (character != null)
-        // {
-        //     character.transform.position = map.PlayerStartPosition;
-        // }
+        if (character != null && map.PlayerStart != null)
+        {
+            character.transform.position = map.PlayerStartPosition;
+        }
 
         // 5. 상태 초기화
         status.Reset(definition);
@@ -245,6 +287,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         // 6. 진입 끝난 후 알리기
         RaiseStageChanged();
+        OnStageReady?.Invoke(facade);
     }
 
     // 로드된 씬 안에서만 StageMapProvider를 찾아서 로드 직후 1회만 돈다
@@ -283,7 +326,7 @@ public class StageController : MonoBehaviour, IBootStrapper
         {
             if (activeElite != null)
             {
-                // monsterFactory.Despawn(activeElite);
+                spawner.Despawn(activeElite);
                 activeElite = null;
             }
             status.EndElite();
@@ -327,6 +370,9 @@ public class StageController : MonoBehaviour, IBootStrapper
                 spawner.DespawnAll();
             }
         }
+        // 클리어 순간에도 ui갱신 가능
+        RaiseStageChanged();
+
     }
 
     private StageChangedInfo BuildStageChangedInfo()

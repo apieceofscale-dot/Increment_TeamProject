@@ -17,8 +17,6 @@ public sealed class MonsterSpawner : MonoBehaviour
     public void Initialize(MonsterFactory factory)
            => monsterFactory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-
-    // Call when map changed (by stageController)
     public void SetMap(in StageMapParts mapParts)
     {
         map = mapParts;
@@ -27,9 +25,6 @@ public sealed class MonsterSpawner : MonoBehaviour
 
     public void ResetTimer() => spawnTimer = 0f;
 
-    /// <summary>
-    /// Call when stage renewals
-    /// </summary>
     public void DespawnAll()
     {
         for (int i = activeMonsters.Count - 1; i >= 0; i--)
@@ -45,7 +40,13 @@ public sealed class MonsterSpawner : MonoBehaviour
         spawnTimer = 0f;
     }
 
+    public void Despawn(MonsterController monster)
+    {
+        if (monster == null) return;
 
+        activeMonsters.Remove(monster);
+        monster.ReturnToPool();
+    }
 
     public void TickSpawn(in StageDefinition definition, float deltaTime)
     {
@@ -63,18 +64,19 @@ public sealed class MonsterSpawner : MonoBehaviour
     public MonsterController SpawnElite(in StageDefinition definition)
     {
         if (!hasMap) return null;
-        return SpawnInternal(definition.EliteMonsterId, definition, GetSpawnPosition(definition));
+        if (!definition.HasElite) return null;
+
+        Vector3 position = map.HasBossSpawnPoint ? map.BossSpawnPosition : GetSpawnPosition(definition);
+        return SpawnInternal(definition.EliteMonsterId, definition, position);
     }
 
     private MonsterController SpawnInternal(int monsterId, in StageDefinition definition, Vector3 position)
     {
-
-        _ = new MonsterSpawnRequest(
-            monsterId, definition.Chapter, definition.StatMultiplier, definition.DropTableId, position);
+        if (monsterId <= 0) return null;
 
         if (monsterFactory == null)
         {
-            Debug.LogWarning("[MonsterSpawner] MonsterFactory is missing.");
+            Debug.LogError("[MonsterSpawner] MonsterFactory가 주입되지 않았습니다.");
             return null;
         }
 
@@ -84,14 +86,10 @@ public sealed class MonsterSpawner : MonoBehaviour
             Quaternion.identity,
             Mathf.Max(1, definition.Chapter));
 
-        if (monster == null)
-        {
-            return null;
-        }
+        if (monster == null) return null;
 
         activeMonsters.Add(monster);
         return monster;
-
     }
 
     private int CountAlive()
@@ -106,20 +104,10 @@ public sealed class MonsterSpawner : MonoBehaviour
         return activeMonsters.Count;
     }
 
-
-    // Spawn at random point
     private Vector3 GetSpawnPosition(in StageDefinition definition)
     {
-        // Transform[] points = map.MonsterSpawnPoints;
-
-        // // 스폰 위치 지정 필요할지말지 고민입니다
-        // if (points == null || points.Length == 0)
-        // {
-        //     Debug.LogWarning($"[MonsterSpawner] 스폰 포인트가 없습니다. stageId={definition.StageId}");
-        //     return map.Root != null ? map.Root.position : Vector3.zero;
-        // }
-
         Transform[] points = map.MonsterSpawnPoints;
+
         if (points == null || points.Length == 0)
         {
             Debug.LogWarning($"[MonsterSpawner] 스폰 포인트가 없습니다. stageId={definition.StageId}");
@@ -134,8 +122,6 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         Vector2 offset = UnityEngine.Random.insideUnitCircle * SpawnRadius;
         return point.position + new Vector3(offset.x, offset.y, 0f);
-
-
     }
-
 }
+
