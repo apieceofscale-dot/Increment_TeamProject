@@ -1,6 +1,10 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 아이템 SO. 전투/장착 스탯은 itemType, value, upgradeStep.
+/// UI 초상화 icon, 필드 외형 worldSprite.
+/// </summary>
 [Serializable]
 public class ItemData : BaseData
 {
@@ -9,19 +13,7 @@ public class ItemData : BaseData
     public int upgradeStep = 1;
 
     public Sprite icon;
-
-    public RuntimeAnimatorController animatorController;
-    public AnimationClip idleClip;
-    public AnimationClip runClip;
-    public AnimationClip attackClip;
-    public AnimationClip hitClip;
-    public AnimationClip deadClip;
-
-    public AudioClip idleAudioClip;
-    public AudioClip runAudioClip;
-    public AudioClip attackAudioClip;
-    public AudioClip hitAudioClip;
-    public AudioClip deadAudioClip;
+    public Sprite worldSprite;
 
     public override BaseData Clone()
     {
@@ -37,19 +29,7 @@ public class ItemData : BaseData
         clone.upgradeStep = upgradeStep;
 
         clone.icon = icon;
-
-        clone.animatorController = animatorController;
-        clone.idleClip = idleClip;
-        clone.runClip = runClip;
-        clone.attackClip = attackClip;
-        clone.hitClip = hitClip;
-        clone.deadClip = deadClip;
-
-        clone.idleAudioClip = idleAudioClip;
-        clone.runAudioClip = runAudioClip;
-        clone.attackAudioClip = attackAudioClip;
-        clone.hitAudioClip = hitAudioClip;
-        clone.deadAudioClip = deadAudioClip;
+        clone.worldSprite = worldSprite;
 
         return clone;
     }
@@ -59,3 +39,4 @@ public class ItemData : BaseData
 public class ItemList : BaseList<ItemData>
 {
 }
+

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,25 +5,18 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
 {
     public static ItemFactory Instance { get; private set; }
 
-    [Serializable]
-    struct PrefabEntry
-    {
-        public int id;
-        public ItemController prefab;
-    }
-
-    [SerializeField] PrefabEntry[] prefabEntries;
+    [SerializeField] ItemController defaultPrefab;
     [SerializeField] ItemObjectPoolManager poolManager;
 
-    readonly Dictionary<int, ItemController> prefabById = new Dictionary<int, ItemController>();
+    public int BootOrder => (int)BootLayer.Factory;
 
-    public int BootOrder => (int)BootLayer.Factory;   
+    void Awake()
+    {
+        Instance = this;
+    }
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-
-        Instance = this;
-
         if (poolManager == null)
         {
             context.TryGet(out poolManager);
@@ -33,25 +25,24 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInitialize()
     {
-        BuildPrefabMap();
-        WarmUpPools();
+        WarmUpPool();
     }
 
     public ItemController Create(int itemId, Vector3 position, Quaternion rotation, int stackAmount = 1, int upgradeLevel = 0, int starForce = 0)
     {
+        if (defaultPrefab == null)
+        {
+            Debug.LogWarning("[ItemFactory] defaultPrefab is missing.");
+            return null;
+        }
+
         if (!DataManager.instance.TryGetItemData(itemId, out ItemData data))
         {
             Debug.LogWarning($"[ItemFactory] ItemData not found. id={itemId}");
             return null;
         }
 
-        if (!prefabById.TryGetValue(itemId, out ItemController prefab) || prefab == null)
-        {
-            Debug.LogWarning($"[ItemFactory] Prefab not found. id={itemId}");
-            return null;
-        }
-
-        ItemController item = GetFromPool(prefab, position, rotation);
+        ItemController item = GetFromPool(position, rotation);
         if (item == null)
         {
             return null;
@@ -73,27 +64,7 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
         poolManager.ReturnObject(item);
     }
 
-    void BuildPrefabMap()
-    {
-        prefabById.Clear();
-
-        if (prefabEntries == null)
-        {
-            return;
-        }
-
-        foreach (PrefabEntry entry in prefabEntries)
-        {
-            if (entry.prefab == null)
-            {
-                continue;
-            }
-
-            prefabById[entry.id] = entry.prefab;
-        }
-    }
-
-    void WarmUpPools()
+    void WarmUpPool()
     {
         if (poolManager == null)
         {
@@ -101,18 +72,17 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
             return;
         }
 
-        var prefabs = new List<ItemController>(prefabById.Values);
-        if (prefabs.Count > 0)
+        if (defaultPrefab != null)
         {
-            poolManager.MakeFirstPools(prefabs);
+            poolManager.MakeFirstPools(new List<ItemController> { defaultPrefab });
         }
     }
 
-    ItemController GetFromPool(ItemController prefab, Vector3 position, Quaternion rotation)
+    ItemController GetFromPool(Vector3 position, Quaternion rotation)
     {
         if (poolManager == null)
         {
-            ItemController created = Instantiate(prefab, position, rotation);
+            ItemController created = Instantiate(defaultPrefab, position, rotation);
             if (created is IPoolable poolable)
             {
                 poolable.InitializePoolObj(() => Destroy(created.gameObject));
@@ -121,6 +91,6 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
             return created;
         }
 
-        return poolManager.GetObject(prefab, position, rotation);
+        return poolManager.GetObject(defaultPrefab, position, rotation);
     }
 }

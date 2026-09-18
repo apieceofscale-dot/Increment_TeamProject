@@ -12,7 +12,7 @@ using UnityEngine;
 /// ■ 미동작·타팀 연결 필요:
 ///   - StageManager/MonsterSpawner.SpawnInternal: Factory.Create 대신 new() 스텁 → Stage 쪽 주석 해제·연결 필요.
 ///   - StageController: MonsterDied 구독·HandleMonsterDied 주석 처리됨 → 킬/경험치 미집계.
-///   - 씬 Inspector: MonsterFactory prefabEntries·poolManager, MonsterFacade→itemDropFacade 수동 연결.
+///   - 씬 Inspector: MonsterFactory defaultPrefab·poolManager, MonsterFacade→itemDropFacade 수동 연결.
 ///   - Monster prefab에 Navi2DAgent 없으면 Trace 폴백(MoveTowards)만 동작.
 ///   - CSV→SO 임포트(Tools/ExcelTest) 안 하면 DataManager 데이터 비어 있음.
 /// </remarks>

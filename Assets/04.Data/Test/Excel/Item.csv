@@ -1,15 +1,15 @@
-id,codeName,description,displayName,itemType,value,upgradeStep,animatorController,idleClip,runClip,attackClip,hitClip,deadClip,idleAudioClip,runAudioClip,attackAudioClip,hitAudioClip,deadAudioClip
-10000,HpPotion,something,HealingPotion,1,50,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
-10001,ManaPotion,nothing,ManaPotion,1,30,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
-10002,Portal,anyting,PortalScroll,2,0,1,Assets/04.Data/Test/Low_Swordman/2.Animation/sword_man.controller,Assets/04.Data/Test/Low_Swordman/2.Animation/Idle.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Run.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Attack.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Sit.anim,Assets/04.Data/Test/Low_Swordman/2.Animation/Die.anim,,,,,
-10010,Hat,hat slot,Hat,2,10,1,,,,,,,,,,
-10011,Top,top slot,Top,2,10,1,,,,,,,,,,
-10012,Bottom,bottom slot,Bottom,2,10,1,,,,,,,,,,
-10013,Gloves,gloves slot,Gloves,2,10,1,,,,,,,,,,
-10014,Cape,cape slot,Cape,2,10,1,,,,,,,,,,
-10015,Shoulder,shoulder slot,Shoulder,2,10,1,,,,,,,,,,
-10016,Belt,belt slot,Belt,2,10,1,,,,,,,,,,
-10017,Shoes,shoes slot,Shoes,2,10,1,,,,,,,,,,
-10018,Ring1,ring slot 1,Ring1,2,10,1,,,,,,,,,,
-10019,Ring2,ring slot 2,Ring2,2,10,1,,,,,,,,,,
-10020,Necklace,necklace slot,Necklace,2,10,1,,,,,,,,,,
+id,codeName,description,displayName,itemType,value,upgradeStep,icon,worldSprite
+10000,HpPotion,something,HealingPotion,1,50,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10001,ManaPotion,nothing,ManaPotion,1,30,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10002,Portal,anyting,PortalScroll,2,0,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10010,Hat,hat slot,Hat,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10011,Top,top slot,Top,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10012,Bottom,bottom slot,Bottom,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10013,Gloves,gloves slot,Gloves,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10014,Cape,cape slot,Cape,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10015,Shoulder,shoulder slot,Shoulder,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10016,Belt,belt slot,Belt,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10017,Shoes,shoes slot,Shoes,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10018,Ring1,ring slot 1,Ring1,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10019,Ring2,ring slot 2,Ring2,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10020,Necklace,necklace slot,Necklace,2,10,1,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png

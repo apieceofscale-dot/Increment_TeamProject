@@ -13,7 +13,7 @@ using UnityEngine;
 ///   - ItemDropManager.ProcessPendingRequests: itemFactory.Create 주석 → 몬ster 드랍 시 필드 아이템 안 생김.
 ///   - ItemPickedUp 구독자 없음 → 인벤토리·HP회복·재화 반영 안 됨 (Character 쪽 구독 필요).
 ///   - CharacterEquipment.armorPartRules vs ItemFacade.TryGetArmorPart — 장착 시 둘 중 하나 연결 필요.
-///   - 씬 Inspector: ItemFactory prefabEntries·poolManager 수동 연결.
+///   - 씬 Inspector: ItemFactory defaultPrefab·poolManager 수동 연결.
 ///   - CSV→SO 임포트(Tools/ExcelTest) 안 하면 장비 10010~10020 데이터 없음.
 /// </remarks>
 public class ItemFacade : MonoBehaviour

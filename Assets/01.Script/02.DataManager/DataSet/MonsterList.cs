@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 몬스터 SO. 전투 스탯 + UI icon + 필드 worldSprite + 애니메이션(선택).
+/// </summary>
 [Serializable]
 public class MonsterData : BaseData
 {
@@ -11,6 +14,9 @@ public class MonsterData : BaseData
     public float attackRange = 1.4f;
     public float attackCooldown = 1f;
     public int dropTableId;
+
+    public Sprite icon;
+    public Sprite worldSprite;
 
     public RuntimeAnimatorController animatorController;
     public AnimationClip idleClip;
@@ -42,6 +48,9 @@ public class MonsterData : BaseData
         clone.attackCooldown = attackCooldown;
         clone.dropTableId = dropTableId;
 
+        clone.icon = icon;
+        clone.worldSprite = worldSprite;
+
         clone.animatorController = animatorController;
         clone.idleClip = idleClip;
         clone.runClip = runClip;
@@ -63,3 +72,4 @@ public class MonsterData : BaseData
 public class MonsterList : BaseList<MonsterData>
 {
 }
+

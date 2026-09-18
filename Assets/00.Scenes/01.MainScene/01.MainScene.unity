@@ -209,9 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9506d180eea98a54da914bd443042458, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemFactory
-  prefabEntries:
-  - id: 0
-    prefab: {fileID: 0}
+  defaultPrefab: {fileID: 6491485383956377605, guid: ba8ccaaba12aab64c8d809402e3d1261, type: 3}
   poolManager: {fileID: 0}
 --- !u!1 &186185353
 GameObject:
@@ -421,7 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8c4422222e1fc24d9e4319c6495b3bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterFactory
-  prefabEntries: []
+  defaultPrefab: {fileID: 8662083666288718600, guid: 160becc24130bd648b26402d76696e96, type: 3}
   poolManager: {fileID: 0}
 --- !u!1 &1135873304
 GameObject:

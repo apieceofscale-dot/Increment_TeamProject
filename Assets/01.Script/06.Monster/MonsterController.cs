@@ -254,12 +254,17 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     void ApplyVisuals(MonsterData data)
     {
-        if (data == null || _animator == null)
+        if (data == null)
         {
             return;
         }
 
-        if (data.animatorController != null)
+        if (_spriteRenderer != null && data.worldSprite != null)
+        {
+            _spriteRenderer.sprite = data.worldSprite;
+        }
+
+        if (_animator != null && data.animatorController != null)
         {
             _animator.runtimeAnimatorController = data.animatorController;
         }

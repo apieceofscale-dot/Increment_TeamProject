@@ -16,7 +16,7 @@ public class ItemController : MonoBehaviour, IPoolable
     readonly ItemStatusProvider _statusProvider = ItemStatusProvider.Default;
 
     Action _returnToPool;
-    Animator _animator;
+    SpriteRenderer _spriteRenderer;
     bool _spawned;
     ItemData _runtimeData;
 
@@ -24,11 +24,7 @@ public class ItemController : MonoBehaviour, IPoolable
 
     void Awake()
     {
-        _animator = GetComponent<Animator>();
-        if (_animator == null)
-        {
-            _animator = GetComponentInChildren<Animator>();
-        }
+        _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     public void BindSpawn(int id, int upgrade, int star, int stackAmount = 1)
@@ -127,14 +123,14 @@ public class ItemController : MonoBehaviour, IPoolable
 
     void ApplyVisuals(ItemData data)
     {
-        if (data == null || _animator == null)
+        if (data == null || _spriteRenderer == null)
         {
             return;
         }
 
-        if (data.animatorController != null)
+        if (data.worldSprite != null)
         {
-            _animator.runtimeAnimatorController = data.animatorController;
+            _spriteRenderer.sprite = data.worldSprite;
         }
     }
 }
