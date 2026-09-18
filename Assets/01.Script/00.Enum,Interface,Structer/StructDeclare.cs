@@ -78,6 +78,17 @@ public struct ItemPickedUpInfo
     public ItemController Source;
 }
 
+/// <summary>강화 UI 미리보기. ItemId·ItemType은 SO/Generated enum 기준.</summary>
+public struct ItemUpgradePreview
+{
+    public ItemId ItemId;
+    public int CurrentUpgradeLevel;
+    public int NextUpgradeLevel;
+    public int CurrentEffectiveValue;
+    public int NextEffectiveValue;
+    public long UpgradeCost;
+}
+
 public readonly struct StageDefinition
 {
     public readonly int StageId;

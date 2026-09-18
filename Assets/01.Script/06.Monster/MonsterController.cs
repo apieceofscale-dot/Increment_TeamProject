@@ -153,7 +153,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         _ai.ForceDead();
         MonsterFacade.NotifyDied(new MonsterDiedInfo
         {
-            MonsterId = dropItemId,
+            MonsterId = monsterId,
+            DropTableId = dropItemId,
             Position = transform.position,
             Source = this
         });
