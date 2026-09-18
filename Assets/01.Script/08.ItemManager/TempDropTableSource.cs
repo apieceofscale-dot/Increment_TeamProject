@@ -16,24 +16,24 @@ public sealed class TempDropTableSource : IDropTableSource
             // 슬라임(2000) — hp포션 확정~최대2개 + mp포션 저확률
             [2000] = new[]
             {
-                new DropTableEntry(itemId: 10000, chance: 1.00f, minAmount: 1, maxAmount: 2),
-                new DropTableEntry(itemId: 10001, chance: 0.15f, minAmount: 1, maxAmount: 1),
+                new DropTableEntry(ItemId.HpPotion, 1.00f, 1, 2),
+                new DropTableEntry(ItemId.ManaPotion, 0.15f, 1, 1),
             },
 
             // 고블린(2001) — hp포션 + mp포션 + 10010번쯤 장비 드랍 추가
             [2001] = new[]
             {
-                new DropTableEntry(itemId: 10000, chance: 1.00f, minAmount: 1, maxAmount: 2),
-                new DropTableEntry(itemId: 10001, chance: 0.20f, minAmount: 1, maxAmount: 1),
-                new DropTableEntry(itemId: 10010, chance: 0.05f, minAmount: 1, maxAmount: 1),
+                new DropTableEntry(ItemId.HpPotion, 1.00f, 1, 2),
+                new DropTableEntry(ItemId.ManaPotion, 0.20f, 1, 1),
+                new DropTableEntry(ItemId.Hat, 0.05f, 1, 1),
             },
 
             // 오크(2002) — 다중 드랍 확인용 확률
             [2002] = new[]
             {
-                new DropTableEntry(itemId: 10000, chance: 1.00f, minAmount: 1, maxAmount: 2),
-                new DropTableEntry(itemId: 10001, chance: 0.80f, minAmount: 1, maxAmount: 1),
-                new DropTableEntry(itemId: 10010, chance: 0.50f, minAmount: 1, maxAmount: 1),
+                new DropTableEntry(ItemId.HpPotion, 1.00f, 1, 2),
+                new DropTableEntry(ItemId.ManaPotion, 0.80f, 1, 1),
+                new DropTableEntry(ItemId.Hat, 0.50f, 1, 1),
             },
         };
     }

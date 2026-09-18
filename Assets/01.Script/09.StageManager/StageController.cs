@@ -84,6 +84,8 @@ public class StageController : MonoBehaviour, IBootStrapper
         CreateCharacter(startPlayerId);
 
 
+        MonsterFacade.MonsterDied += HandleMonsterDied;
+
         if (autoStartOnBoot)
         {
             StartStage(startStageId);
@@ -92,7 +94,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     private void OnDestroy()
     {
-        //MonsterFacade.MonsterDied -= HandleMonsterDied;
+        MonsterFacade.MonsterDied -= HandleMonsterDied;
     }
 
 
@@ -296,10 +298,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         bool wasElite = activeElite != null && ReferenceEquals(activeElite, info.Source);
 
-        // 드랍 —DropTableId가 아직 안 채워졌으면 MonsterId로 
-        // 몬스터 담당이 DropTableId를 채우면 폴백 제거
-        int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
-        dropFacade.RequestDrop(dropTableId, info.Position);
+        // 드랍·Despawn은 MonsterFacade → ItemDropFacade (중복 RequestDrop 하지 않음)
 
         // 경험치
         if (character != null && info.ExpReward > 0)

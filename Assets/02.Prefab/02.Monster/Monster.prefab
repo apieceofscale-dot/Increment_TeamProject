@@ -87,8 +87,7 @@ MonoBehaviour:
   traceRange: 6
   attackRange: 1.4
   attackCooldown: 1
-  dropItemId: 1
-  dropChance: 1
+  dropTableId: 0
   targetTag: Player
 --- !u!70 &8800020000000000002
 CapsuleCollider2D:

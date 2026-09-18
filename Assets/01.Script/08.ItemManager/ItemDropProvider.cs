@@ -69,10 +69,10 @@ public class ItemDropProvider
 //드랍 판정 결과 1건
 public readonly struct DropResult
 {
-    public readonly int ItemId;
+    public readonly ItemId ItemId;
     public readonly int Amount;
 
-    public DropResult(int itemId, int amount)
+    public DropResult(ItemId itemId, int amount)
     {
         ItemId = itemId;
         Amount = amount;

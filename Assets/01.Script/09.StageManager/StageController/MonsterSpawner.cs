@@ -37,7 +37,7 @@ public sealed class MonsterSpawner : MonoBehaviour
             MonsterController monster = activeMonsters[i];
             if (monster != null)
             {
-                // 몬스터팩토리의 디스폰ㅁ?
+                monster.ReturnToPool();
             }
         }
 
@@ -69,14 +69,27 @@ public sealed class MonsterSpawner : MonoBehaviour
     private MonsterController SpawnInternal(int monsterId, in StageDefinition definition, Vector3 position)
     {
 
-        MonsterSpawnRequest request = new MonsterSpawnRequest(
+        _ = new MonsterSpawnRequest(
             monsterId, definition.Chapter, definition.StatMultiplier, definition.DropTableId, position);
 
-        // 여기서 오브젝트 풀 혹은 몬스터팩토리 create 통해 activeMonsters 채우고, 몬스터 반환하기
-        // new() 대신 주석 윗줄 항목을 쓸 것  
-        MonsterController monster = new();
+        if (monsterFactory == null)
+        {
+            Debug.LogWarning("[MonsterSpawner] MonsterFactory is missing.");
+            return null;
+        }
 
+        MonsterController monster = monsterFactory.Create(
+            monsterId,
+            position,
+            Quaternion.identity,
+            Mathf.Max(1, definition.Chapter));
 
+        if (monster == null)
+        {
+            return null;
+        }
+
+        activeMonsters.Add(monster);
         return monster;
 
     }
@@ -106,7 +119,18 @@ public sealed class MonsterSpawner : MonoBehaviour
         //     return map.Root != null ? map.Root.position : Vector3.zero;
         // }
 
-        Transform point = map.MonsterSpawnPoints[UnityEngine.Random.Range(0, map.MonsterSpawnPoints.Length)];
+        Transform[] points = map.MonsterSpawnPoints;
+        if (points == null || points.Length == 0)
+        {
+            Debug.LogWarning($"[MonsterSpawner] 스폰 포인트가 없습니다. stageId={definition.StageId}");
+            return map.Root != null ? map.Root.position : Vector3.zero;
+        }
+
+        Transform point = points[UnityEngine.Random.Range(0, points.Length)];
+        if (point == null)
+        {
+            return map.Root != null ? map.Root.position : Vector3.zero;
+        }
 
         Vector2 offset = UnityEngine.Random.insideUnitCircle * SpawnRadius;
         return point.position + new Vector3(offset.x, offset.y, 0f);

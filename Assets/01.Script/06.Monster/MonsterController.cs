@@ -11,8 +11,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     [SerializeField] float traceRange = 6f;
     [SerializeField] float attackRange = 1.4f;
     [SerializeField] float attackCooldown = 1f;
-    [SerializeField] int dropItemId = 1;
-    [SerializeField] float dropChance = 1f;
+    [SerializeField] int dropTableId;
     [SerializeField] string targetTag = "Player";
 
     readonly MonsterStatus _status = new MonsterStatus();
@@ -31,7 +30,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     public MonsterStatus Status => _status;
     public MonsterAI AI => _ai;
     public bool IsDead => _status.IsDead;
-    public int DropTableId => dropItemId;
+    /// <summary>SO dropTableId. 드랍 판정은 ItemDropManager 전담.</summary>
+    public int DropTableId => dropTableId;
 
     void Awake()
     {
@@ -67,7 +67,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         traceRange = data.traceRange;
         attackRange = data.attackRange;
         attackCooldown = data.attackCooldown;
-        dropItemId = data.dropTableId > 0 ? data.dropTableId : data.id;
+        dropTableId = data.dropTableId > 0 ? data.dropTableId : data.id;
     }
 
     public void InitializePoolObj(Action returnAction)
@@ -90,8 +90,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             traceRange,
             attackRange,
             attackCooldown,
-            dropItemId,
-            dropChance,
+            dropTableId,
             palette);
         _stageProvider.ApplyStage(_status, stageIndex);
         _ai.Reset();
@@ -151,13 +150,16 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
 
         _ai.ForceDead();
-        MonsterFacade.NotifyDied(new MonsterDiedInfo
-        {
-            MonsterId = monsterId,
-            DropTableId = dropItemId,
-            Position = transform.position,
-            Source = this
-        });
+        MonsterDiedInfo diedInfo = _runtimeData != null
+            ? MonsterDiedInfo.From(_runtimeData, transform.position, this)
+            : new MonsterDiedInfo
+            {
+                MonsterId = (MonsterId)monsterId,
+                DropTableId = dropTableId,
+                Position = transform.position,
+                Source = this,
+            };
+        MonsterFacade.NotifyDied(diedInfo);
     }
 
     public Transform FindTarget()

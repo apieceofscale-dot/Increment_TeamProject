@@ -108,7 +108,7 @@ public class MonsterFacade : MonoBehaviour
     {
         if (itemDropFacade != null)
         {
-            int dropTableId = info.DropTableId > 0 ? info.DropTableId : info.MonsterId;
+            int dropTableId = info.DropTableId > 0 ? info.DropTableId : (int)info.MonsterId;
             itemDropFacade.RequestDrop(dropTableId, info.Position);
         }
 

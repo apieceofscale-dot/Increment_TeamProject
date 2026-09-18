@@ -93,14 +93,17 @@ public class ItemController : MonoBehaviour, IPoolable
         }
 
         _status.MarkPickedUp();
-        ItemFacade.NotifyPickedUp(new ItemPickedUpInfo
-        {
-            ItemId = _status.Id,
-            Type = _status.Type,
-            Value = _status.EffectiveValue,
-            Collector = collector,
-            Source = this
-        });
+        ItemPickedUpInfo pickedUp = _runtimeData != null
+            ? ItemPickedUpInfo.From(_runtimeData, _status.EffectiveValue, collector, this)
+            : new ItemPickedUpInfo
+            {
+                ItemId = (ItemId)_status.Id,
+                Type = _status.Type,
+                Value = _status.EffectiveValue,
+                Collector = collector,
+                Source = this,
+            };
+        ItemFacade.NotifyPickedUp(pickedUp);
     }
 
     public void ReturnToPool()

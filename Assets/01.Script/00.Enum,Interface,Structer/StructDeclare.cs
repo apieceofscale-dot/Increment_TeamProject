@@ -44,14 +44,15 @@ public readonly struct BootstrapContext
 
 }
 
+/// <summary>드랍 테이블 한 줄. 아이템 id는 Generated <see cref="ItemId"/> (SO id와 동일).</summary>
 public readonly struct DropTableEntry
 {
-    public readonly int ItemId;
+    public readonly ItemId ItemId;
     public readonly float Chance;
     public readonly int MinAmount;
     public readonly int MaxAmount;
 
-    public DropTableEntry(int itemId, float chance, int minAmount, int maxAmount)
+    public DropTableEntry(ItemId itemId, float chance, int minAmount, int maxAmount)
     {
         ItemId = itemId;
         Chance = chance;
@@ -60,22 +61,60 @@ public readonly struct DropTableEntry
     }
 }
 
+/// <summary>몬스터 사망 이벤트. 스탯·드랍 풀은 <see cref="MonsterData"/>(Clone SO) 기준.</summary>
 public struct MonsterDiedInfo
 {
-    public int MonsterId;
+    public MonsterId MonsterId;
     public int DropTableId;
     public long ExpReward;
     public Vector3 Position;
     public MonsterController Source;
+
+    /// <summary>DataManager에 로드된 MonsterData(복제본)에서 id·dropTableId만 전달. 드랍 판정은 ItemDropManager.</summary>
+    public static MonsterDiedInfo From(MonsterData data, Vector3 position, MonsterController source, long expReward = 0)
+    {
+        if (data == null)
+        {
+            return default;
+        }
+
+        return new MonsterDiedInfo
+        {
+            MonsterId = (MonsterId)data.id,
+            DropTableId = data.dropTableId > 0 ? data.dropTableId : data.id,
+            ExpReward = expReward,
+            Position = position,
+            Source = source,
+        };
+    }
 }
 
+/// <summary>필드 줍기 이벤트. 타입·기본 스탯은 SO <see cref="ItemData"/>에서, Value는 런타임 적용값.</summary>
 public struct ItemPickedUpInfo
 {
-    public int ItemId;
+    public ItemId ItemId;
     public ItemType Type;
     public int Value;
     public GameObject Collector;
     public ItemController Source;
+
+    /// <summary>Initialize에 넣은 ItemData(Clone 경로) 기준. 별도 스탯 테이블 없음.</summary>
+    public static ItemPickedUpInfo From(ItemData data, int effectiveValue, GameObject collector, ItemController source)
+    {
+        if (data == null)
+        {
+            return default;
+        }
+
+        return new ItemPickedUpInfo
+        {
+            ItemId = (ItemId)data.id,
+            Type = data.itemType,
+            Value = effectiveValue,
+            Collector = collector,
+            Source = source,
+        };
+    }
 }
 
 /// <summary>강화 UI 미리보기. ItemId·ItemType은 SO/Generated enum 기준.</summary>

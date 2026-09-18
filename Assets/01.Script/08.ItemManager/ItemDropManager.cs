@@ -112,8 +112,7 @@ public sealed class ItemDropManager : MonoBehaviour, IBootStrapper
                 DropResult result = resolveBuffer[i];
                 Vector3 spawnPosition = GetScatteredPosition(request.Position, i, resolveBuffer.Count);
 
-                //itemFactory.Create??
-
+                itemFactory.Create((int)result.ItemId, spawnPosition, Quaternion.identity, result.Amount);
                 spawnedThisFrame++;
             }
         }

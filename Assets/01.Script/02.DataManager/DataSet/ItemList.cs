@@ -5,11 +5,8 @@ using UnityEngine;
 
 
 /// <summary>
-
-/// 아이템 SO. 전투/장착 스탯은 itemType, value, upgradeStep.
-
-/// UI 초상화 icon, 필드 외형 worldSprite.
-
+/// 아이템 SO. CSV→ExcelImporter가 id/codeName(ItemId enum)·필드를 채움.
+/// DataRepositary.Load 시 <see cref="Clone"/>으로 행마다 복제본을 들고 있음 — 스탯·이미지는 여기만 정의.
 /// </summary>
 
 [Serializable]

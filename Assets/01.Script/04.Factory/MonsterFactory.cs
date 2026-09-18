@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-10001)]
 public class MonsterFactory : MonoBehaviour, IBootStrapper
 {
     public static MonsterFactory Instance { get; private set; }

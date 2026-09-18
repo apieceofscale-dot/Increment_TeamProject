@@ -12,8 +12,7 @@ public sealed class MonsterStatus
     public float TraceRange { get; private set; }
     public float AttackRange { get; private set; }
     public float AttackCooldown { get; private set; }
-    public int DropItemId { get; private set; }
-    public float DropChance { get; private set; }
+    public int DropTableId { get; private set; }
 
     public bool IsDead => State == MonsterState.Dead || CurrentHp <= 0;
 
@@ -25,8 +24,7 @@ public sealed class MonsterStatus
         float traceRange,
         float attackRange,
         float attackCooldown,
-        int dropItemId,
-        float dropChance,
+        int dropTableId,
         Color paletteColor)
     {
         Id = id;
@@ -37,8 +35,7 @@ public sealed class MonsterStatus
         TraceRange = traceRange;
         AttackRange = attackRange;
         AttackCooldown = Mathf.Max(0.1f, attackCooldown);
-        DropItemId = dropItemId;
-        DropChance = Mathf.Clamp01(dropChance);
+        DropTableId = dropTableId;
         PaletteColor = paletteColor;
         State = MonsterState.Idle;
     }
@@ -78,7 +75,6 @@ public sealed class MonsterStatus
     {
         CurrentHp = 0;
         State = MonsterState.Idle;
-        DropItemId = 0;
-        DropChance = 0f;
+        DropTableId = 0;
     }
 }

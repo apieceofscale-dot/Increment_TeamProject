@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-10001)]
 public class ItemFactory : MonoBehaviour, IBootStrapper
 {
     public static ItemFactory Instance { get; private set; }

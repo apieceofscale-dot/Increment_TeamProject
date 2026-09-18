@@ -18,6 +18,25 @@ public static class ExcelImporter
         ImportCsv("Assets/04.Data/Test/Excel/Test.csv");
     }
 
+    [MenuItem("Tools/ExcelTest/2. Read Item.csv")]
+    public static void ReadItemCsv()
+    {
+        ImportCsv("Assets/04.Data/Test/Excel/Item.csv");
+    }
+
+    [MenuItem("Tools/ExcelTest/3. Read Monster.csv")]
+    public static void ReadMonsterCsv()
+    {
+        ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
+    }
+
+    [MenuItem("Tools/ExcelTest/4. Read Item + Monster (게임 데이터)")]
+    public static void ReadGameDataCsvs()
+    {
+        ImportCsv("Assets/04.Data/Test/Excel/Item.csv");
+        ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
+    }
+
     public static void ImportCsv(string path) 
     {      
         ScriptableObject listAsset  = FindTargetListAsset(path);
