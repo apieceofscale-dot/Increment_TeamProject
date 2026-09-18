@@ -4,6 +4,23 @@ using UnityEngine;
 [Serializable]
 public class PlayerData : BaseData
 {
+    // 비주얼 관련
+    public RuntimeAnimatorController animatorController;
+
+    public AnimationClip idleClip;
+    public AnimationClip runClip;
+    public AnimationClip attackClip;
+    public AnimationClip jumpClip;
+    public AnimationClip deadClip;
+
+    public AudioClip idleAudioClip;
+    public AudioClip runAudioClip;
+    public AudioClip attackAudioClip;
+    public AudioClip jumpAudioClip;
+    public AudioClip deadAudioClip;
+
+    public Sprite portrait;
+
     // 기본 상태
     public int level;
     public long exp;
@@ -45,6 +62,15 @@ public class PlayerData : BaseData
         clone.codeName = this.codeName;
         clone.description = this.description;
         clone.displayName = this.displayName;
+        
+        // 비주얼 관련
+        clone.animatorController = this.animatorController;
+        clone.idleClip = this.idleClip;
+        clone.runClip = this.runClip;
+        clone.attackClip = this.attackClip;
+        clone.jumpClip = this.jumpClip;
+        clone.deadClip = this.deadClip;
+        clone.portrait = this.portrait;
 
         // 기본 상태
         clone.level = this.level;

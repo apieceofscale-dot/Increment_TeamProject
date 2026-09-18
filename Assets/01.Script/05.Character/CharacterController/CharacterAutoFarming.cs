@@ -19,23 +19,59 @@ public class CharacterAutoFarming : MonoBehaviour
     private Collider2D bodyCollider, target;
     private float nextSearch;
 
-    private void Awake()
+    private bool initialized;
+    private bool automaticStartPending;
+
+    internal void Inject(CharacterControllers owner)
     {
-        controller = GetComponent<CharacterControllers>();
+        controller = owner;
         agent = GetComponent<Navi2DAgent>();
         bodyCollider = GetComponent<Collider2D>();
-        agent.enabled = false;
+
+        if (owner == null || agent == null || bodyCollider == null)
+            throw new InvalidOperationException("필수 컴포넌트 확인");
+
+        agent.enabled = false; // 부트 중 Navi2DAgent의 프레임 실행을 막는다.
     }
-    private void Start() { if (startAutomatically) SetAutoFarming(true); }
-    private void OnDisable() { SetAutoFarming(false); }
+
+    internal void Initialize()
+    {
+        if (initialized)
+            return;
+
+        if (controller == null || agent == null || bodyCollider == null)
+            throw new InvalidOperationException("자동사냥 Inject를 먼저 호출");
+
+        IsRunning = false;
+        CurrentState = "Idle";
+        automaticStartPending = startAutomatically;
+        initialized = true;
+    }
+
+    private void OnDisable()
+    { 
+        SetAutoFarming(false);
+    }
+
     private void Update()
     {
+        if (automaticStartPending && controller != null && controller.CanRun && controller.isActiveAndEnabled)
+        {
+            automaticStartPending = false;
+            SetAutoFarming(true);
+        }
+
         if (IsRunning && (controller == null || !controller.isActiveAndEnabled))
             SetAutoFarming(false);
     }
 
     public void SetAutoFarming(bool enabled)
     {
+        if (enabled && (!initialized || controller == null || !controller.CanRun))
+            return;
+
+        automaticStartPending = false;
+
         if (!enabled)
         {
             if (IsRunning) PauseAgent();
@@ -44,14 +80,16 @@ public class CharacterAutoFarming : MonoBehaviour
             target = null;
             return;
         }
-        if (IsRunning || !isActiveAndEnabled || controller == null
-            || !controller.isActiveAndEnabled || controller.Status.CurrentHp <= 0) return;
-        if (agent == null || !controller.AutoFarmingConfigured
-            || !bodyCollider.enabled || bodyCollider.isTrigger)
+
+        if (IsRunning || !isActiveAndEnabled || controller == null || !controller.isActiveAndEnabled || controller.Status.CurrentHp <= 0)
+            return;
+
+        if (agent == null || !controller.AutoFarmingConfigured || !bodyCollider.enabled || bodyCollider.isTrigger)
         {
             Debug.LogWarning("자동사냥: Agent, 본체 Collider, Ground Check, Attack Point, 레이어 설정을 확인", this);
             return;
         }
+
         IsRunning = true;
         CurrentState = "Search";
         target = null;
@@ -61,17 +99,28 @@ public class CharacterAutoFarming : MonoBehaviour
 
     internal void Tick()
     {
-        if (!IsRunning) return;
+        if (!initialized || controller == null || !controller.CanRun || !IsRunning)
+            return;
+
         if (controller.Status.CurrentHp <= 0 || agent == null)
-        { SetAutoFarming(false); return; }
+        {
+            SetAutoFarming(false);
+            return;
+        }
+
         if (!IsValidTarget(target))
         {
             target = null;
             CurrentState = "Search";
             PauseAgent();
-            if (Time.time >= nextSearch) FindTarget();
-            if (target == null) return;
+
+            if (Time.time >= nextSearch)
+                FindTarget();
+
+            if (target == null)
+                return;
         }
+
         controller.FaceAutoFarmingTarget(target.bounds.center.x);
         
         if (controller.AutoFarmingGrounded && controller.CanAutoFarmingAttack(target))

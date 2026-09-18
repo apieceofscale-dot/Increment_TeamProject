@@ -2,28 +2,34 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterFacade : MonoBehaviour
+public class CharacterFacade : MonoBehaviour, IBootStrapper
 {
     
     [SerializeField] private CharacterControllers characterControllers;
-    private CharacterControllers Controller
-    {
-        get
-        {
-            if (characterControllers == null)
-                characterControllers = GetComponent<CharacterControllers>();
+    private CharacterControllers Controller => characterControllers;
 
-            return characterControllers;
-        }
+    [SerializeField] private int bootOrder = 1100;
+    public int BootOrder => bootOrder;
+    public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;
+    public bool CanRun => characterControllers != null && characterControllers.CanRun;
+    internal void Inject(CharacterControllers owner)
+    {
+        if (owner == null)
+            throw new System.ArgumentNullException(nameof(owner));
+
+        if (characterControllers != null && characterControllers != owner)
+            throw new System.InvalidOperationException("연결된 캐릭터와 주입 대상 다름");
+
+        characterControllers = owner;
     }
-
-    private void Awake()
+    public void IBootStrapperInject(BootstrapContext context)
     {
-        if (characterControllers == null)
-            characterControllers = GetComponent<CharacterControllers>();
-
-        if (characterControllers == null)
-            Debug.LogError("캐릭터 컨트롤러 없음", this);
+        Inject(characterControllers != null ? characterControllers : GetComponentInParent<CharacterControllers>());
+    }
+    public void IBootStrapperInitialize()
+    {
+        if (!IsInitialized)
+            throw new System.InvalidOperationException("Controller 초기화 먼저 완료해야함");
     }
 
     #region 공용 상세 객체 접근 용

@@ -6,6 +6,15 @@ using System.Collections.Generic;
 [DisallowMultipleComponent]
 public class CharacterInventory : MonoBehaviour
 {
+    private CharacterEquipment equipment;
+    internal void Inject(CharacterEquipment source)
+    {
+        if (source == null || source.gameObject != gameObject)
+            throw new InvalidOperationException("같은 캐릭터의 CharacterEquipment 필요");
+
+        equipment = source;
+    }
+
     private readonly Dictionary<Guid, CharacterInventoryEquipment> equipmentItems = new Dictionary<Guid, CharacterInventoryEquipment>();
 
     public int EquipmentCount => equipmentItems.Count;
@@ -50,7 +59,8 @@ public class CharacterInventory : MonoBehaviour
 
     public bool TryRemoveEquipment(Guid instanceId)
     {
-        CharacterEquipment equipment = GetComponent<CharacterEquipment>();
+        if (equipment == null)
+            return false;
 
         if (equipment != null && equipment.IsEquipped(instanceId))
             return false;
