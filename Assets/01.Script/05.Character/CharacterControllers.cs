@@ -4,8 +4,76 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 [RequireComponent(typeof(CharacterEquipment))]
-public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
+public class CharacterControllers : MonoBehaviour, IBootStrapper
 {
+    [SerializeField] private int bootOrder = 1000;
+    [SerializeField] private int scenePlayerId = 1000;
+    public int BootOrder => bootOrder;
+    public bool IsInitialized {  get; private set; }
+    public bool CanRun => IsInitialized && bootStrapper != null && bootStrapper.IsBootCompleted;
+    private BootStrapper bootStrapper;
+    private bool referencesInjected;
+    private CharacterSkillBase[] ownedSkills;
+
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+        if (referencesInjected)
+            return;
+        
+        bootStrapper = FindFirstObjectByType<BootStrapper>();
+
+        if (bootStrapper == null)
+            throw new InvalidOperationException("부트스트래퍼 필요");
+
+        rigid = GetComponent<Rigidbody2D>();
+        jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
+
+        if (characterInventory == null)
+            characterInventory = GetComponent<CharacterInventory>();
+
+        characterEquipment = GetComponent<CharacterEquipment>();
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>(true);
+
+        autoFarming = GetComponent<CharacterAutoFarming>();
+
+        if (rigid == null || jobAdvancedment == null || characterInventory == null || characterEquipment == null)
+            throw new InvalidOperationException("캐릭터 필수 컴포넌트 확인");
+
+        if (characterInventory.gameObject != gameObject)
+            throw new InvalidOperationException("Inventory는 같은 캐릭터 오브젝트의 컴포넌트여야힘");
+
+        characterInventory.Inject(characterEquipment);
+        characterEquipment.Inject(this, characterInventory);
+        EnsureSkillSlots(); // UI 구독 전에 채널 6개를 한 번만 생성한다.
+        ownedSkills = GetComponentsInChildren<CharacterSkillBase>(true);
+
+        foreach (var facade in GetComponentsInChildren<CharacterFacade>(true))
+            if (facade.GetComponentInParent<CharacterControllers>() == this)
+                facade.Inject(this);
+
+        foreach (var input in GetComponentsInChildren<PlayerInputController>(true))
+            if (input.GetComponentInParent<CharacterControllers>() == this)
+                input.Inject(this);
+
+        if (autoFarming != null)
+            autoFarming.Inject(this);
+
+        referencesInjected = true;
+    }
+
+    public void IBootStrapperInitialize()
+    {
+        if (IsInitialized)
+            return;
+
+        if (DataManager.instance == null || !DataManager.instance.TryGetPlayerData(scenePlayerId, out PlayerData data) || data == null)
+            throw new InvalidOperationException($"캐릭터 초기 데이터 없음: {scenePlayerId}. DataManager 초기화 순서를 확인하세요.");
+
+        Initialize(data);
+    }
+
     #region
     public const int SkillSlotCount = 6;
 
@@ -27,7 +95,10 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     // 스킬 컬렉션 길이는 6으로 고정함
     public IReadOnlyList<SkillCooldownChannel> SkillCooldownEvents
     {
-        get { EnsureSkillSlots(); return skillCooldownEvents; }
+        get 
+        { 
+            return skillCooldownEvents ?? throw new InvalidOperationException("스킬 채널 주입 전입니다."); 
+        }
     }
 
     private void EnsureSkillSlots()
@@ -73,7 +144,8 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     // UI 최초 표시나 재생성 시 호출. 현재 상태 동기화 필요
     public SkillSlotInfo GetEquippedSkill(int slotIndex) //
     {
-        EnsureSkillSlots();
+        if (!IsInitialized)
+            throw new InvalidOperationException("캐릭터 초기화 전");
 
         if (!IsValidSkillSlot(slotIndex))
             throw new ArgumentOutOfRangeException(nameof(slotIndex));
@@ -85,7 +157,8 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public SkillCooldownInfo GetSkillCooldown(int slotIndex)
     {
-        EnsureSkillSlots();
+        if (!IsInitialized)
+            throw new InvalidOperationException("캐릭터 초기화 전");
 
         if (!IsValidSkillSlot(slotIndex))
             throw new ArgumentOutOfRangeException(nameof(slotIndex));
@@ -102,7 +175,8 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool EquipSkill(int slotIndex, CharacterSkillBase entry)
     {
-        EnsureSkillSlots();
+        if (!CanRun)
+            return false;
 
         if (!IsValidSkillSlot(slotIndex) || entry == null || !entry.BelongsTo(this))
             return false;
@@ -122,16 +196,22 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool UnequipSkill(int slotIndex)
     {
-        EnsureSkillSlots();
-        if (!IsValidSkillSlot(slotIndex) || skillSlots[slotIndex] == null) return false;
+        if (!CanRun)
+            return false;
+
+        if (!IsValidSkillSlot(slotIndex) || skillSlots[slotIndex] == null)
+            return false;
+
         skillSlots[slotIndex] = null;
         PublishSkillSlot(slotIndex);
+
         return true;
     }
 
     public bool UseSkill(int slotIndex)
     {
-        EnsureSkillSlots();
+        if (!CanRun)
+            return false;
 
         if (!isActiveAndEnabled || !IsValidSkillSlot(slotIndex))
             return false;
@@ -162,49 +242,16 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     #endregion
 
     private CharacterStatus status;
-    public CharacterStatus Status
-    {
-        get
-        {
-            if (status == null)
-                status = new CharacterStatus();
-            return status;
-        }
-    }
+    public CharacterStatus Status => status;
 
     [SerializeField] private CharacterInventory characterInventory;
-    public CharacterInventory Inventory
-    {
-        get
-        {
-            if (characterInventory == null)
-                characterInventory = GetComponent<CharacterInventory>();
-
-            return characterInventory;
-        }
-    }
+    public CharacterInventory Inventory => characterInventory;
 
     private CharacterEquipment characterEquipment;
-    public CharacterEquipment Equipment
-    {
-        get
-        {
-            if (characterEquipment == null)
-                characterEquipment = GetComponent<CharacterEquipment>();
-            return characterEquipment;
-        }
-    }
+    public CharacterEquipment Equipment => characterEquipment;
 
     [SerializeField] private Animator animator;
-    public Animator Animator
-    {
-        get
-        {
-            if (animator == null)
-                animator = GetComponentInChildren<Animator>();
-            return animator;
-        }
-    }
+    public Animator Animator => animator;
 
     private CharacterLevelUpProvider characterLevelUpProvider;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
@@ -239,54 +286,69 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void Initialize(PlayerData playerData)
     {
+        if (!referencesInjected)
+            throw new InvalidOperationException("IBootStrapperInject를 먼저 호출");
+
         if (playerData == null)
+            throw new ArgumentNullException(nameof(playerData));
+
+        if (IsInitialized)
         {
-            Debug.LogError("플레이어 데이터 없음", this);
+            if (Data != playerData) throw new InvalidOperationException("이미 초기화한 캐릭터의 데이터를 교체할 수 없음");
             return;
         }
 
+        status = new CharacterStatus();
+        characterLevelUpProvider = new CharacterLevelUpProvider();
+        skillLevelUpProvider = new CharacterSkillLevelUpProvider();
         Data = playerData;
-        Status.Initialize(playerData);
+        status.Initialize(playerData);
 
-        ChangeJob(playerData.id);
-        RefreshEquipmentStats();
+        if (!jobAdvancedment.TryChangeJob(playerData.id))
+            throw new InvalidOperationException("CharacterJobAdvancedment의 플레이어 리스트에 초기 직업이 필요");
+
+        foreach (CharacterSkillBase entry in ownedSkills)
+            if (entry != null && entry.GetComponentInParent<CharacterControllers>() == this)
+                entry.Initialize(this);
+
+        ValidateInitialSkillSlots(); // 스킬의 소유자·RuntimeSkill 준비 후 검사
+
+        if (visualRoot != null)
+            FacingDirection = visualRoot.localScale.x < 0f ? -1 : 1;
+
+        if (!RefreshEquipmentStats())
+            throw new InvalidOperationException("초기 장비 스탯 적용에 실패");
+
+        if (autoFarming != null)
+            autoFarming.Initialize();
+
+        hasUiSnapshot = false;
+        IsInitialized = true; // 이 줄까지 모두 성공해야 입력과 전투 실행을 허용
     }
 
-    private CharacterJobAdvancedment GetJobController()
-    {
-        if (jobAdvancedment == null)
-            jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
-
-        return jobAdvancedment;
-    }
+    private CharacterJobAdvancedment GetJobController() => jobAdvancedment;
 
     public bool ChangeJob(int id)
     {
+        if (!CanRun)
+            return false;
+
         return GetJobController().TryChangeJob(id);
     }
 
     public bool ChangeNextJob()
     {
+        if (!CanRun)
+            return false;
+
         return GetJobController().TryChangeNextJob();
-    }
-
-    private void Awake()
-    {
-        ValidateInitialSkillSlots();
-
-        rigid = GetComponent<Rigidbody2D>();
-        jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
-
-        if (visualRoot != null)
-            FacingDirection = visualRoot.localScale.x < 0f ? -1 : 1;
-
-        characterLevelUpProvider = new CharacterLevelUpProvider();
-        skillLevelUpProvider = new CharacterSkillLevelUpProvider();
     }
 
     private void Update()
     {
-        EnsureSkillSlots();
+        if (!CanRun)
+            return;
+
         for (int i = 0; i < SkillSlotCount; i++)
         {
             if (!ReferenceEquals(observedSkills[i], skillSlots[i]) || (!ReferenceEquals(skillSlots[i], null) && skillSlots[i] == null))
@@ -307,6 +369,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void FixedUpdate()
     {
+        if (!CanRun)
+            return;
+
         if (IsAutoFarming)
             AutoFarming.Tick();
 
@@ -336,6 +401,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void GainExp(long amount)
     {
+        if (!CanRun)
+            return;
+
         if (amount <= 0)
             return;
 
@@ -345,8 +413,8 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void CheckLevelUp() // 레벨 수치 상승
     {
-        if (characterLevelUpProvider == null)
-            characterLevelUpProvider = new CharacterLevelUpProvider();
+        if (!IsInitialized)
+            return;
 
         while (true) // 보유 경험치량이 다음 레벨 업 요구 경험치 보다 많으면 반복해서 레벨업함
         {
@@ -370,6 +438,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void SetMoveInput(float input)
     {
+        if (!CanRun)
+            return;
+
         if (IsAutoFarming)
             return;
 
@@ -398,6 +469,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void Jump()
     {
+        if (!CanRun)
+            return;
+
         if (IsAutoFarming || Status.CurrentHp <= 0)
             return;
 
@@ -425,16 +499,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     }
 
     private CharacterAutoFarming autoFarming;
-    private CharacterAutoFarming AutoFarming
-    {
-        get
-        {
-            if (autoFarming == null)
-                autoFarming = GetComponent<CharacterAutoFarming>();
-
-            return autoFarming;
-        }
-    }
+    private CharacterAutoFarming AutoFarming => autoFarming;
     public bool IsAutoFarming => AutoFarming != null && AutoFarming.IsRunning;
     public string AutoFarmingState => AutoFarming != null ? AutoFarming.CurrentState : "Idle";
     public bool AutoFarmingConfigured => groundCheck != null && attackPoint != null && groundLayer.value != 0 && monsterLayer.value != 0;
@@ -496,6 +561,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool TryAttack()
     {
+        if (!CanRun)
+            return false;
+
         if (Status == null || Status.CurrentHp <= 0 || Time.time < attackReadyTime)
             return false;
 
@@ -505,6 +573,10 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
                 return false;
 
             attackReadyTime = Time.time + basicAttackReplacement.GetUseInterval();
+
+            if (Animator != null)
+                Animator.SetTrigger("attack");
+
             return true;
         }
 
@@ -512,6 +584,10 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             return false;
 
         attackReadyTime = Time.time + GetAttackInterval();
+
+        if (Animator != null)
+            Animator.SetTrigger("attack");
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, monsterLayer);
         HashSet<IDamageable> damaged = new HashSet<IDamageable>();
 
@@ -519,7 +595,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         {
             if (hit == null || !hit.gameObject.activeInHierarchy || hit.transform.IsChildOf(transform))
                 continue;
+
             IDamageable target = hit.GetComponentInParent<IDamageable>();
+
             if (target != null && damaged.Add(target))
                 target.TakeDamage(Status.Attack);
         }
@@ -533,6 +611,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public bool SetBasicAttackReplacement(CharacterSkillBase replacement)
     {
+        if (!CanRun)
+            return false;
+
         if (replacement != null && (!replacement.CanReplaceBasicAttack))
             return false;
         basicAttackReplacement = replacement;
@@ -560,11 +641,11 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public void TestSkillLevelUp()
     {
-        if (skillSlash == null)
+        if (!CanRun)
             return;
 
-        if (skillLevelUpProvider == null)
-            skillLevelUpProvider = new CharacterSkillLevelUpProvider();
+        if (skillSlash == null)
+            return;
 
         CharacterSkill runtime = skillSlash.RuntimeSkill;
 
@@ -840,12 +921,15 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         hasUiSnapshot = false; // 재활성화 후 첫 확인에서는 모든 값을 알림
 
-        if (Equipment != null)
+        if (IsInitialized && Equipment != null)
             Equipment.RequestEquipmentStatsRefresh();
     }
 
     private void LateUpdate()
     {
+        if (!CanRun)
+            return;
+
         if (Equipment != null)
             Equipment.RefreshEquipmentStatsIfNeeded();
 
@@ -859,7 +943,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     private void PublishUiChanges(bool force)
     {
-        if (publishingUiChanges)
+        if (!CanRun || publishingUiChanges)
             return;
 
         publishingUiChanges = true; // 발행 시작 표시

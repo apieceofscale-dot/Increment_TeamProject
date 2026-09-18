@@ -5,21 +5,35 @@ using UnityEngine;
 
 public class CharacterFactory : MonoBehaviour, IBootStrapper
 {
-    public int BootOrder { get; }
+    [SerializeField] private int bootOrder = 5;
+    public int BootOrder => bootOrder;
+    private BootstrapContext bootContext;
+    private bool injected;
+    private bool initialized;
 
     [SerializeField] private CharacterControllers characterPrefab;
     [SerializeField] private Transform testSpawnPoint; // 테스트용
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-
+        bootContext = context;
+        injected = true;
     }
     public void IBootStrapperInitialize()
     {
-
+        if (!injected || DataManager.instance == null || characterPrefab == null)
+            throw new System.InvalidOperationException("Factory 주입, DataManager, Character Prefab 확인");
+        
+        initialized = true;
     }
     public CharacterControllers Create(int playerId, Vector3 spawnPosition)
     {
+        if (!initialized)
+        {
+            Debug.LogError("CharacterFactory 초기화 전입니다.", this);
+            return null;
+        }
+
         if (DataManager.instance == null)
         {
             Debug.LogError("데이터 매니저 없음", this);
@@ -40,7 +54,18 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
 
         CharacterControllers character = Instantiate(characterPrefab, spawnPosition, Quaternion.identity);
 
-        character.Initialize(playerData);
+        try
+        {
+            character.IBootStrapperInject(bootContext);
+            character.Initialize(playerData);
+        }
+        catch (System.Exception exception)
+        {
+            character.gameObject.SetActive(false); // 실패한 객체가 다음 프레임에 실행되지 않게 한다.
+            Destroy(character.gameObject);
+            Debug.LogException(exception, this);
+            return null;
+        }
 
         return character;
     }

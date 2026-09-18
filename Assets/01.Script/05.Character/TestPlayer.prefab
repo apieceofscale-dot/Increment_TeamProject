@@ -258,7 +258,7 @@ MonoBehaviour:
   skillSlash: {fileID: 357542788659323390}
   skillProjectile: {fileID: 261204065874194282}
   skillAttackBuff: {fileID: 5415692169738909216}
-  characterPortrait: {fileID: 0}
+  characterPortrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
 --- !u!114 &4813162430074982621
 MonoBehaviour:
   m_ObjectHideFlags: 0

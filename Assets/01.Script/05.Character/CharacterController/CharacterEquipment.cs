@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-using static CharacterEquipment;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CharacterInventory))]
@@ -16,13 +15,15 @@ public class CharacterEquipment : MonoBehaviour
     public event Action<CharacterEquipmentSlot, Guid, Guid> SlotChanged;
     public event Action ListChanged;
 
-    private CharacterInventory Inventory
+    private CharacterControllers controller;
+    private CharacterInventory Inventory => inventory;
+    internal void Inject(CharacterControllers owner, CharacterInventory source)
     {
-        get
-        {
-            if (inventory == null) inventory = GetComponent<CharacterInventory>();
-            return inventory;
-        }
+        if (owner == null || source == null || owner.gameObject != gameObject || source.gameObject != gameObject)
+            throw new InvalidOperationException("장비와 인벤토리는 같은 캐릭터에 있어야 합니다.");
+
+        controller = owner;
+        inventory = source;
     }
 
     #region 장비 스탯 조회 및 합산하는 부분
@@ -80,10 +81,8 @@ public class CharacterEquipment : MonoBehaviour
 
         try
         {
-            CharacterControllers controller = GetComponent<CharacterControllers>();
-
-            if (controller == null)
-                return StatsFailed("컨트롤러 없음");
+            if (controller == null || controller.Status == null || inventory == null)
+                return StatsFailed("Controller의 참조 주입 및 Status 초기화가 필요합니다.");
 
             var total = new EquipmentStatValues();
             var seen = new HashSet<Guid>();
@@ -117,8 +116,10 @@ public class CharacterEquipment : MonoBehaviour
             Debug.LogException(exception, this);
             return false;
         }
-
-        finally { recalculatingStats = false; }
+        finally 
+        {
+            recalculatingStats = false;
+        }
     }
 
     private bool StatsFailed(string message)
@@ -138,8 +139,10 @@ public class CharacterEquipment : MonoBehaviour
     private static Dictionary<CharacterEquipmentSlot, Guid> CreateSlots()
     {
         var result = new Dictionary<CharacterEquipmentSlot, Guid>();
+
         foreach (CharacterEquipmentSlot slot in Enum.GetValues(typeof(CharacterEquipmentSlot)))
             result.Add(slot, Guid.Empty);
+
         return result;
     }
 
