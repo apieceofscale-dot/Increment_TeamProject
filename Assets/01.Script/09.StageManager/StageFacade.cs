@@ -29,7 +29,7 @@ public sealed class StageFacade : MonoBehaviour
     public void StartStage(int stageId)
     {
         if (!IsReady()) return;
-        stageController.StartStage(stageId);
+        stageController.EnterStage(stageId);
     }
     //다음스테이지 활성화용
     public bool GoNextStage()
@@ -46,13 +46,17 @@ public sealed class StageFacade : MonoBehaviour
         return stageController.TryMoveToChallengeStage();
     }
 
-
+    // 엘리트, 소환조건 못 채웠을시 false
     public bool SummonElite()
     {
         if (!IsReady()) return false;
         return stageController.TrySummonElite();
 
     }
+
+
+    // 씬 전환 중일 땐 이동 버튼 잠금이어야해서
+    public bool IsTransitioning => IsReady() && stageController.IsTransitioning;
 
 
     //UI용
