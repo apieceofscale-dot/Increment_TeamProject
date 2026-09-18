@@ -1,4 +1,4 @@
-
+using System;
 using UnityEngine;
 
 public sealed class StageFacade : MonoBehaviour
@@ -11,6 +11,14 @@ public sealed class StageFacade : MonoBehaviour
     public void Bind(StageController controller)
     {
         stageController = controller;
+    }
+
+    /// <summary>스테이지 진입·클리어 등 진행 변경 시 UI 갱신용.</summary>
+    public event Action<StageChangedInfo> StageChanged;
+
+    internal void NotifyStageChanged(in StageChangedInfo info)
+    {
+        StageChanged?.Invoke(info);
     }
 
     private bool IsReady()

@@ -189,3 +189,4 @@ MonoBehaviour:
   skillSlash: {fileID: 0}
   skillProjectile: {fileID: 0}
   skillAttackBuff: {fileID: 0}
+  characterPortrait: {fileID: 21300000, guid: 681cdb2853ae7144c815013a86c8da7c, type: 3}

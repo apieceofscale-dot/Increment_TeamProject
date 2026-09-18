@@ -16,17 +16,35 @@ public class MonsterFactory : MonoBehaviour, IBootStrapper
         Instance = this;
     }
 
+    /// <summary>조립: 풀 매니저·프리팹 참조만 연결. 풀 생성은 Initialize 마지막 MakeFirstPools.</summary>
     public void IBootStrapperInject(BootstrapContext context)
     {
         if (poolManager == null)
         {
             context.TryGet(out poolManager);
         }
+
+        if (poolManager == null)
+        {
+            poolManager = FindFirstObjectByType<MonsterObjectPoolManager>();
+        }
     }
 
     public void IBootStrapperInitialize()
     {
-        WarmUpPool();
+        if (poolManager == null)
+        {
+            Debug.LogWarning("[MonsterFactory] MonsterObjectPoolManager is missing.");
+            return;
+        }
+
+        if (defaultPrefab == null)
+        {
+            Debug.LogWarning("[MonsterFactory] defaultPrefab is missing.");
+            return;
+        }
+
+        poolManager.MakeFirstPools(new List<MonsterController> { defaultPrefab });
     }
 
     public MonsterController Create(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 1)
@@ -37,18 +55,25 @@ public class MonsterFactory : MonoBehaviour, IBootStrapper
             return null;
         }
 
+        if (poolManager == null)
+        {
+            Debug.LogWarning("[MonsterFactory] pool is not ready. Check MakeFirstPools / ObjectPool boot.");
+            return null;
+        }
+
         if (!DataManager.instance.TryGetMonsterData(monsterId, out MonsterData data))
         {
             Debug.LogWarning($"[MonsterFactory] MonsterData not found. id={monsterId}");
             return null;
         }
 
-        MonsterController monster = GetFromPool(position, rotation);
+        MonsterController monster = poolManager.GetObject(defaultPrefab, position, rotation);
         if (monster == null)
         {
             return null;
         }
 
+        // IPoolable은 풀 매니저가 붙이고, Factory는 SO 주입 + 스폰 준비만.
         monster.Initialize(data, stageIndex);
         monster.OnSpawn();
         return monster;
@@ -62,35 +87,5 @@ public class MonsterFactory : MonoBehaviour, IBootStrapper
         }
 
         poolManager.ReturnObject(monster);
-    }
-
-    void WarmUpPool()
-    {
-        if (poolManager == null)
-        {
-            Debug.LogWarning("[MonsterFactory] MonsterObjectPoolManager is missing.");
-            return;
-        }
-
-        if (defaultPrefab != null)
-        {
-            poolManager.MakeFirstPools(new List<MonsterController> { defaultPrefab });
-        }
-    }
-
-    MonsterController GetFromPool(Vector3 position, Quaternion rotation)
-    {
-        if (poolManager == null)
-        {
-            MonsterController created = Instantiate(defaultPrefab, position, rotation);
-            if (created is IPoolable poolable)
-            {
-                poolable.InitializePoolObj(() => Destroy(created.gameObject));
-            }
-
-            return created;
-        }
-
-        return poolManager.GetObject(defaultPrefab, position, rotation);
     }
 }

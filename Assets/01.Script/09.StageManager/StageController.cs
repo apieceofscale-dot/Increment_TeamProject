@@ -408,7 +408,9 @@ public class StageController : MonoBehaviour, IBootStrapper
             return;
         }
 
-        stageChangedChannel.Raise(BuildStageChangedInfo());
+        StageChangedInfo info = BuildStageChangedInfo();
+        stageChangedChannel.Raise(info);
+        facade?.NotifyStageChanged(info);
     }
 
 }

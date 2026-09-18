@@ -16,17 +16,35 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
         Instance = this;
     }
 
+    /// <summary>조립: 풀 매니저·프리팹 참조만 연결. 풀 생성은 Initialize 마지막 MakeFirstPools.</summary>
     public void IBootStrapperInject(BootstrapContext context)
     {
         if (poolManager == null)
         {
             context.TryGet(out poolManager);
         }
+
+        if (poolManager == null)
+        {
+            poolManager = FindFirstObjectByType<ItemObjectPoolManager>();
+        }
     }
 
     public void IBootStrapperInitialize()
     {
-        WarmUpPool();
+        if (poolManager == null)
+        {
+            Debug.LogWarning("[ItemFactory] ItemObjectPoolManager is missing.");
+            return;
+        }
+
+        if (defaultPrefab == null)
+        {
+            Debug.LogWarning("[ItemFactory] defaultPrefab is missing.");
+            return;
+        }
+
+        poolManager.MakeFirstPools(new List<ItemController> { defaultPrefab });
     }
 
     public ItemController Create(int itemId, Vector3 position, Quaternion rotation, int stackAmount = 1, int upgradeLevel = 0, int starForce = 0)
@@ -37,13 +55,19 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
             return null;
         }
 
+        if (poolManager == null)
+        {
+            Debug.LogWarning("[ItemFactory] pool is not ready. Check MakeFirstPools / ObjectPool boot.");
+            return null;
+        }
+
         if (!DataManager.instance.TryGetItemData(itemId, out ItemData data))
         {
             Debug.LogWarning($"[ItemFactory] ItemData not found. id={itemId}");
             return null;
         }
 
-        ItemController item = GetFromPool(position, rotation);
+        ItemController item = poolManager.GetObject(defaultPrefab, position, rotation);
         if (item == null)
         {
             return null;
@@ -63,35 +87,5 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
         }
 
         poolManager.ReturnObject(item);
-    }
-
-    void WarmUpPool()
-    {
-        if (poolManager == null)
-        {
-            Debug.LogWarning("[ItemFactory] ItemObjectPoolManager is missing.");
-            return;
-        }
-
-        if (defaultPrefab != null)
-        {
-            poolManager.MakeFirstPools(new List<ItemController> { defaultPrefab });
-        }
-    }
-
-    ItemController GetFromPool(Vector3 position, Quaternion rotation)
-    {
-        if (poolManager == null)
-        {
-            ItemController created = Instantiate(defaultPrefab, position, rotation);
-            if (created is IPoolable poolable)
-            {
-                poolable.InitializePoolObj(() => Destroy(created.gameObject));
-            }
-
-            return created;
-        }
-
-        return poolManager.GetObject(defaultPrefab, position, rotation);
     }
 }

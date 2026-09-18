@@ -1,49 +1,34 @@
 using UnityEngine;
 
-public class PortraitPresenter : MonoBehaviour
+public class PortraitPresenter
 {
     PortraitView view;
     CharacterFacade model;
-
-    //참조 : 파사드의 골드 변경 이벤트
-    //참조 : 전투력 변경 이벤트.
-
 
     public PortraitPresenter(PortraitView view, CharacterFacade model)
     {
         this.view = view;
         this.model = model;
 
-        //골드 변경 이벤트 += HandleGoldChanged;
-        //전투력 변경 이벤트 += HandleAttackRating;
+        model.MoneyChanged += HandleGoldChanged;
+        model.AttackRatingChanged += HandleAttackRating;
 
-        //HandlePortrait(model.portrait); 초기화.
-        //HandleAttackRating(model.attkRating)
-        HandleGoldChanged((int)model.Money);
-
+        HandlePortrait(model.GetCharacterPortrait());
+        model.RefreshUiEvents();
     }
 
-
-    //얘는 캐릭터 초상화라 이벤트 필요 없습니다.
     public void HandlePortrait(Sprite portrait)
     {
         view.SetPortrait(portrait);
     }
 
-
-    //아래는 이벤트 필요합니다. 
     public void HandleAttackRating(float attackRating)
     {
         view.SetAttackRating(attackRating);
-    } 
-
-    public void HandleGoldChanged(int gold)
-    {
-        view.SetGold(gold);
     }
 
-
-
-
+    public void HandleGoldChanged(long gold)
+    {
+        view.SetGold((int)gold);
+    }
 }
-

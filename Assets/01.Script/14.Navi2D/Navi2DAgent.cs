@@ -430,4 +430,38 @@ public class Navi2DAgent : MonoBehaviour
         currentPathIndex = 0;       
     }
 
+    /// <summary>FSM이 추적(Trace)을 벗어날 때 호출. 이동만 멈추고 풀 반환용 전체 초기화는 ResetMovement.</summary>
+    public void StopMovement()
+    {
+        isTracing = false;
+        repathPending = false;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
+    }
+
+    /// <summary>몬스터 풀링 OnDespawn 등 ? 경로·공중 상태·속도 전부 초기화.</summary>
+    public void ResetMovement()
+    {
+        isTracing = false;
+        repathPending = false;
+        isAirMoving = false;
+        isApproachingDrop = false;
+        isWaitingToSteerDrop = false;
+        hasLeftGround = false;
+
+        path = null;
+        currentPathIndex = 0;
+        lastTargetNode = null;
+        airTargetNode = null;
+        targetPosition = default;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+    }
+
 }

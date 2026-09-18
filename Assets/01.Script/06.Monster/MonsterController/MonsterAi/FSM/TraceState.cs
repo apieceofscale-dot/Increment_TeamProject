@@ -16,5 +16,8 @@ public sealed class TraceState : IMonsterFsmState
         monster.AI.ExecuteTrace();
     }
 
-    public void Exit(MonsterController monster) { }
+    public void Exit(MonsterController monster)
+    {
+        monster.StopNavigation();
+    }
 }

@@ -2,7 +2,7 @@
 public class AutoFarmingPresenter
 {
     private AutoFarmingView view;
-    private CharacterFacade model;   
+    private CharacterFacade model;
 
     public AutoFarmingPresenter(AutoFarmingView view, CharacterFacade model)
     {
@@ -10,13 +10,10 @@ public class AutoFarmingPresenter
         this.model = model;
 
         view.OnAutoFarmingChanged += HandleAutoFarmingChanged;
-        
     }
-
 
     private void HandleAutoFarmingChanged(bool isOn)
     {
-        //model.SetAutoFarming(isON)
-    }  
-
+        model.SetAutoFarming(isOn);
+    }
 }

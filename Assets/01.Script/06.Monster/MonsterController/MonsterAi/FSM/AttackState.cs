@@ -4,6 +4,7 @@ public sealed class AttackState : IMonsterFsmState
 
     public void Enter(MonsterController monster)
     {
+        monster.StopNavigation();
         monster.AI.ResetAttackTimer();
     }
 

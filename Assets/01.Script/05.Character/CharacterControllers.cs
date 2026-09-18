@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 [RequireComponent(typeof(CharacterEquipment))]
-public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 s붙임
+public class CharacterControllers : MonoBehaviour //???? ????????? ??? ????? s????
 {
     #region
     public const int SkillSlotCount = 6;
@@ -17,14 +17,14 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         internal void Raise(SkillCooldownInfo data) { Changed?.Invoke(data); }
     }
 
-    // 장착 교체 해제 때 전달
+    // ???? ??? ???? ?? ????
     public event Action<SkillSlotInfo> SkillSlotChanged;
     private SkillCooldownChannel[] skillCooldownChannels;
     private IReadOnlyList<SkillCooldownChannel> skillCooldownEvents;
     private readonly bool[] wasSkillCooling = new bool[SkillSlotCount];
     private readonly CharacterSkillBase[] observedSkills = new CharacterSkillBase[SkillSlotCount];
 
-    // 스킬 컬렉션 길이는 6으로 고정함
+    // ??? ?????? ????? 6???? ??????
     public IReadOnlyList<SkillCooldownChannel> SkillCooldownEvents
     {
         get { EnsureSkillSlots(); return skillCooldownEvents; }
@@ -48,7 +48,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         skillCooldownEvents = Array.AsReadOnly(skillCooldownChannels);
     }
 
-    // 잘못 연결한 다른 캐릭터의 스킬 및 같은 컴포넌트 중복 제거
+    // ??? ?????? ??? ???????? ??? ?? ???? ??????? ??? ????
     private void ValidateInitialSkillSlots()
     {
         EnsureSkillSlots();
@@ -59,7 +59,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             CharacterSkillBase entry = skillSlots[i];
             if (entry != null && (!entry.BelongsTo(this) || !seen.Add(entry)))
             {
-                Debug.LogWarning($"스킬 슬롯 {i}: 소유 캐릭터 또는 중복 연결을 확인하세요.", this);
+                Debug.LogWarning($"??? ???? {i}: ???? ?????? ??? ??? ?????? ????????.", this);
                 skillSlots[i] = null;
             }
         }
@@ -70,7 +70,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return slotIndex >= 0 && slotIndex < SkillSlotCount;
     }
 
-    // UI 최초 표시나 재생성 시 호출. 현재 상태 동기화 필요
+    // UI ???? ???? ????? ?? ???. ???? ???? ????? ???
     public SkillSlotInfo GetEquippedSkill(int slotIndex) //
     {
         EnsureSkillSlots();
@@ -141,7 +141,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         if (entry == null || !entry.BelongsTo(this) || !entry.TryUse())
             return false;
 
-        PublishSkillCooldown(slotIndex); // 성공 직후 UI에 즉시 알림
+        PublishSkillCooldown(slotIndex); // ???? ???? UI?? ??? ???
 
         return true;
     }
@@ -149,8 +149,8 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private void PublishSkillSlot(int slotIndex)
     {
         observedSkills[slotIndex] = skillSlots[slotIndex];
-        SkillSlotChanged?.Invoke(GetEquippedSkill(slotIndex)); // 아이콘/이름부터 설정
-        PublishSkillCooldown(slotIndex); // 교체한 스킬의 진행 상태도 함께 동기화
+        SkillSlotChanged?.Invoke(GetEquippedSkill(slotIndex)); // ??????/??????? ????
+        PublishSkillCooldown(slotIndex); // ????? ????? ???? ????? ??? ?????
     }
 
     private void PublishSkillCooldown(int slotIndex)
@@ -210,7 +210,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
     public PlayerData Data { get; private set; }
 
-    // 이동 및 점프 관련
+    // ??? ?? ???? ????
     private Rigidbody2D rigid;
     private float moveInput;
 
@@ -221,12 +221,12 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     [SerializeField] private Transform visualRoot;
 
-    // 공격 관련
+    // ???? ????
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackRange = 1.2f;
     [SerializeField] private LayerMask monsterLayer;
 
-    // 스킬 테스트용
+    // ??? ??????
     [SerializeField] private CharacterSkillSlash skillSlash;
     [SerializeField] private CharacterSkillProjectile skillProjectile;
     [SerializeField] private CharacterSkillAttackBuff skillAttackBuff;
@@ -241,7 +241,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     {
         if (playerData == null)
         {
-            Debug.LogError("플레이어 데이터 없음", this);
+            Debug.LogError("??????? ?????? ????", this);
             return;
         }
 
@@ -343,18 +343,18 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         CheckLevelUp();
     }
 
-    private void CheckLevelUp() // 레벨 수치 상승
+    private void CheckLevelUp() // ???? ??? ???
     {
         if (characterLevelUpProvider == null)
             characterLevelUpProvider = new CharacterLevelUpProvider();
 
-        while (true) // 보유 경험치량이 다음 레벨 업 요구 경험치 보다 많으면 반복해서 레벨업함
+        while (true) // ???? ????????? ???? ???? ?? ?? ????? ???? ?????? ?????? ????????
         {
             long requiredExp = characterLevelUpProvider.GetRequiredExp(Status.Level);
 
             if (requiredExp <= 0)
             {
-                Debug.LogWarning("요구 경험치는 0보다 커야됨", this);
+                Debug.LogWarning("?? ??????? 0???? ?????", this);
                 break;
             }
 
@@ -447,7 +447,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         if (AutoFarming != null)
             AutoFarming.SetAutoFarming(enabled);
         else if (enabled)
-            Debug.LogWarning("자동사냥 컴포넌트 추가", this);
+            Debug.LogWarning("?????? ??????? ???", this);
     }
 
     public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter)
@@ -575,10 +575,10 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         runtime.SetMpCost(skillLevelUpProvider.GetMpCost(runtime.Level));
         runtime.SetCooldown(skillLevelUpProvider.GetCooldown(runtime.Level));
 
-        Debug.Log($"{runtime.SkillName} 강화 | Lv.{runtime.Level} / MP {runtime.MpCost} / CD {runtime.Cooldown}");
+        Debug.Log($"{runtime.SkillName} ??? | Lv.{runtime.Level} / MP {runtime.MpCost} / CD {runtime.Cooldown}");
     }
 
-    private void ApplyLevelUpGrowth() // 실질적인 레벨 업 시 스탯 상승 적용
+    private void ApplyLevelUpGrowth() // ???????? ???? ?? ?? ???? ??? ????
     {
         int currentLevel = Status.Level;
         long hpGorwth = characterLevelUpProvider.GetMaxHpGrowth(currentLevel);
@@ -589,7 +589,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Status.IncreaseAttack(attackGrowth);
         Status.IncreaseDefence(defenceGrowth);
 
-        Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenceGrowth}");
+        Debug.Log($"??????! | Lv.{Status.Level} | ?????? +{hpGorwth} | ????? +{attackGrowth} | ???? +{defenceGrowth}");
     }
 
     public bool UseSkillSlash()
@@ -607,7 +607,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return skillAttackBuff != null && skillAttackBuff.TryUse();
     }
 
-    #region 장비 팝업 연결
+    #region ??? ??? ????
     public event Action InventoryChanged
     {
         add
@@ -640,7 +640,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         }
     }
 
-    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // 팝업용 미착용 목록 복사본
+    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // ????? ?????? ??? ????
     {
         var result = new List<CharacterInventoryEquipment>();
 
@@ -654,7 +654,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return result.AsReadOnly();
     }
 
-    public bool TryGetItemData(int itemId, out ItemData data) // 공용 원본 데이터 조회
+    public bool TryGetItemData(int itemId, out ItemData data) // ???? ???? ?????? ???
     {
         data = default;
 
@@ -671,13 +671,13 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquipItem(instanceId);
     }
 
-    public bool UnequipItem(CharacterEquipmentSlot slot)// 장착칸 클릭 시 호출
+    public bool UnequipItem(CharacterEquipmentSlot slot)// ????? ??? ?? ???
     {
         return UnequipEquipment(slot);
     }
     #endregion
 
-    // 장비착용 관련 호출
+    // ??????? ???? ???
     public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot)
     {
         return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquip(instanceId, slot);
@@ -704,7 +704,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return Equipment.GetSlotsSnapshot();
     }
 
-    // 인벤토리 관련 호출용
+    // ?????? ???? ????
     public bool AddEquipment(ItemStatus status, out Guid instanceId)
     {
         return Inventory.TryAddEquipment(status, out instanceId);
@@ -730,7 +730,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         return Inventory.GetEquipmentSnapshot();
     }
 
-    // 현재 착용 장비 전체의 합계 교체
+    // ???? ???? ??? ????? ??? ???
     public void SetEquipmentStats(
         long maxHp = 0,
         int maxMp = 0,
@@ -776,7 +776,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
             dodgeRate: dodgeRate);
     }
 
-    // 강화/옵션 변경 후 착용 장비를 다시 조회 및 합산, 성공 여부 반환
+    // ???/??? ???? ?? ???? ??? ??? ??? ?? ???, ???? ???? ???
     public bool RefreshEquipmentStats()
     {
         return Equipment != null && Equipment.RefreshEquipmentStats();
@@ -789,7 +789,7 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
     public long Money { get; private set; }
 
-    public void SetMoney(long amount) // 최신 보유 재화만 전달하는 용
+    public void SetMoney(long amount) // ??? ???? ????? ??????? ??
     {
         if (amount < 0)
             throw new ArgumentOutOfRangeException(nameof(amount));
@@ -797,21 +797,39 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         Money = amount;
     }
 
-    // 전달용 이벤트 (현재값, 최대값)
+    // ????? ???? (?????, ???S)
     public event Action<long, long> HpChanged;
     public event Action<int, int> MpChanged;
     public event Action<int> LevelChanged;
     public event Action<long> MoneyChanged;
     public event Action<int> CombatPowerChanged;
     public event Action<string> JobNameChanged;
+    public event Action<long, long> ExpChanged;
 
-    // UI에서 현재값 조회용 프로퍼티
+    /// <summary>UI ?????? ????. ?? ????? ?? (1 + ?????? ??????).</summary>
+    public event Action<float> AttackRatingChanged;
+
+    // UI???? ????? ????? ???????
     public long CurrentHp => Status.CurrentHp;
     public long MaxHp => Status.MaxHp;
     public int CurrentMp => Status.CurrentMp;
     public int MaxMp => Status.MaxMp;
     public int Level => Status.Level;
     public int CombatPower => Status.Attack;
+    public long CurrentExp => Status.Exp;
+
+    public long RequiredExpForCurrentLevel
+    {
+        get
+        {
+            if (characterLevelUpProvider == null)
+                characterLevelUpProvider = new CharacterLevelUpProvider();
+
+            return characterLevelUpProvider.GetRequiredExp(Status.Level);
+        }
+    }
+
+    public float AttackRating => Status.Attack * (1f + Status.AttackSpeedRate);
 
     public string JobName
     {
@@ -824,9 +842,9 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         }
     }
 
-    // 변경됐는지 확인용 이전 값 저장 변수
-    private bool hasUiSnapshot; // 이전에 값을 한번이라도 기록했는지
-    private bool publishingUiChanges; // 지금 이벤트 발행하는 중인지
+    // ???????? ????? ???? ?? ???? ????
+    private bool hasUiSnapshot; // ?????? ???? ?????? ????????
+    private bool publishingUiChanges; // ???? ???? ??????? ??????
     private long previousCurrentHp;
     private long previousMaxHp;
     private int previousCurrentMp;
@@ -835,13 +853,67 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
     private long previousMoney;
     private int previousCombatPower;
     private string previousJobName;
+    private long previousExp;
+    private long previousRequiredExp;
+    private float previousAttackRating;
 
     private void OnEnable()
     {
-        hasUiSnapshot = false; // 재활성화 후 첫 확인에서는 모든 값을 알림
+        hasUiSnapshot = false;
+
+        ItemFacade.ItemPickedUp += HandleItemPickedUp;
 
         if (Equipment != null)
             Equipment.RequestEquipmentStatsRefresh();
+    }
+
+    private void OnDisable()
+    {
+        ItemFacade.ItemPickedUp -= HandleItemPickedUp;
+    }
+
+    private void HandleItemPickedUp(ItemPickedUpInfo info)
+    {
+        if (info.Collector == null || !IsPickupCollector(info.Collector))
+            return;
+
+        if (info.Type != ItemType.Equipment)
+            return;
+
+        ItemStatus snapshot = CreateInventoryItemStatus(info);
+        AddEquipment(snapshot, out _);
+    }
+
+    private static ItemStatus CreateInventoryItemStatus(ItemPickedUpInfo info)
+    {
+        if (info.Source != null)
+        {
+            ItemStatus live = info.Source.Status;
+            ItemStatus copy = new ItemStatus();
+            copy.Reset(
+                live.Id,
+                live.Type,
+                live.BaseValue,
+                live.UpgradeStep,
+                live.Upgrade.Level,
+                live.Enchant.StarForce,
+                live.EffectiveValue);
+            return copy;
+        }
+
+        int itemId = (int)info.ItemId;
+        int value = Mathf.Max(1, info.Value);
+        ItemStatus fallback = new ItemStatus();
+        fallback.Reset(itemId, ItemType.Equipment, value, 1, 0, 0, value);
+        return fallback;
+    }
+
+    private bool IsPickupCollector(GameObject collector)
+    {
+        if (collector == gameObject)
+            return true;
+
+        return transform.IsChildOf(collector.transform);
     }
 
     private void LateUpdate()
@@ -849,12 +921,12 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         if (Equipment != null)
             Equipment.RefreshEquipmentStatsIfNeeded();
 
-        PublishUiChanges(false); // 매 프레임 마지막에 변경된 값만 알림
+        PublishUiChanges(false); // ?? ?????? ???????? ????? ???? ???
     }
 
     public void RefreshUiEvents()
     {
-        PublishUiChanges(true); // 요청시 변경 여부와 관계없이 전체 알림
+        PublishUiChanges(true); // ????? ???? ?????? ??????? ??? ???
     }
 
     private void PublishUiChanges(bool force)
@@ -862,15 +934,15 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         if (publishingUiChanges)
             return;
 
-        publishingUiChanges = true; // 발행 시작 표시
+        publishingUiChanges = true; // ???? ???? ???
 
         try
         {
-            PublishUiChangesCore(force); // 실제 비교와 이벤트 호출
+            PublishUiChangesCore(force); // ???? ??? ???? ???
         }
         finally
         {
-            publishingUiChanges = false; // 예외가 발생해도 발행 중 표시 해제
+            publishingUiChanges = false; // ????? ?????? ???? ?? ??? ????
         }
     }
 
@@ -884,18 +956,21 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         long money = Money;
         int combatPower = CombatPower;
         string jobName = JobName;
+        long exp = CurrentExp;
+        long requiredExp = RequiredExpForCurrentLevel;
+        float attackRating = AttackRating;
 
-        bool all = force || !hasUiSnapshot; // 강제 갱신 또는 최초 확인이면 전체 알림
+        bool all = force || !hasUiSnapshot;
 
-        // 현재값과 이전값을 비교. HP/MP는 최대치 변경도 감지
         bool changedHp = all || hp != previousCurrentHp || maxHp != previousMaxHp;
         bool changedMp = all || mp != previousCurrentMp || maxMp != previousMaxMp;
         bool changedLevel = all || level != previousLevel;
         bool changedMoney = all || money != previousMoney;
         bool changedCombatPower = all || combatPower != previousCombatPower;
         bool changedJobName = all || jobName != previousJobName;
+        bool changedExp = all || exp != previousExp || requiredExp != previousRequiredExp;
+        bool changedAttackRating = all || !Mathf.Approximately(attackRating, previousAttackRating);
 
-        // 다음 프레임에서 비교할 수 있도록 이번 값을 저장
         hasUiSnapshot = true;
         previousCurrentHp = hp;
         previousMaxHp = maxHp;
@@ -905,8 +980,10 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
         previousMoney = money;
         previousCombatPower = combatPower;
         previousJobName = jobName;
+        previousExp = exp;
+        previousRequiredExp = requiredExp;
+        previousAttackRating = attackRating;
 
-        // 알림이 필요한 항목만 발행. ?.Invoke는 구독자가 있을 때만 호출
         if (changedHp)
             HpChanged?.Invoke(hp, maxHp);
 
@@ -924,12 +1001,18 @@ public class CharacterControllers : MonoBehaviour //기존 컴포넌트랑 이름 같아서 
 
         if (changedJobName)
             JobNameChanged?.Invoke(jobName);
+
+        if (changedExp)
+            ExpChanged?.Invoke(exp, requiredExp);
+
+        if (changedAttackRating)
+            AttackRatingChanged?.Invoke(attackRating);
     }
 
-    [SerializeField] private Sprite characterPortrait; // 초상화용 이미지
+    [SerializeField] private Sprite characterPortrait; // ?????? ?????
 
     public Sprite GetCharacterPortrait()
     {
-        return characterPortrait; // 미지정 상태에서는 null 반환
+        return characterPortrait; // ?????? ?????????? null ???
     }
 }

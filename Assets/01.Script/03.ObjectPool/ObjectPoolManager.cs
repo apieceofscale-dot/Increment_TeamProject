@@ -118,8 +118,8 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         activedObjects.Add(go);
         go.gameObject.SetActive(true);
 
-        if (go is IPoolable poolable)
-            poolable.OnSpawn(); 
+        // OnSpawn/OnDespawn은 IPoolable 구현체 + Factory(데이터 Initialize 후)에서 처리.
+        // GetObject는 풀에서 꺼내 활성화만 한다.
 
         return go;
     }

@@ -9,10 +9,10 @@ using UnityEngine;
 /// [팀 전달 — 2025-09-16, 신현수 부재 시 참고]
 /// ■ Facade/API: Spawn·Despawn·MonsterDied 이벤트 껍데기 구현됨.
 /// ■ 동작함: MonsterFactory+풀링, AI FSM, 사망→RequestDrop→Despawn (ItemDropFacade 연결 시).
-/// ■ 미동작·타팀 연결 필요:
-///   - StageManager/MonsterSpawner.SpawnInternal: Factory.Create 대신 new() 스텁 → Stage 쪽 주석 해제·연결 필요.
-///   - StageController: MonsterDied 구독·HandleMonsterDied 주석 처리됨 → 킬/경험치 미집계.
-///   - 씬 Inspector: MonsterFactory defaultPrefab·poolManager, MonsterFacade→itemDropFacade 수동 연결.
+/// ■ 타팀·씬 연결:
+///   - MonsterSpawner → MonsterFactory.Create 연결됨 (09). 맵 스폰 포인트 없으면 경고만.
+///   - StageController MonsterDied 구독 → 킬/경험치 (드랍은 이 Facade만 RequestDrop).
+///   - 씬 Inspector: MonsterFactory defaultPrefab, MonsterFacade→itemDropFacade, ItemDropFacade on ItemDropManager GO.
 ///   - Monster prefab에 Navi2DAgent 없으면 Trace 폴백(MoveTowards)만 동작.
 ///   - CSV→SO 임포트(Tools/ExcelTest) 안 하면 DataManager 데이터 비어 있음.
 /// </remarks>
@@ -88,8 +88,6 @@ public class MonsterFacade : MonoBehaviour
         monster.ReturnToPool();
     }
 
-    // TODO(StageManager): MonsterSpawner.SpawnInternal → MonsterFactory.Create 또는 Spawn() 연결 (현재 new() 스텁)
-    // TODO(StageManager): StageController MonsterDied 구독 주석 해제 → 킬/경험치
     // TODO(UI): 정예 소환 버튼 → Spawn(...)
     // TODO(UI): 몬스터 처치 카운트 → MonsterDied 이벤트 구독
 

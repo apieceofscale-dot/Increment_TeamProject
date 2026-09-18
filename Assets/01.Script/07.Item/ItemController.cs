@@ -108,16 +108,15 @@ public class ItemController : MonoBehaviour, IPoolable
 
     public void ReturnToPool()
     {
-        OnDespawn();
-        if (ItemFactory.Instance != null)
-        {
-            ItemFactory.Instance.Release(this);
-            return;
-        }
-
         if (_returnToPool != null)
         {
             _returnToPool.Invoke();
+            return;
+        }
+
+        if (ItemFactory.Instance != null)
+        {
+            ItemFactory.Instance.Release(this);
             return;
         }
 

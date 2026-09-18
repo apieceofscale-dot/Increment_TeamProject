@@ -102,6 +102,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnDespawn()
     {
+        ResetNavigation();
         _spawned = false;
         _deathNotified = false;
         _runtimeData = null;
@@ -192,6 +193,22 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
     }
 
+    public void StopNavigation()
+    {
+        if (_naviAgent != null)
+        {
+            _naviAgent.StopMovement();
+        }
+    }
+
+    public void ResetNavigation()
+    {
+        if (_naviAgent != null)
+        {
+            _naviAgent.ResetMovement();
+        }
+    }
+
     public void TraceTowards(Vector3 worldPosition)
     {
         float speed = _status.MoveSpeed;
@@ -239,16 +256,15 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void ReturnToPool()
     {
-        OnDespawn();
-        if (MonsterFactory.Instance != null)
-        {
-            MonsterFactory.Instance.Release(this);
-            return;
-        }
-
         if (_returnToPool != null)
         {
             _returnToPool.Invoke();
+            return;
+        }
+
+        if (MonsterFactory.Instance != null)
+        {
+            MonsterFactory.Instance.Release(this);
             return;
         }
 

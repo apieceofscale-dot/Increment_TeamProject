@@ -3,9 +3,10 @@ using UnityEngine;
 public class GameSessionManager : MonoBehaviour, IBootStrapper
 {
     [SerializeField] Transform spawnPosition;
+    [SerializeField] int firstStageId = 9000;
 
     public int BootOrder => (int)BootLayer.GameSessionManager;
-        
+
     CharacterFactory characterFactory;
     UIManager uiManager;
     StageController stageManager;
@@ -15,29 +16,43 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
     private StageFacade currentStageFacade;
 
     public void IBootStrapperInject(BootstrapContext context)
-    {       
-        characterFactory = context.Get<CharacterFactory>();        
+    {
+        characterFactory = context.Get<CharacterFactory>();
         uiManager = context.Get<UIManager>();
-        stageManager = context.Get<StageController>();      
-        
-
+        stageManager = context.Get<StageController>();
     }
 
     public void IBootStrapperInitialize()
     {
         uiManager.OnCharacterSelected += HandleCharacterSelected;
+        stageManager.OnStageReady += HandleStageReady;
+    }
+
+    private void OnDestroy()
+    {
+        if (uiManager != null)
+            uiManager.OnCharacterSelected -= HandleCharacterSelected;
+
+        if (stageManager != null)
+            stageManager.OnStageReady -= HandleStageReady;
     }
 
     private void HandleCharacterSelected(int playerId)
     {
-        
-
         currentCharacter = characterFactory.Create(playerId, spawnPosition.position);
 
-        if (currentCharacter == null) return;
+        if (currentCharacter == null)
+            return;
 
-        // 스테이지 진입 요청
-        // stageManager.EnterStage(...);
+        currentCharacterFacade = currentCharacter.GetComponent<CharacterFacade>();
+        if (currentCharacterFacade == null)
+        {
+            Debug.LogError("[GameSessionManager] CharacterFacade가 없습니다.");
+            return;
+        }
+
+        stageManager.SetCharacter(currentCharacterFacade);
+        stageManager.EnterStage(firstStageId);
     }
 
     private void HandleStageReady(StageFacade stageFacade)
@@ -47,6 +62,15 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
         uiManager.BindGameplayUI(currentCharacterFacade, currentStageFacade);
     }
 
+    /// <summary>클리어 조건 충족 시 다음 스테이지로 이동. UI·스테이지 버튼에서 호출.</summary>
+    public bool TryGoToNextStage()
+    {
+        if (currentStageFacade == null)
+            return false;
 
+        return currentStageFacade.GoNextStage();
+    }
 
+    public bool CanGoToNextStage =>
+        currentStageFacade != null && stageManager != null && stageManager.CanGoNextStage;
 }
