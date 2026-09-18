@@ -27,4 +27,44 @@ public class StageMapProvider : MonoBehaviour
             transform, groundTilemap, pathFinder,
             playerStart, monsterSpawnPoints, bossSpawnPoint);
     }
+
+
+    private void OnDrawGizmos()
+    {
+        if (playerStart != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(playerStart.position, 0.4f);
+        }
+
+        if (monsterSpawnPoints != null)
+        {
+            Gizmos.color = Color.red;
+            for (int i = 0; i < monsterSpawnPoints.Length; i++)
+            {
+                if (monsterSpawnPoints[i] != null)
+                    Gizmos.DrawWireSphere(monsterSpawnPoints[i].position, 0.3f);
+            }
+        }
+
+        if (bossSpawnPoint != null)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireCube(bossSpawnPoint.position, Vector3.one * 0.8f);
+        }
+    }
+
+    private void CollectSpawnPoints()
+    {
+        System.Collections.Generic.List<Transform> found = new System.Collections.Generic.List<Transform>();
+
+        foreach (Transform child in GetComponentsInChildren<Transform>(true))
+        {
+            if (child != transform && child.name.StartsWith("SpawnPoint"))
+                found.Add(child);
+        }
+
+        monsterSpawnPoints = found.ToArray();
+        Debug.Log($"[StageMapProvider] 스폰 포인트 {found.Count}개 수집", this);
+    }
 }
