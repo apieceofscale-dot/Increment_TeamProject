@@ -15,7 +15,7 @@ MonoBehaviour:
   baseList:
   - id: 2000
     codeName: Slime
-    description: Weak blob monster
+    description: Weak blob monster. Chapter 1 fodder.
     displayName: Green Slime
     maxHp: 10
     attackDamage: 1
@@ -39,7 +39,7 @@ MonoBehaviour:
     deadAudioClip: {fileID: 0}
   - id: 2001
     codeName: Goblin
-    description: Fast skirmisher
+    description: Fast skirmisher. Stage 9001 normal spawn.
     displayName: Forest Goblin
     maxHp: 15
     attackDamage: 2
@@ -49,7 +49,7 @@ MonoBehaviour:
     attackCooldown: 0.9
     dropTableId: 2001
     icon: {fileID: 21300000, guid: d843bdc711e689e49b636a4b8a824c67, type: 3}
-    worldSprite: {fileID: 21300000, guid: d843bdc711e689e49b636a4b8a824c67, type: 3}
+    worldSprite: {fileID: 21300000, guid: 066cc7941702be2409b4c86b8dac4ea9, type: 3}
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
@@ -63,7 +63,7 @@ MonoBehaviour:
     deadAudioClip: {fileID: 0}
   - id: 2002
     codeName: Orc
-    description: Heavy melee bruiser
+    description: Heavy bruiser. Stage 9001 elite and 9002 boss.
     displayName: Highland Orc
     maxHp: 25
     attackDamage: 3
@@ -73,7 +73,7 @@ MonoBehaviour:
     attackCooldown: 1.2
     dropTableId: 2002
     icon: {fileID: 21300000, guid: 681cdb2853ae7144c815013a86c8da7c, type: 3}
-    worldSprite: {fileID: 21300000, guid: 681cdb2853ae7144c815013a86c8da7c, type: 3}
+    worldSprite: {fileID: 21300000, guid: 3accdbde4e56f5c4e9cfa311b8cef55f, type: 3}
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
