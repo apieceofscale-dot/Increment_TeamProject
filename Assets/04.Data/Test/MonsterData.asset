@@ -15,8 +15,8 @@ MonoBehaviour:
   baseList:
   - id: 2000
     codeName: Slime
-    description: something
-    displayName: SmallSlime
+    description: Weak blob monster
+    displayName: Green Slime
     maxHp: 10
     attackDamage: 1
     moveSpeed: 1.5
@@ -39,8 +39,8 @@ MonoBehaviour:
     deadAudioClip: {fileID: 0}
   - id: 2001
     codeName: Goblin
-    description: nothing
-    displayName: SmallGoblin
+    description: Fast skirmisher
+    displayName: Forest Goblin
     maxHp: 15
     attackDamage: 2
     moveSpeed: 1.8
@@ -48,8 +48,8 @@ MonoBehaviour:
     attackRange: 1.5
     attackCooldown: 0.9
     dropTableId: 2001
-    icon: {fileID: 21300000, guid: 98669ea49f47bbb4d80419a7cbbaafc8, type: 3}
-    worldSprite: {fileID: 21300000, guid: 98669ea49f47bbb4d80419a7cbbaafc8, type: 3}
+    icon: {fileID: 21300000, guid: d843bdc711e689e49b636a4b8a824c67, type: 3}
+    worldSprite: {fileID: 21300000, guid: d843bdc711e689e49b636a4b8a824c67, type: 3}
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
@@ -63,8 +63,8 @@ MonoBehaviour:
     deadAudioClip: {fileID: 0}
   - id: 2002
     codeName: Orc
-    description: anyting
-    displayName: SmallOrc
+    description: Heavy melee bruiser
+    displayName: Highland Orc
     maxHp: 25
     attackDamage: 3
     moveSpeed: 1.2
@@ -72,8 +72,8 @@ MonoBehaviour:
     attackRange: 1.6
     attackCooldown: 1.2
     dropTableId: 2002
-    icon: {fileID: 21300000, guid: 98669ea49f47bbb4d80419a7cbbaafc8, type: 3}
-    worldSprite: {fileID: 21300000, guid: 98669ea49f47bbb4d80419a7cbbaafc8, type: 3}
+    icon: {fileID: 21300000, guid: 681cdb2853ae7144c815013a86c8da7c, type: 3}
+    worldSprite: {fileID: 21300000, guid: 681cdb2853ae7144c815013a86c8da7c, type: 3}
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}

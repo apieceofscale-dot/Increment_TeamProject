@@ -1,0 +1,15 @@
+id,codeName,description,displayName,itemType,value,upgradeStep,armorPart,icon,worldSprite
+10000,HpPotion,Restores HP on use,Healing Potion,Consumable,50,1,Hat,Assets/03.Asset/Generated/01.HPUI/HpBar.png,Assets/03.Asset/Generated/01.HPUI/HpBar.png
+10001,ManaPotion,Restores MP on use,Mana Potion,Consumable,30,1,Hat,Assets/03.Asset/Generated/01.HPUI/MpBar.png,Assets/03.Asset/Generated/01.HPUI/MpBar.png
+10002,Portal,Warp scroll consumable,Portal Scroll,Consumable,0,1,Hat,Assets/04.Data/Test/textBoundary.png,Assets/04.Data/Test/textBoundary.png
+10010,Hat,Head armor,Leather Cap,Equipment,12,1,Hat,Assets/04.Data/Test/Low_Swordman/1.Sprite/Hat-Helmet.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Hat-Helmet.png
+10011,Top,Chest armor,Chain Mail,Equipment,18,1,Top,Assets/04.Data/Test/Low_Swordman/1.Sprite/body.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/body.png
+10012,Bottom,Leg armor,Leather Pants,Equipment,14,1,Bottom,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png
+10013,Gloves,Hand armor,Leather Gloves,Equipment,10,1,Gloves,Assets/04.Data/Test/Low_Swordman/1.Sprite/Shield.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Shield.png
+10014,Cape,Back cape,Traveler Cape,Equipment,8,1,Cape,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Complete.png
+10015,Shoulder,Shoulder armor,Pauldrons,Equipment,11,1,Shoulder,Assets/04.Data/Test/Low_Swordman/1.Sprite/Weapon-Sword.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Weapon-Sword.png
+10016,Belt,Waist belt,Leather Belt,Equipment,9,1,Belt,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png
+10017,Shoes,Foot armor,Leather Boots,Equipment,10,1,Shoes,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Leg.png
+10018,Ring1,Ring slot 1,Silver Ring,Equipment,7,1,Ring,Assets/04.Data/Test/Low_Swordman/1.Sprite/Weapon-Sword.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Weapon-Sword.png
+10019,Ring2,Ring slot 2,Gold Ring,Equipment,9,1,Ring,Assets/04.Data/Test/Low_Swordman/1.Sprite/Shield.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Shield.png
+10020,Necklace,Neck accessory,Amulet,Equipment,8,1,Necklace,Assets/04.Data/Test/Low_Swordman/1.Sprite/Head.png,Assets/04.Data/Test/Low_Swordman/1.Sprite/Head.png

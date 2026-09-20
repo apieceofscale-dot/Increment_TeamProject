@@ -21,20 +21,36 @@ public static class ExcelImporter
     [MenuItem("Tools/ExcelTest/2. Read Item.csv")]
     public static void ReadItemCsv()
     {
-        ImportCsv("Assets/04.Data/Test/Excel/Item.csv");
+        ImportCsv(ResolveCsvPath("Item"));
     }
 
     [MenuItem("Tools/ExcelTest/3. Read Monster.csv")]
     public static void ReadMonsterCsv()
     {
-        ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
+        ImportCsv(ResolveCsvPath("Monster"));
     }
 
     [MenuItem("Tools/ExcelTest/4. Read Item + Monster (???? ??????)")]
     public static void ReadGameDataCsvs()
     {
-        ImportCsv("Assets/04.Data/Test/Excel/Item.csv");
-        ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
+        ImportCsv(ResolveCsvPath("Item"));
+        ImportCsv(ResolveCsvPath("Monster"));
+    }
+
+    /// <summary>갱신본이 *.csv.ready에 있으면 우선 import (Excel이 .csv를 잠글 때).</summary>
+    static string ResolveCsvPath(string csvBaseName)
+    {
+        string primary = $"Assets/04.Data/Test/Excel/{csvBaseName}.csv";
+        string ready = $"Assets/04.Data/Test/Excel/{csvBaseName}.csv.ready";
+        string projectRoot = Path.GetDirectoryName(Application.dataPath)!;
+
+        if (File.Exists(Path.Combine(projectRoot, ready.Replace('/', Path.DirectorySeparatorChar))))
+        {
+            Debug.Log($"[ExcelImporter] {csvBaseName} ← csv.ready");
+            return ready;
+        }
+
+        return primary;
     }
 
     public static void ImportCsv(string path) 
@@ -126,7 +142,10 @@ public static class ExcelImporter
                 else if (field.FieldType.IsEnum)
                 {
                     string raw = values[col].Trim();
-                    value = Enum.Parse(field.FieldType, raw);
+                    if (int.TryParse(raw, out int enumAsInt))
+                        value = Enum.ToObject(field.FieldType, enumAsInt);
+                    else
+                        value = Enum.Parse(field.FieldType, raw);
                 }
                 else
                 {
