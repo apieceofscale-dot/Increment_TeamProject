@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//ÆÑÅä¸®°¡ Áö±Ý ÇÁ¸®ÆÕ ¿¬°á Ã¥ÀÓÀ» µé°í ÀÖ´Âµ¥, ÀÌ°É AssetManager·Î ºÐ¸®ÇÏ¿© µé°í ÀÖ¾î¾ß ÇÔ. 
+//ï¿½ï¿½ï¿½ä¸®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¥ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö´Âµï¿½, ï¿½Ì°ï¿½ AssetManagerï¿½ï¿½ ï¿½Ð¸ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ ï¿½ï¿½. 
 public partial class DataManager : MonoBehaviour, IBootStrapper
 {
     public static DataManager instance;
     public int BootOrder => (int)BootLayer.DataManager;
 
-    //ÀÚµ¿±¸Çö
+    //ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½
     partial void LoadAllOfDataGenerated();
     private void LoadData<T>(DataRepositary<T> repositary, List<T> dataList) where T : BaseData
     {
@@ -15,7 +15,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
         if(dataList == null )
         {
-            Debug.Log($"{dataList} µ¥ÀÌÅÍ Null");
+            Debug.Log($"{dataList} ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Null");
             return;
         }
 
@@ -23,8 +23,8 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
     }
 
 
-    //ÆÑÅä¸® È£Ãâ¿ë    
-    public bool TryGetMonsterData(int id, out MonsterData monsterData)//¾Æ·¡tryget¶û °°Àº ¹æ½ÄÀ¸·Î ¾´°ÅÀÓ. ¿©±â¿¡ out ¾øÀ¸´Ï±î Ãâ·Â ¾ÈµÊ.
+    //ï¿½ï¿½ï¿½ä¸® È£ï¿½ï¿½ï¿½    
+    public bool TryGetMonsterData(int id, out MonsterData monsterData)//ï¿½Æ·ï¿½trygetï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½â¿¡ out ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ ï¿½Èµï¿½.
     {
         return monsterRepository.TryGet(id, out monsterData);
     }
@@ -43,7 +43,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
 
 
-    //ºÎÆ® ½ºÆ®·¡ÆÛ¿ë.
+    //ï¿½ï¿½Æ® ï¿½ï¿½Æ®ï¿½ï¿½ï¿½Û¿ï¿½.
     public void IBootStrapperInject(BootstrapContext context)
     {        
         instance = this;
@@ -66,7 +66,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
  * public static DataManager instance;
 
   
-   // private readonly List<Monster> thisMonsterList = new List<Monster>(); //readonly´Â ´ëÃæ const¶û ºñ½Á. 
+   // private readonly List<Monster> thisMonsterList = new List<Monster>(); //readonlyï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ constï¿½ï¿½ ï¿½ï¿½ï¿½. 
     //private readonly Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
     [SerializeField] private MonsterList monsterData;  
     private readonly DataRepositary<Monster> monsters = new DataRepositary<Monster>();
@@ -77,7 +77,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
     [SerializeField] private WeaponList weaponData;
     private readonly DataRepositary<Weapon> weapons = new DataRepositary<Weapon>();
 
-    //¿©±â¿¡ µ¥ÀÌÅÍ ÇÏ³ª¾¿ À§¶û °°Àº ¹æ½ÄÀ¸·Î ³Ö±â. ¾Æ·¡  LoadAllOFData()¿¡µµ ³Ö±â . ³ªÁß¿¡ ½ºÅ©¸³ÅÍºí ¿ÀºêÁ§Æ®·Î
+    //ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½. ï¿½Æ·ï¿½  LoadAllOFData()ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½ . ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½Å©ï¿½ï¿½ï¿½Íºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½
 
 
 
@@ -92,7 +92,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
         LoadAllOFData();
     }
 
-    private void LoadAllOFData() //°Á Á¤¸®ÇÑ °Å.
+    private void LoadAllOFData() //ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
     {
         LoadWeapon();
         LoadMonster();
@@ -107,7 +107,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
         if(monsterData == null)
         {
-            Debug.Log("ÀÎ½ºÆåÅÍ¿¡¼­ ¸ó½ºÅÍ µ¥ÀÌÅÍ ³Ö¾î¶óÁ»");
+            Debug.Log("ï¿½Î½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½");
             return;
         }
         monsters.Load(monsterData.monsterList); 
@@ -119,7 +119,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
         if(playerData == null)
         {
-            Debug.Log("ÀÎ½ºÆåÅÍ¿¡¼­ ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ ³Ö¾î¶óÁ»");
+            Debug.Log("ï¿½Î½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½");
             return;
         }
         players.Load(playerData.playerList); 
@@ -130,7 +130,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
         weapons.Clear();
         if(weaponData == null)
         {
-            Debug.Log("ÀÎ½ºÆåÅÍ¿¡¼­ ¹«±â µ¥ÀÌÅÍ ³Ö¾î¶óÁ»");
+            Debug.Log("ï¿½Î½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½");
         }
 
         weapons.Load(weaponData.weaponList);
@@ -138,7 +138,7 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
 
 
 
-    public bool TryGetMonsterData(int id, out Monster monsterData)//¾Æ·¡tryget¶û °°Àº ¹æ½ÄÀ¸·Î ¾´°ÅÀÓ. ¿©±â¿¡ out ¾øÀ¸´Ï±î Ãâ·Â ¾ÈµÊ.
+    public bool TryGetMonsterData(int id, out Monster monsterData)//ï¿½Æ·ï¿½trygetï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½â¿¡ out ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ ï¿½Èµï¿½.
     {
         return monsters.TryGet(id, out monsterData);
     }

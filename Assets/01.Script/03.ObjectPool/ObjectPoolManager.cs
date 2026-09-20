@@ -5,20 +5,20 @@ using UnityEngine;
 
 
 
-//Á¦³×¸¯È­ -> ÀÚ½Ä ½ºÅ©¸³Æ®·Î ºñ Á¦³×¸¯ ¸ó½ºÅÍ/¹Ì»çÀÏ Ç®¸µ ¸Å´ÏÀú µû·Î ¸¸µé±â.
+//ï¿½ï¿½ï¿½×¸ï¿½È­ -> ï¿½Ú½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½×¸ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½Ì»ï¿½ï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
 
 public class ObjectPoolManager<T> : MonoBehaviour where T : Component
 {
     public static ObjectPoolManager<T> instance;
 
-    List<T> objList; //½ºÅ×ÀÌÁö ¸Å´ÏÀú°¡ ÃÊ±âÈ­
-    //½ÇÁ¦ ¿ÀºêÁ§Æ® ÀúÀå À§Ä¡
+    List<T> objList; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
     Dictionary<T, Queue<T>> pools = new Dictionary<T, Queue<T>>();
-    //Áï string->ÀÌ¸§, Queue ->ÀúÀå ÇüÅÂ°¡ µÊ. 
+    //ï¿½ï¿½ string->ï¿½Ì¸ï¿½, Queue ->ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â°ï¿½ ï¿½ï¿½. 
     Dictionary<T, Transform> poolsParents = new Dictionary<T, Transform>();
-    //ÇÁ¸®ÆÕÀÇ ¿øº»ÀÌ ¹ºÁö ÀúÀåÇÒ °Í. TryGetValue
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½. TryGetValue
     Dictionary<T, T> originPrefabs = new Dictionary<T, T>();
-    //»ì¾ÆÀÖ´Â ¿ÀºêÁ§Æ®µé ´Ù µ¹·Á¹Þ´Â¿ë.
+    //ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Þ´Â¿ï¿½.
     private HashSet<T> activedObjects = new HashSet<T>();
 
     
@@ -43,7 +43,7 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
     {
         foreach (T obj in stageManagerList)
         {
-            objList.Add(obj); //? ÀÌ°Å °ÔÀÓ ¿ÀºêÁ§Æ® ¾Æ´Ñ°¡?
+            objList.Add(obj); //? ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Æ´Ñ°ï¿½?
         }
 
         poolSize = 30;
@@ -61,11 +61,11 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
 
         poolSize = n;
 
-        GameObject parentPool = new GameObject($"{prefab.name}_Pool");   // ÀÏ´Ü Á¤¸®¸¦ À§ÇØ {obj.name}_Pool ÀÌ¸§ÀÇ ºó °ÔÀÓ ¿ÀºêÁ§Æ®¸¦»ý¼º.
-        parentPool.transform.SetParent(transform);                  //±×¸®°í ÀÌ parentPoolÀÇ ºÎ¸ð¸¦ ÀÌ ¿ÀºêÁ§Æ®·Î ÇÔ.
-                                                                    //Áï ÀÌ  ¿ÀºêÁ§Æ® ¾Æ·¡¿¡ {obj.name}_Pool°¡ ÀÖ°ÔµÊ.
-        poolsParents[prefab] = parentPool.transform;                // ±×¸®°í ±× À§Ä¡µµ ÀúÀå.
-        pools[prefab] = new Queue<T>();                    //µñ¼Å³Ê¸®ÀÇ Å°·Î ÀÌ¸§À» ³Ö°í, Å¥¸¦ ¼±¾ðÇØÁÜ. 
+        GameObject parentPool = new GameObject($"{prefab.name}_Pool");   // ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ {obj.name}_Pool ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        parentPool.transform.SetParent(transform);                  //ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ parentPoolï¿½ï¿½ ï¿½Î¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½.
+                                                                    //ï¿½ï¿½ ï¿½ï¿½  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Æ·ï¿½ï¿½ï¿½ {obj.name}_Poolï¿½ï¿½ ï¿½Ö°Ôµï¿½.
+        poolsParents[prefab] = parentPool.transform;                // ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+        pools[prefab] = new Queue<T>();                    //ï¿½ï¿½Å³Ê¸ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½Ö°ï¿½, Å¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. 
 
         for (int i = 0; i < poolSize; i++)
         {
@@ -75,11 +75,11 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         }
     }
 
-    public T CreatePooledObject(T prefab) //ºÎÁ·ÇØ¼­ »ý¼ºÇØ¾ß ÇÒ °æ¿ì¿Í ÄÚµå°¡ Áßº¹µÇ¼­ ºÐ¸®ÇÔ.
+    public T CreatePooledObject(T prefab) //ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµå°¡ ï¿½ßºï¿½ï¿½Ç¼ï¿½ ï¿½Ð¸ï¿½ï¿½ï¿½.
     {
         T go = Instantiate(prefab, poolsParents[prefab]);
 
-        originPrefabs[go] = prefab; //»ý¼ºµÈ ÇÁ¸®ÆÕÀ» ÀúÀå.
+        originPrefabs[go] = prefab; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
         if (go is IPoolable poolable)
         {
@@ -94,10 +94,10 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         if (prefab == null)
         {
             Debug.Log("???");
-            return null; //±×·³ ¾È ½î°Ô????
+            return null; //ï¿½×·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½????
         }
 
-        if (!pools.ContainsKey(prefab)) //¿ÀºêÁ§Æ® Ç® ÀÚÃ¼°¡ ¾øÀ» °æ¿ì ºÎ¸ð+ÀúÀåÀ§Ä¡ ±îÁö °°ÀÌ »ý¼º. ¹«±â¸¦ µµÁß¿¡ ¾òÀ» ¶§ ÇÊ¿äÇÔ.
+        if (!pools.ContainsKey(prefab)) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® Ç® ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Î¸ï¿½+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½â¸¦ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½.
         {
             ObjectPoolMaker(prefab, 30);
         }
@@ -109,7 +109,7 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
             go = pools[prefab].Dequeue();
 
         }
-        else //Ç®Àº ÀÖ´Âµ¥ ºÎÁ·ÇÒ °æ¿ì »ý¼º. ÀÌ¶§ ÀúÀå À§Ä¡ ±â¾ï.
+        else //Ç®ï¿½ï¿½ ï¿½Ö´Âµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½Ì¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½.
         {
             go = CreatePooledObject(prefab);
 
@@ -118,13 +118,13 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
         activedObjects.Add(go);
         go.gameObject.SetActive(true);
 
-        // OnSpawn/OnDespawnÀº IPoolable ±¸ÇöÃ¼ + Factory(µ¥ÀÌÅÍ Initialize ÈÄ)¿¡¼­ Ã³¸®.
-        // GetObject´Â Ç®¿¡¼­ ²¨³» È°¼ºÈ­¸¸ ÇÑ´Ù.
+        // OnSpawn/OnDespawnï¿½ï¿½ IPoolable ï¿½ï¿½ï¿½ï¿½Ã¼ + Factory(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Initialize ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½.
+        // GetObjectï¿½ï¿½ Ç®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È°ï¿½ï¿½È­ï¿½ï¿½ ï¿½Ñ´ï¿½.
 
         return go;
     }
 
-    public T GetObject(T prefab, Vector3 position, Quaternion rotation) // »ý¼º½Ã ¹Ù·Î À§Ä¡ ¹× È¸Àü µî ÁöÁ¤ °¡´ÉÇÑ ¿À¹ö·Îµå
+    public T GetObject(T prefab, Vector3 position, Quaternion rotation) // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Îµï¿½
     {
         T go = GetObject(prefab);
 
@@ -151,8 +151,8 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
             return;
         }
 
-        if (!originPrefabs.TryGetValue(go, out T originPrefab)) // int tryparseÇß´ø °Å¶û °°Àº °Å.
-                                                                // ¿©±â¼­´Â ¿øº» ÇÁ¸®ÆÕÀ» Ã£´Â´Ù.
+        if (!originPrefabs.TryGetValue(go, out T originPrefab)) // int tryparseï¿½ß´ï¿½ ï¿½Å¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
+                                                                // ï¿½ï¿½ï¿½â¼­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½Â´ï¿½.
         {
             Debug.Log("???");
             activedObjects.Add(go);
@@ -163,7 +163,7 @@ public class ObjectPoolManager<T> : MonoBehaviour where T : Component
             poolable.OnDespawn();
 
         go.gameObject.SetActive(false);
-        go.transform.SetParent(poolsParents[originPrefab]); //ÀúÀå À§Ä¡ Ã£¾Æ°¡±â.
+        go.transform.SetParent(poolsParents[originPrefab]); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ Ã£ï¿½Æ°ï¿½ï¿½ï¿½.
         pools[originPrefab].Enqueue(go);
         activedObjects.Remove(go);
     }

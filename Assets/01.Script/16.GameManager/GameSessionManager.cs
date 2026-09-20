@@ -47,7 +47,7 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
         currentCharacterFacade = currentCharacter.GetComponent<CharacterFacade>();
         if (currentCharacterFacade == null)
         {
-            Debug.LogError("[GameSessionManager] CharacterFacade°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogError("[GameSessionManager] CharacterFacadeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
             return;
         }
 
@@ -62,7 +62,7 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
         uiManager.BindGameplayUI(currentCharacterFacade, currentStageFacade);
     }
 
-    /// <summary>Å¬¸®¾î Á¶°Ç ÃæÁ· ½Ã ´ÙÀ½ ½ºÅ×ÀÌÁö·Î ÀÌµ¿. UI¡¤½ºÅ×ÀÌÁö ¹öÆ°¿¡¼­ È£Ãâ.</summary>
+    /// <summary>Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½. UIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½.</summary>
     public bool TryGoToNextStage()
     {
         if (currentStageFacade == null)
