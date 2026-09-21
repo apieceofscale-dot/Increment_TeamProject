@@ -71,20 +71,23 @@ public sealed class MonsterSpawner : MonoBehaviour
         if (CountAlive() >= definition.MaxAliveMonster) return;
 
         spawnTimer = definition.SpawnInterval;
-        SpawnInternal(definition.MonsterId, definition, GetSpawnPosition(definition));
+
+        // 보스맵은 지정된 보스 위치에서, 파밍은 스폰 포인트 중 랜덤 위치에서
+        Vector3 position = definition.Type == StageType.Boss && map.HasBossSpawnPoint
+            ? map.BossSpawnPosition
+            : GetSpawnPosition(definition);
+
+        SpawnInternal(definition.MonsterId, definition, position);
     }
 
+    // 엘리트는 이번에 호출하지 않는다. 코드 복구만 해 둔다.
     public MonsterController SpawnElite(in StageDefinition definition)
     {
         if (!hasMap) return null;
         if (!definition.HasElite) return null;
 
-        // 보스맵 소환 포인트가 있으면 그자리에서, 없음 일반위치에서 ㄱ
         Vector3 position = map.HasBossSpawnPoint ? map.BossSpawnPosition : GetSpawnPosition(definition);
-
         return SpawnInternal(definition.EliteMonsterId, definition, position);
-
-
     }
 
     // 타겟은 스폰할 때 한번 넣어주기
