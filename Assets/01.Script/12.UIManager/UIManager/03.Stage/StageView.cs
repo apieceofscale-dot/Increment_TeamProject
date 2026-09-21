@@ -5,11 +5,13 @@ using System;
 
 public class StageView : MonoBehaviour, IUIViewInitialize
 {
-    [SerializeField] TextMeshProUGUI nowMapName;
+    [SerializeField] TextMeshProUGUI mapName;
     [SerializeField] TextMeshProUGUI ChallengeStageNum;
     [SerializeField] TextMeshProUGUI stageProcedureText;
     [SerializeField] Image stageProcedureBar;
     [SerializeField] Button challengeButton;
+    [SerializeField] TextMeshProUGUI timeleft;
+    [SerializeField] TextMeshProUGUI monsterLeft;
   
     public void InitializeView()
     {
@@ -20,11 +22,11 @@ public class StageView : MonoBehaviour, IUIViewInitialize
 
     public void SetName(string nowMapName)
     {
-        this.nowMapName.text = nowMapName;
+        this.mapName.text = nowMapName;
     }
-    public void SetChallengeStageNum(int nowStageNum /*, string nextStageName*/)
+    public void SetChallengeStageNum( string nextStageName)
     {
-        this.ChallengeStageNum.text = nowStageNum.ToString();        
+        this.ChallengeStageNum.text = ToString(); 
     }   
     public void SetStageProcedureText(int nowStageNum, int totalStageNum)
     {
@@ -37,6 +39,19 @@ public class StageView : MonoBehaviour, IUIViewInitialize
     public void SetChallengeAvailable(bool available)
     {
         challengeButton.interactable = available;
+    }
+
+
+
+    //아래 2개는 시간 남으면 하기.
+    public void SetTimeLeft(string timeLeft)
+    {
+        this.timeleft.text = timeLeft;
+    }
+
+    public void Monsterleft(int monsterLeft)
+    {
+        this.monsterLeft.text = monsterLeft.ToString();
     }
 
 }

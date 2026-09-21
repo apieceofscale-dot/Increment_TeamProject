@@ -42,7 +42,7 @@ public class StagePresenter
         }
 
         view.SetName(info.MapName);
-        view.SetChallengeStageNum(info.ChallengeStageNum);
+        view.SetChallengeStageNum(info.ChallengeStageNum.ToString()); //사실 이름인데 잘못넣엇는데 걍 넘어감.
         view.SetStageProcedureText(info.NowStageNum, info.TotalStageNum);
         view.SetStageProcedureBar(info.NowStageNum, Math.Max(1, info.TotalStageNum));
 
@@ -58,7 +58,7 @@ public class StagePresenter
         // TODO: 스테이지 담당자가 제공할 "현재 스테이지 도전 시작" API 연결.
         //
         // 조건 1 완료 → CanChallenge = true 수신 → 버튼 활성화
-        // 버튼 클릭 → 여기서 도전 시작 요청
+        // 버튼 클릭 → 여기서 도전 시작 요청        
         // 도전 시작 → CanChallenge = false 수신 → 버튼 비활성화
         // 조건 2 완료 → 스테이지 쪽에서 다음 스테이지로 이동
         // 변경된 스테이지 정보 수신 → HandleStageChange에서 화면 갱신
