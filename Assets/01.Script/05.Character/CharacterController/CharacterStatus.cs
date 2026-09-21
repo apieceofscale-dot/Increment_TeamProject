@@ -88,7 +88,7 @@ public class CharacterStatus
 
     public int BaseDodgeRate { get; private set; }
     public int EquipDodgeRate { get; private set; }
-    public int DodgeRate => BaseDodgeRate + EquipDodgeRate; // È¸À“
+    public int DodgeRate => BaseDodgeRate + EquipDodgeRate; // È¸ÇÇ
 
     public void Initialize(PlayerData data)
     {
@@ -291,5 +291,74 @@ public class CharacterStatus
             return;
 
         BaseDefence += amount;
+    }
+
+    internal bool TryApplyGrowth(CharacterDamageMainStat mainStat, int main, int attack, long defence, long hp, int mp, bool fullyHeal, bool apply = true)
+    {
+        if (main < 0 || attack < 0 || defence < 0 || hp < 0 || mp < 0)
+            return false;
+
+        int strength = BaseStrength;
+        int dexterity = BaseDexterity;
+        int intelligence = BaseIntelligence;
+        int luck = BaseLuck;
+        int nextAttack;
+        int nextMp;
+        long nextDefence;
+        long nextHp;
+        long nextCurrentHp;
+
+        try
+        {
+            checked
+            {
+                switch (mainStat)
+                {
+                    case CharacterDamageMainStat.Strength:
+                        strength += main; break;
+                    case CharacterDamageMainStat.Dexterity:
+                        dexterity += main; break;
+                    case CharacterDamageMainStat.Intelligence:
+                        intelligence += main; break;
+                    case CharacterDamageMainStat.Luck:
+                        luck += main; break;
+                    default:
+                        return false;
+                }
+
+                nextAttack = BaseAttack + attack;
+                nextDefence = BaseDefence + defence;
+                nextHp = BaseMaxHp + hp;
+                nextMp = BaseMaxMp + mp;
+                
+                int totalStrength = strength + EquipStrength;
+                int totalDexterity = dexterity + EquipDexterity;
+                int totalIntelligence = intelligence + EquipIntelligence;
+                int totalLuck = luck + EquipLuck;
+                int totalAttack = nextAttack + EquipAttack;
+                long totalDefence = nextDefence + EquipDefence;
+                long totalHp = nextHp + EquipMaxHp;
+                int totalMp = nextMp + EquipMaxMp;
+                nextCurrentHp = fullyHeal ? totalHp : Math.Min(totalHp, CurrentHp + hp);
+            }
+        }
+        catch (OverflowException) 
+        { 
+            return false; 
+        }
+
+        if (!apply)
+            return true;
+
+        BaseStrength = strength;
+        BaseDexterity = dexterity;
+        BaseIntelligence = intelligence;
+        BaseLuck = luck;
+        BaseAttack = nextAttack;
+        BaseDefence = nextDefence;
+        BaseMaxHp = nextHp;
+        BaseMaxMp = nextMp;
+        CurrentHp = nextCurrentHp;
+        return true;
     }
 }

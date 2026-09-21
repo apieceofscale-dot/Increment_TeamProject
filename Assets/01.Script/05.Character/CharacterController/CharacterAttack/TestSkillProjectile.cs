@@ -4,6 +4,10 @@ public class TestSkillProjectile : MonoBehaviour
 {
     [SerializeField, Min(0.01f)] private float hitRadius = 0.15f;
     private int damage;
+    private bool usesDamageCalculator;
+    private CharacterDamageAttackData attackSnapshot;
+    private float skillMultiplier;
+    private CharacterControllers damageOwner;
     private float speed;
     private Vector2 direction;
     private float remainingDistance;
@@ -15,6 +19,8 @@ public class TestSkillProjectile : MonoBehaviour
 
     public void Initialize(int damage, float speed, Vector2 direction, float maxDistance, LayerMask monsterLayer, LayerMask blockingLayer, Transform owner)
     {
+        usesDamageCalculator = false;
+        damageOwner = null;
         this.damage = damage;
         this.speed = Mathf.Max(0.01f, speed);
         this.direction = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.right;
@@ -25,6 +31,15 @@ public class TestSkillProjectile : MonoBehaviour
         finished = false;
         initialized = true;
         transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(this.direction.y, this.direction.x) * Mathf.Rad2Deg);
+    }
+
+    public void Initialize(CharacterDamageAttackData attack, float multiplier, float speed, Vector2 direction, float maxDistance, LayerMask monsterLayer, LayerMask blockingLayer, CharacterControllers source)
+    {
+        Initialize(0, speed, direction, maxDistance, monsterLayer, blockingLayer, source != null ? source.transform : null);
+        attackSnapshot = attack;
+        skillMultiplier = multiplier;
+        damageOwner = source;
+        usesDamageCalculator = true;
     }
 
     private void Update()
@@ -53,13 +68,30 @@ public class TestSkillProjectile : MonoBehaviour
                 Finish();
                 return;
             }
+
             IDamageable target = other.GetComponentInParent<IDamageable>();
 
             if ((monsterLayer.value & layer) != 0 && target != null)
             {
                 finished = true;
-                target.TakeDamage(damage);
-                Destroy(gameObject);
+
+                try
+                {
+                    if (usesDamageCalculator)
+                    {
+                        CharacterDamageResult result = CharacterDamageUtility.Apply(attackSnapshot, skillMultiplier, target);
+
+                        if (damageOwner != null)
+                            damageOwner.ReportDamageResult(target, result);
+                    }
+                    else if (damage > 0)
+                        target.TakeDamage(damage);
+                }
+                finally
+                {
+                    Destroy(gameObject);
+                }
+
                 return;
             }
         }

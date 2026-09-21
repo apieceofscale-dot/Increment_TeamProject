@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterFacade : MonoBehaviour, IBootStrapper
+public class CharacterFacade : MonoBehaviour
 {
     
     [SerializeField] private CharacterControllers characterControllers;
     private CharacterControllers Controller => characterControllers;
 
-    [SerializeField] private int bootOrder = 1100;
-    public int BootOrder => bootOrder;
     public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;
     public bool CanRun => characterControllers != null && characterControllers.CanRun;
     internal void Inject(CharacterControllers owner)
@@ -21,28 +19,108 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
             throw new System.InvalidOperationException("연결된 캐릭터와 주입 대상 다름");
 
         characterControllers = owner;
-    }
-    public void IBootStrapperInject(BootstrapContext context)
-    {
-        Inject(characterControllers != null ? characterControllers : GetComponentInParent<CharacterControllers>());
-    }
-    public void IBootStrapperInitialize()
-    {
-        if (!IsInitialized)
-            throw new System.InvalidOperationException("Controller 초기화 먼저 완료해야함");
+
+        if (owner == CharacterControllers.Current && currentFacade == null)
+            currentFacade = this;
     }
 
+    #region 씬 전환용 외부 API
+    private static CharacterFacade currentFacade;
+
+    // 별도의 플레이어를 만들지 않고, 현재 DDOL 플레이어의 창구 반환
+    public static CharacterFacade Current => currentFacade != null && currentFacade.characterControllers != null && currentFacade.characterControllers == CharacterControllers.Current ? currentFacade : null;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCurrentFacade() { currentFacade = null; }
+
+    private void OnDestroy()
+    {
+        if (currentFacade == this)
+            currentFacade = null;
+    }
+
+    public void PrepareForSceneChange() // 씬 전환 전에 캐릭터 이동·전투 준비 상태 정리
+    {
+        RequireSceneController().PrepareForSceneChange();
+    }
+
+    public void BindSceneBootstrap(BootStrapper sceneBootstrap) // 새 씬의 부트스트래퍼를 기존 캐릭터에 연결
+    {
+        RequireSceneController().BindSceneBootstrap(sceneBootstrap);
+    }
+
+    public void MoveToScenePosition(Vector3 spawnPosition) // 기존 캐릭터를 새 스테이지 시작 위치로 배치
+    {
+        RequireSceneController().MoveToScenePosition(spawnPosition);
+    }
+
+    private CharacterControllers RequireSceneController()
+    {
+        if (Controller == null || !Controller.IsInitialized || Controller != CharacterControllers.Current)
+            throw new InvalidOperationException("초기화된 현재 플레이어의 Facade 필요");
+
+        return Controller;
+    }
+    #endregion
+
     #region 공용 상세 객체 접근 용
-    public CharacterStatus Status => Controller.Status;
-    public CharacterInventory Inventory => Controller.Inventory;
-    public CharacterEquipment Equipment => Controller.Equipment;
+    public CharacterStatus Status => Controller.Status; // 현재 기본 스탯·장비 보너스·합산 스탯 조회
+    public CharacterInventory Inventory => Controller.Inventory; // 보유 장비 상세 조회용, 일반 UI 동작은 아래 장비 API 사용
+    public CharacterEquipment Equipment => Controller.Equipment; // 착용 상태 상세 조회용, 일반 UI 동작은 아래 착용·해제 API 사용
     #endregion
 
     #region 캐릭터 생성 및 초기화
-    public PlayerData Data => Controller.Data;
-    public void Initialize(PlayerData playerData)
+    public PlayerData Data => Controller.Data; // 캐릭터 생성에 사용한 원본 데이터 조회, 성장 후 수치는 Status 사용
+    public void Initialize(PlayerData playerData) // Controller 참조 주입 후 초기 데이터 적용
     {
         Controller.Initialize(playerData);
+    }
+    #endregion
+
+    #region 레벨 성장 및 능력치 포인트
+    public CharacterStatUpgradeInfo GetStatUpgradeInfo() => Controller.GetStatUpgradeInfo(); // 일반·특별 포인트, 캐릭터 등급, 항목별 강화 횟수 조회
+    public bool TryUpgradeStat(CharacterStatUpgradeType type) => Controller.TryUpgradeStat(type); // 강화 버튼: 선택한 항목을 1회 강화, 성공 여부 반환
+    public long RequiredExp => Controller.RequiredExp; // 다음 레벨 요구 경험치 조회, 0이면 추가 레벨업 불가
+    public event Action StatUpgradeChanged // 레벨업·강화 성공 후 포인트와 스탯 다시 조회
+    {
+        add
+        {
+            Controller.StatUpgradeChanged += value;
+        }
+        remove
+        {
+            if (Controller != null)
+                Controller.StatUpgradeChanged -= value;
+        }
+    }
+    #endregion
+
+    #region 경험치 및 강화 표시
+    public long CurrentExp => Controller.CurrentExp; // 현재 레벨에서 누적한 경험치 조회
+    public int MainStatValue => Controller.MainStatValue; // 재 직업 주 스탯의 장비 포함 합산 값 조회
+    public CharacterStatUpgradeOption GetStatUpgradeOption(CharacterStatUpgradeType type) => Controller.GetStatUpgradeOption(type);
+
+    public event Action<long, long> ExpChanged // 경험치 바 갱신용, 현재 경험치·요구 경험치 순서로 전달
+    {
+        add
+        {
+            Controller.ExpChanged += value;
+        }
+        remove
+        {
+            if (Controller != null) Controller.ExpChanged -= value;
+        }
+    }
+    public event Action<Sprite> PortraitChanged // 초상화 변경 시 이미지 갱신, null 처리 필요
+    {
+        add
+        {
+            Controller.PortraitChanged += value;
+        }
+        remove
+        {
+            if (Controller != null) Controller.PortraitChanged -= value;
+        }
     }
     #endregion
 
@@ -236,37 +314,54 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
     public bool UseSkill(int slotIndex) => Controller.UseSkill(slotIndex);
     #endregion
 
+    #region 피해 계산 조회 및 알림
+    public CharacterDamageMainStat DamageMainStat => Controller.DamageMainStat; // STR·DEX·INT·LUK 중 현재 주 스탯 종류 조회
+    public CharacterDamageAttackData CaptureDamageAttack() => Controller.CaptureDamageAttack(); // 호출 시점의 공격 스탯을 복사, 이 호출만으로 피해를 주지는 않음
+    public event Action<IDamageable, CharacterDamageResult> DamageResolved // 대상과 계산 결과 전달, 이 이벤트에서 피해를 다시 적용하지 않음
+    {
+        add 
+        {
+            Controller.DamageResolved += value; 
+        }
+        remove 
+        { 
+            if (Controller != null)
+                Controller.DamageResolved -= value; 
+        }
+    }
+    #endregion
+
     #region 몬스터 및 전투용
-    public void TakeDamage(long damage)
+    public void TakeDamage(long damage) // 캐릭터 HP에서 전달한 피해량 차감
     {
         Controller.Status.TakeDamage(damage);
     }
 
-    public void RecoverHp(long amount)
+    public void RecoverHp(long amount) // 캐릭터 현재 HP 회복
     {
         Controller.Status.RecoverHp(amount);
     }
 
-    public bool UseMp(int amount)
+    public bool UseMp(int amount) // MP 사용 요청, 부족하면 false 반환
     {
         return Controller.Status.UseMp(amount);
     }
 
-    public void RecoverMp(int amount)
+    public void RecoverMp(int amount) // 캐릭터 현재 MP 회복
     {
         Controller.Status.RecoverMp(amount);
     }
     #endregion
 
     #region 보상 및 재화 용
-    public void GainExp(long amount)
+    public void GainExp(long amount) // 경험치 지급 및 조건 충족 시 레벨업 처리
     {
         Controller.GainExp(amount);
     }
 
-    public void SetMoney(long amount)
+    public void SetMoney(long amount) // 획득량이 아닌 최종 보유 잔액 전달
     {
-        Controller.SetMoney(amount); // 재화 잔액 전달
+        Controller.SetMoney(amount);
     }
     #endregion
 
@@ -299,7 +394,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
 
     #region 아이템 스탯 연동 용
     // 현재 착용 장비 전체의 합계를 교체, 생략한 항목은 0
-    public void SetEquipmentStats(
+    public void SetEquipmentStats( // 현재 착용 장비 전체의 스탯 합계를 전달
         long maxHp = 0,
         int maxMp = 0,
         int recoverMpPerSec = 0,
@@ -344,12 +439,12 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
             dodgeRate: dodgeRate);
     }
 
-    public bool RefreshEquipmentStats()
+    public bool RefreshEquipmentStats() // 장비 옵션 변경 후 착용 장비의 스탯 재계산 요청
     {
         return Controller.RefreshEquipmentStats(); // 조회·합산·적용 요청을 전달
     }
 
-    public void ClearEquipmentStats()
+    public void ClearEquipmentStats() // 장비 보너스만 초기화, 기본 스탯은 유지
     {
         Controller.ClearEquipmentStats();
     }
@@ -361,44 +456,44 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         Controller.SetAutoFarming(enabled); 
     }
 
-    public bool IsAutoFarming => Controller.IsAutoFarming;
-    public string AutoFarmingState => Controller.AutoFarmingState;
+    public bool IsAutoFarming => Controller.IsAutoFarming; // 현재 ON/OFF 상태 표시
+    public string AutoFarmingState => Controller.AutoFarmingState; // 자동사냥 상태 표시·디버깅용 상태 문자열 조회
 
-    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter)
+    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter) // 자동사냥이 선택할 대상의 허용 조건 연결
     {
         Controller.SetAutoFarmingTargetFilter(filter);
     }
     #endregion
 
     #region 캐릭터 조작 및 자동전투용
-    public void SetMoveInput(float input)
+    public void SetMoveInput(float input) // 좌우 이동 입력 전달, 정지 시 0 전달
     {
         Controller.SetMoveInput(input);
     }
 
-    public void Jump()
+    public void Jump() // 점프 요청, 실제 가능 여부는 Controller에서 판단
     {
         Controller.Jump();
     }
 
-    public bool Attack()
+    public bool Attack() // 현재 기본 공격 사용 요청, 성공 여부 반환
     {
         return Controller.TryAttack();
     }
 
-    public bool SetBasicAttackReplacement(CharacterSkillBase skill)
+    public bool SetBasicAttackReplacement(CharacterSkillBase skill) // 기본 공격을 대체할 스킬 지정, 성공 여부 반환
     {
         return Controller.SetBasicAttackReplacement(skill);
     }
 
-    public void RestoreBasicAttack()
+    public void RestoreBasicAttack() // 기본 공격 대체를 해제하고 일반 공격으로 복원
     {
         Controller.RestoreBasicAttack();
     }
     #endregion
 
     #region 직업 및 성장 용
-    public bool ChangeJob(int id)
+    public bool ChangeJob(int id) // 지정 ID로 직업 변경 요청, 성공 여부 반환
     {
         return Controller.ChangeJob(id);
     }
