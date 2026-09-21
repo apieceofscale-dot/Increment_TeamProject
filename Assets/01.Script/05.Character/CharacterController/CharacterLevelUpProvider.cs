@@ -3,43 +3,42 @@ using System;
 public class CharacterLevelUpProvider
 {
     private const long BaseRequiredExp = 100;
-    private const double ExpGrowthRate = 1.15; // 임시로 1.15로 지정, 추후 기획에 따라 변경예정
-    private const long BaseHpGrowth = 10;
-    private const int BaseAttackGrowth = 2;
-    private const int BaseDefenceGrowth = 1;
+    private const double ExpGrowthRate = 1.15;
+    public const int StatPointsPerLevel = 5;
 
     public long GetRequiredExp(int level)
     {
-        if (level < 1)
-            level = 1;
-        double requiredExp = BaseRequiredExp * Math.Pow(ExpGrowthRate, level - 1);
+        double required = BaseRequiredExp * Math.Pow(ExpGrowthRate, Math.Max(1, level) - 1);
 
-        return (long)Math.Round(requiredExp);
+        if (level == int.MaxValue || double.IsInfinity(required) || required >= long.MaxValue)
+            return 0;
+
+        return (long)Math.Round(required);
     }
 
-    // 아래는 임시 공식들
+    public long GetMaxHpGrowth(int level) => 10;
+    public int GetAttackGrowth(int level) => 1;
+    public int GetDefenceGrowth(int level) => 1;
+    public int GetMainStatGrowth(int level) => 1;
+    public int GetMaxMpGrowth(int level) => 2;
 
-    public long GetMaxHpGrowth(int level)
+    internal bool TryLevelUp(CharacterStatus status, CharacterDamageMainStat mainStat)
     {
-        if(level < 1)
-            level = 1;
+        if (status == null)
+            return false;
 
-        return BaseHpGrowth + level;
-    }
+        long required = GetRequiredExp(status.Level);
 
-    public int GetAttackGrowth(int level)
-    {
-        if (level < 1)
-            level = 1;
+        if (required <= 0 || status.Exp < required)
+            return false;
 
-        return BaseAttackGrowth + level / 5;
-    }
+        int nextLevel = status.Level + 1;
 
-    public int GetDefenceGrowth(int level)
-    {
-        if (level < 1)
-            level = 1;
-
-        return BaseDefenceGrowth + level / 10;
+        if (!status.TryApplyGrowth(mainStat, GetMainStatGrowth(nextLevel), GetAttackGrowth(nextLevel), GetDefenceGrowth(nextLevel), GetMaxHpGrowth(nextLevel), GetMaxMpGrowth(nextLevel), true))
+            return false;
+        
+        status.UseExp(required);
+        status.IncreaseLevel();
+        return true;
     }
 }

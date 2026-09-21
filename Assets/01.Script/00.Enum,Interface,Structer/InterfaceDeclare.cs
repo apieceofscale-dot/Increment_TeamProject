@@ -42,3 +42,8 @@ public interface IUIViewInitialize
 {
     public void InitializeView();
 }
+
+public interface ICharacterDamageTarget // 피해 계산에 필요한 정보 요청 인터페이스
+{
+    CharacterDamageTargetData GetDamageTargetData();
+}

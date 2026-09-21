@@ -85,6 +85,10 @@ public class PlayerInputController : MonoBehaviour, IBootStrapper
         characterControllers.GainExp(100);
 
         Debug.Log($"Lv.{characterControllers.Status.Level} / Exp : {characterControllers.Status.Exp} / Attack : {characterControllers.Status.Attack}");
+
+        long required = characterControllers.LevelupProvider.GetRequiredExp(characterControllers.Status.Level);
+
+        Debug.Log($"다음 레벨업 요구 경험치 : {required}");
     }
 
     private void TestTakeDamage()

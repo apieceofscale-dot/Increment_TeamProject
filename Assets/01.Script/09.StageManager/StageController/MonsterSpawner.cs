@@ -118,11 +118,12 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         spawnTimer = definition.SpawnInterval;
 
-        SpawnInternal(definition.MonsterId, definition, GetSpawnPosition(definition));
+        Vector3 position = definition.Type == StageType.Boss && map.HasBossSpawnPoint
+            ? map.BossSpawnPosition
+            : GetSpawnPosition(definition);
 
+        SpawnInternal(definition.MonsterId, definition, position);
     }
-
-
 
     public MonsterController SpawnElite(in StageDefinition definition)
 
@@ -132,12 +133,8 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         if (!definition.HasElite) return null;
 
-
-
         Vector3 position = map.HasBossSpawnPoint ? map.BossSpawnPosition : GetSpawnPosition(definition);
-
         return SpawnInternal(definition.EliteMonsterId, definition, position);
-
     }
 
 

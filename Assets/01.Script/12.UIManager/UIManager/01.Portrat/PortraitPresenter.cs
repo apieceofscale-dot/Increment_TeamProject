@@ -11,13 +11,11 @@ public class PortraitPresenter
         this.model = model;
 
         model.MoneyChanged += HandleGoldChanged;
-        model.AttackRatingChanged += HandleAttackRating;
+        model.CombatPowerChanged += HandleCombatPower;
 
         HandlePortrait(model.GetCharacterPortrait());
         HandleGoldChanged(model.Money);
-        HandleAttackRating(model.AttackRating);
-
-        model.RefreshUiEvents();
+        HandleCombatPower(model.CombatPower);
     }
 
     public void HandlePortrait(Sprite portrait)
@@ -25,9 +23,9 @@ public class PortraitPresenter
         view.SetPortrait(portrait);
     }
 
-    public void HandleAttackRating(float attackRating)
+    public void HandleCombatPower(int combatPower)
     {
-        view.SetAttackRating(attackRating);
+        view.SetAttackRating(combatPower);
     }
 
     public void HandleGoldChanged(long gold)

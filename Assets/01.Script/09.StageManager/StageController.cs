@@ -4,19 +4,26 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 
 /// <summary>
-/// 스테이지 진입 이후의 일을 합니다
-/// 1. 캐릭터 생성x 세션이 넘겨준 캐릭터 보관o
-/// 2,. 스테이지 씬을 로드/언로드 + 맵 요소 확보
-///3. 몬스터 스폰 지시/사망 받기 -> 집계/경험치/드랍 요청 진행
+/// [역할] 스테이지 진입 이후의 흐름을 맡는 스테이지 내부 허브(Controller)
+///  1. 세션이 넘겨준 캐릭터를 보관한다 (생성은 GameSessionManager 책임)
+///  2. 스테이지 씬을 Additive로 로드/언로드하고 맵 요소(StageMapProvider)를 확보한다
+///  3. 몬스터 스폰 지시(MonsterSpawner) / 사망 수신 → 반납 → 킬 집계 → 클리어 판정
+///  4. [도전] 버튼 → NextStageId로 이동 (001 → 002 → 003 → 보스맵)
+/// 
+/// [진행 규칙]
+/// - 파밍: ClearKillCount(10) 달성 → 도전 가능(버튼도 활성화). 달성 후에도 파밍(스폰)은 계속된다.
+///  - 도전: 다음 스테이지로 이동. 003의 다음이 보스맵이라 "보스맵 이동"도 같은 경로.
+///  - 보스: 1마리 처치 → Cleared 고정, 스폰 중단. 다음 스테이지 없음.
+/// 
+/// 
+/// [구조] 외부(UI·세션)는 StageFacade만 부른다. 이 클래스는 세션을 참조하지 않고 이벤트로 보고한다.
+/// - OnStageReady (C# event, 받는 쪽 = 세션 하나)  : 진입 완료 -> HUD 생성 (1회)
+///  - StageChangedEventChannelSO (SO, 받는 쪽 = UI) : 스테이지 정보·킬 수·도전 가능 여부 갱신
 /// </summary>
 
 public class StageController : MonoBehaviour, IBootStrapper
 {
     public int BootOrder => (int)BootLayer.StageManager;
-
-    private int startPlayerId = 1000;   // 테스트용
-    private int startStageId = 9000;
-    private bool autoStartOnBoot = true; // SaveManager 완성되면 false로 두고 세이브가 호출
 
 
     // 부트 주입
@@ -52,22 +59,27 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     public StageFacade Facade => facade;
     public StageProgressInfo Progress => status.ToInfo();
-    public EliteProgressInfo EliteProgress => status.ToEliteInfo();
+    //public EliteProgressInfo EliteProgress => status.ToEliteInfo();
     public StageChangedInfo StageInfo => BuildStageChangedInfo();
     public CharacterFacade Character => character;
     public bool IsTransitioning => isTransitioning;
 
 
-    // ui버튼 활성 판단용, 실제 이동은 TryGoNextStage가 다시 검사
+    /// <summary>
+    /// [도전] 버튼 활성 조건. UI 표시용이며 실제 이동 시 TryGoNextStage가 한 번 더 검사한다.
+    /// 전환 중 아님 + 파밍 중 + 10킬 달성 + 다음 스테이지가 존재.
+    /// 도전 조건
+    /// </summary>
     public bool CanGoNextStage
     {
         get
         {
             if (isTransitioning) return false;
+            if (status.State != StageState.Battle) return false;
             if (!status.IsClearConditionMet) return false;
 
             int nextStageId = status.Definition.NextStageId;
-            if (nextStageId == status.Definition.StageId) return false;   // 마지막 스테이지
+            if (nextStageId == status.Definition.StageId) return false;   // 마지막(보스) 스테이지
 
             return stageTable.TryGet(nextStageId, out _);
         }
@@ -87,7 +99,7 @@ public class StageController : MonoBehaviour, IBootStrapper
         spawner = GetComponent<MonsterSpawner>();
         if (spawner == null)
         {
-            throw new System.InvalidOperationException(
+            throw new InvalidOperationException(
                 "[StageController] 오브젝트에 MonsterSpawner가 없습니다");
         }
 
@@ -96,10 +108,14 @@ public class StageController : MonoBehaviour, IBootStrapper
         facade = GetComponent<StageFacade>();
         if (facade == null)
         {
-            throw new System.InvalidOperationException(
+            throw new InvalidOperationException(
                 "[StageController] 오브젝트에 StageFacade가 없습니다.");
         }
         facade.Bind(this);
+
+        // 채널 누락은 게임이 못 도는 문제는 아니므로 예외 대신 경고 1회 (부트 전체를 멈추지 않게)
+        if (stageChangedChannel == null)
+            Debug.LogWarning("[StageController] StageChangedEventChannel이 인스펙터에 물려있지 않습니다. UI가 갱신되지 않습니다.", this);
 
         MonsterFacade.MonsterDied += HandleMonsterDied;
     }
@@ -111,7 +127,7 @@ public class StageController : MonoBehaviour, IBootStrapper
     }
 
 
-    // 외부 호출 api
+    // ── 외부 API (StageFacade / 세션이 호출) ─────────────
 
     // 세션이 캐릭터를 만든 뒤 1회 호출, 전환마다 다시 부를 필요 x. 캐릭터는 ddol
     public void SetCharacter(CharacterFacade characterFacade)
@@ -170,8 +186,8 @@ public class StageController : MonoBehaviour, IBootStrapper
 
 
 
-
-    // 스테이지 넘김 조건 체크 
+    /// <summary>[도전] 버튼. 조건 미달이면 false, 이동을 시작했으면 true.
+    /// 도전 조건 체크</summary>
     public bool TryGoNextStage()
     {
         if (!CanGoNextStage) return false;
@@ -180,59 +196,51 @@ public class StageController : MonoBehaviour, IBootStrapper
         return true;
     }
 
-    // 엘리트 소환 조건 체크
-    public bool TrySummonElite()
-    {
-        if (isTransitioning) return false;
-        if (!status.ToEliteInfo().CanSummon) return false;
 
-        activeElite = spawner.SpawnElite(status.Definition);
-        if (activeElite == null) return false;
+    // // 일단 없는셈치고 별도 조건 없이 선형 진행 하겠습니다... 삭제
+    //     public bool TryMoveToChallengeStage()
+    //     {
+    //         if (isTransitioning) return false;
+    //         if (status.Definition.StageId == 0) return false;   // 아직 스테이지에 들어간 적 없음
 
-        status.BeginElite();
-        return true;
-    }
+    //         int chapter = status.Definition.Chapter;
 
-    public bool TryMoveToChallengeStage()
-    {
-        if (isTransitioning) return false;
-        if (status.Definition.StageId == 0) return false;   // 아직 스테이지에 들어간 적 없음
+    //         if (!stageTable.TryGetChallengeStageId(chapter, out int challengeStageId))
+    //         {
 
-        int chapter = status.Definition.Chapter;
+    //             //스테이지쪽에 도전맵있어어ㅑ함
+    //             Debug.LogWarning($"[StageController] 챕터 {chapter}에 도전맵(Boss 스테이지)이 없습니다.");
+    //             return false;
+    //         }
 
-        if (!stageTable.TryGetChallengeStageId(chapter, out int challengeStageId))
-        {
+    //         // 이미 도전맵이면 재진입시키지 않는다(진행도 초기화 방지)
+    //         if (challengeStageId == status.Definition.StageId) return false;
 
-            //스테이지쪽에 도전맵있어어ㅑ함
-            Debug.LogWarning($"[StageController] 챕터 {chapter}에 도전맵(Boss 스테이지)이 없습니다.");
-            return false;
-        }
+    //         // 클리어 조건을 걸고 싶으면 아래 줄을 살린다 (기획 확정 전까지는 항상 도전 허용)
+    //         // if (!status.IsClearConditionMet) return false;
 
-
-
-        // 이미 도전맵이면 재진입시키지 않는다(진행도 초기화 방지)
-        if (challengeStageId == status.Definition.StageId) return false;
-
-        // 클리어 조건을 걸고 싶으면 아래 줄을 살린다 (기획 확정 전까지는 항상 도전 허용)
-        // if (!status.IsClearConditionMet) return false;
-
-        EnterStage(challengeStageId);
-        return true;
-    }
+    //         EnterStage(challengeStageId);
+    //         return true;
+    //     }
 
 
 
-    // 내부용 로직
+    // 내부용 로직----------------------------
 
 
     private IEnumerator StartStageRoutine(StageDefinition definition)
     {
         isTransitioning = true;
+        RaiseStageChanged();   // 전환 시작 → UI가 도전 버튼을 바로 잠그도록 (연타 방지)
+
+        // 이전 씬의 PathFinder는 곧 언로드되어 파괴된다. 언로드 전에 끊어서
+        // 전환 중에 캐릭터가 파괴된 PathFinder로 길찾기를 시도하지 않게 한다.
+        // TODO(자동사냥 머지 후 주석 해제)
+        // if (character != null) character.SetPathFinder(null);
 
         // 1.이전 스테이지 정리
         spawner.DespawnAll();
         dropFacade.CancelPendingDrops();
-        activeElite = null;
         status.SetState(StageState.None);
 
         // 2.씬 전환(같은 씬이면 로딩 없이 건너뛰기)
@@ -250,14 +258,13 @@ public class StageController : MonoBehaviour, IBootStrapper
             {
                 Debug.LogError(
                     $"[StageController] 씬 로드 실패. sceneName={definition.SceneName} " +
-                    $"(Build Settings 등록 여부와 스펠링 확인하세요) stageId={definition.StageId}");
+                    $"(Build Profiles 등록 여부와 스펠링 확인) stageId={definition.StageId}");
                 status.SetState(StageState.Failed);
                 isTransitioning = false;
                 yield break;
             }
 
             loadedSceneName = definition.SceneName;
-
         }
 
         //  3.맵 요소 확보
@@ -279,13 +286,17 @@ public class StageController : MonoBehaviour, IBootStrapper
             character.transform.position = map.PlayerStartPosition;
         }
 
-        // 5. 상태 초기화
-        status.Reset(definition);
+        // 씬마다 PathFinder가 다르므로 씬을 로드한 쪽(스테이지)이 새 맵의 PathFinder를 넣어준다. (규칙 6)
+        // 캐릭터는 스테이지 로드 전에 메인 씬에서 생성되므로 Navi2DAgent.Awake에서는 찾지 못한다.
+        // TODO(자동사냥 머지 후 주석 해제)
+        // if (character != null) character.SetPathFinder(map.PathFinder);
 
+        // 5. 상태 초기화(State = Battle → Update에서 스폰 시작)
+        status.Reset(definition);
         isTransitioning = false;
 
 
-        // 6. 진입 끝난 후 알리기
+        // 6. 진입 완료 알림 (UI 갱신 → 세션 HUD 연결 순)
         RaiseStageChanged();
         OnStageReady?.Invoke(facade);
     }
@@ -304,7 +315,6 @@ public class StageController : MonoBehaviour, IBootStrapper
             if (provider != null) return true;
         }
 
-
         return false;
 
     }
@@ -312,65 +322,51 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     private void Update()
     {
+        // 스폰은 파밍/보스 전투 중에만. Cleared(보스 처치 후)·None(전환 중)·Failed에서는 멈춘다.
         if (isTransitioning) return;
         if (status.State != StageState.Battle) return;
 
 
-        float deltaTime = Time.deltaTime;
-
-        spawner.TickSpawn(status.Definition, deltaTime);
-
-
-        // 엘리트 제한시간 초과시 도망
-        if (status.TickEliteTime(deltaTime))
-        {
-            if (activeElite != null)
-            {
-                spawner.Despawn(activeElite);
-                activeElite = null;
-            }
-            status.EndElite();
-        }
+        spawner.TickSpawn(status.Definition, Time.deltaTime);
 
     }
 
-    // 스테이지는 드랍 테이블 id만 알고, 테이블 내용과 확률 판정은 아이템 쪽이 
+    // 몬스터 사망 수신. 스테이지는 드랍 테이블 id만 알고, 테이블 내용과 확률 판정은 아이템 쪽이 한다.
     private void HandleMonsterDied(MonsterDiedInfo info)
     {
+        // ★ 죽은 몬스터 정리는 스테이지가 한다. 씬에 MonsterFacade가 없으므로 여기서 안 하면
+        //   시체가 남고 CountAlive가 줄지 않아 스폰이 멈춘다.
+        if (info.Source != null) spawner.Despawn(info.Source);
+
         if (status.State != StageState.Battle) return;
 
-        bool wasElite = activeElite != null && ReferenceEquals(activeElite, info.Source);
+        int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
+        dropFacade.RequestDrop(dropTableId, info.Position);
 
-        // 드랍·Despawn은 MonsterFacade → ItemDropFacade (중복 RequestDrop 하지 않음)
-
-        // 경험치
+        // 경험치 (MonsterData에 exp 필드가 생기기 전까지는 0이라 실제로는 안 오름)
         if (character != null && info.ExpReward > 0)
         {
             character.GainExp(info.ExpReward);
         }
 
-        if (wasElite)
-        {
-            activeElite = null;
-            status.EndElite();
-            return;   // 엘리트는 킬 카운트에 넣지 않는다
-        }
-
         status.AddKill();
 
+        // 도전 조건
         if (!status.IsClearConditionMet && status.KillCount >= status.Definition.ClearKillCount)
         {
-            status.CheckClearConditionMet();
+            status.CheckClearConditionMet();   // → CanGoNextStage = true → 도전 버튼 활성
 
-            // 보스는 Cleared로 고정해 무한 리스폰을 막는다.
-            // 파밍 스테이지는 Battle을 유지해 계속 파밍할 수 있게 둔다.
+            // 보스는 Cleared로 고정해 추가 스폰을 막는다.
+            // 파밍 스테이지는 Battle을 유지해 도전 버튼을 누르기 전까지 계속 파밍할 수 있게 둔다.
             if (status.Definition.Type == StageType.Boss)
             {
                 status.SetState(StageState.Cleared);
                 spawner.DespawnAll();
+                // TODO(기획): 보스 클리어 후 흐름 (다음 챕터 / 결과창 / 003 복귀) 확정되면 여기서 처리
             }
         }
-        // 클리어 순간에도 ui갱신 가능
+
+        // 킬마다 발행 → UI의 킬 진행도와 도전 버튼 갱신
         RaiseStageChanged();
 
     }
@@ -378,15 +374,16 @@ public class StageController : MonoBehaviour, IBootStrapper
     private StageChangedInfo BuildStageChangedInfo()
     {
         StageDefinition definition = status.Definition;
-        if (definition.StageId == 0) return default;
+        if (definition.StageId == 0) return default;   // 아직 한 번도 진입하지 않음
 
         int totalStageNum = stageTable.GetChapterStageCount(definition.Chapter);
 
-        bool hasChallenge = stageTable.TryGetChallengeStageId(definition.Chapter, out int challengeStageId);
+        // UI의 "보스 스테이지 번호" 표시용
         int challengeStageNum = 0;
-        if (hasChallenge && stageTable.TryGet(challengeStageId, out StageDefinition challenge))
+        if (stageTable.TryGetChallengeStageId(definition.Chapter, out int bossStageId)
+            && stageTable.TryGet(bossStageId, out StageDefinition boss))
         {
-            challengeStageNum = challenge.IndexInChapter;
+            challengeStageNum = boss.IndexInChapter;
         }
 
         return new StageChangedInfo(
@@ -397,20 +394,41 @@ public class StageController : MonoBehaviour, IBootStrapper
             totalStageNum,
             definition.Type,
             challengeStageNum,
-            hasChallenge && challengeStageId != definition.StageId);
+            CanGoNextStage);   // ★ 도전 버튼 활성 여부 = 다음 스테이지로 갈 수 있는가
     }
 
     private void RaiseStageChanged()
     {
         if (stageChangedChannel == null)
-        {
-            Debug.LogWarning("[StageController] StageChangedEventChannel이 인스펙터에 물려있지 않습니다.");
             return;
-        }
 
         StageChangedInfo info = BuildStageChangedInfo();
         stageChangedChannel.Raise(info);
         facade?.NotifyStageChanged(info);
     }
+
+
+#if UNITY_EDITOR
+    // [테스트용] HUD가 아직 안 붙었을 때 인스펙터 ⋮ 메뉴에서 도전 흐름만 확인. 에디터 빌드에서만 존재.
+    [ContextMenu("Test/10킬 채우기")]
+    private void TestFillKills()
+    {
+        if (!Application.isPlaying || status.State != StageState.Battle) return;
+        while (!status.IsClearConditionMet && status.KillCount < status.Definition.ClearKillCount)
+        {
+            status.AddKill();
+        }
+        status.CheckClearConditionMet();
+        RaiseStageChanged();
+        Debug.Log($"[StageController] 테스트: {status.Definition.StageId} 10킬 처리. CanGoNextStage={CanGoNextStage}");
+    }
+
+    [ContextMenu("Test/도전 (다음 스테이지)")]
+    private void TestGoNext()
+    {
+        if (!Application.isPlaying) return;
+        Debug.Log($"[StageController] 테스트: TryGoNextStage = {TryGoNextStage()}");
+    }
+#endif
 
 }

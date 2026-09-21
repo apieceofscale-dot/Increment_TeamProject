@@ -18,7 +18,7 @@ public class PlayerStatusBarPresenter
 
         HandleHpChanged(model.CurrentHp, model.MaxHp);
         HandleMpChanged(model.CurrentMp, model.MaxMp);
-        HandleExpChanged(model.CurrentExp, model.RequiredExpForCurrentLevel);
+        HandleExpChanged(model.CurrentExp, model.RequiredExp);
         HandleLevelChanged(model.Level);
         HandleJobChanged(model.JobName);
 

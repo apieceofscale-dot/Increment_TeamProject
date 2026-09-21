@@ -34,7 +34,7 @@ public class StagePresenter
         }
 
         view.SetName(info.MapName);
-        view.SetChallengeStageNum(info.ChallengeStageNum);
+        view.SetChallengeStageNum(info.ChallengeStageNum.ToString());
         view.SetStageProcedureText(info.NowStageNum, info.TotalStageNum);
         view.SetStageProcedureBar(info.NowStageNum, Math.Max(1, info.TotalStageNum));
         view.SetChallengeAvailable(info.CanChallenge);

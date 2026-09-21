@@ -18,9 +18,9 @@ public class CharacterSkillProjectile : CharacterSkillBase
 
     protected override void Execute()
     {
-        int damage = (int)((double)characterControllers.Status.Attack * Mathf.Max(0f, damageMultiplier));
+        CharacterDamageAttackData attack = characterControllers.CaptureDamageAttack();
         Vector2 direction = characterControllers.FacingDirection < 0 ? Vector2.left : Vector2.right;
         TestSkillProjectile projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        projectile.Initialize(damage, projectileSpeed, direction, maxDistance, monsterLayer, blockingLayer, characterControllers.transform);
+        projectile.Initialize(attack, damageMultiplier, projectileSpeed, direction, maxDistance, monsterLayer, blockingLayer, characterControllers);
     }
 }

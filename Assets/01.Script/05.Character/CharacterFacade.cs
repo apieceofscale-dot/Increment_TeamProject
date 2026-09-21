@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterFacade : MonoBehaviour, IBootStrapper
+public class CharacterFacade : MonoBehaviour
 {
     
     [SerializeField] private CharacterControllers characterControllers;
     private CharacterControllers Controller => characterControllers;
 
-    [SerializeField] private int bootOrder = 1100;
-    public int BootOrder => bootOrder;
     public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;
     public bool CanRun => characterControllers != null && characterControllers.CanRun;
     internal void Inject(CharacterControllers owner)
@@ -18,56 +16,132 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
             throw new System.ArgumentNullException(nameof(owner));
 
         if (characterControllers != null && characterControllers != owner)
-            throw new System.InvalidOperationException(" ??   ?");
+            throw new System.InvalidOperationException("¿¬°áµÈ Ä³¸¯ÅÍ¿Í ÁÖÀÔ ´ë»ó ´Ù¸§");
 
         characterControllers = owner;
-    }
-    public void IBootStrapperInject(BootstrapContext context)
-    {
-        Inject(characterControllers != null ? characterControllers : GetComponentInParent<CharacterControllers>());
+
+        if (owner == CharacterControllers.Current && currentFacade == null)
+            currentFacade = this;
     }
 
-    public void IBootStrapperInitialize()
+    #region ¾À ÀüÈ¯¿ë ¿ÜºÎ API
+    private static CharacterFacade currentFacade;
+
+    // º°µµÀÇ ÇÃ·¹ÀÌ¾î¸¦ ¸¸µéÁö ¾Ê°í, ÇöÀç DDOL ÇÃ·¹ÀÌ¾îÀÇ Ã¢±¸ ¹İÈ¯
+    public static CharacterFacade Current => currentFacade != null && currentFacade.characterControllers != null && currentFacade.characterControllers == CharacterControllers.Current ? currentFacade : null;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCurrentFacade() { currentFacade = null; }
+
+    private void OnDestroy()
     {
-        if (!IsInitialized)
-            throw new System.InvalidOperationException("Controller must be initialized before CharacterFacade boot.");
+        if (currentFacade == this)
+            currentFacade = null;
     }
 
-    #region ???? ?? ??? ???? ??
-    public CharacterStatus Status => Controller.Status;
-    public CharacterInventory Inventory => Controller.Inventory;
-    public CharacterEquipment Equipment => Controller.Equipment;
+    public void PrepareForSceneChange() // ¾À ÀüÈ¯ Àü¿¡ Ä³¸¯ÅÍ ÀÌµ¿¡¤ÀüÅõ ÁØºñ »óÅÂ Á¤¸®
+    {
+        RequireSceneController().PrepareForSceneChange();
+    }
+
+    public void BindSceneBootstrap(BootStrapper sceneBootstrap) // »õ ¾ÀÀÇ ºÎÆ®½ºÆ®·¡ÆÛ¸¦ ±âÁ¸ Ä³¸¯ÅÍ¿¡ ¿¬°á
+    {
+        RequireSceneController().BindSceneBootstrap(sceneBootstrap);
+    }
+
+    public void MoveToScenePosition(Vector3 spawnPosition) // ±âÁ¸ Ä³¸¯ÅÍ¸¦ »õ ½ºÅ×ÀÌÁö ½ÃÀÛ À§Ä¡·Î ¹èÄ¡
+    {
+        RequireSceneController().MoveToScenePosition(spawnPosition);
+    }
+
+    private CharacterControllers RequireSceneController()
+    {
+        if (Controller == null || !Controller.IsInitialized || Controller != CharacterControllers.Current)
+            throw new InvalidOperationException("ÃÊ±âÈ­µÈ ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ Facade ÇÊ¿ä");
+
+        return Controller;
+    }
     #endregion
 
-    #region ???? ???? ?? ????
-    public PlayerData Data => Controller.Data;
-    public void Initialize(PlayerData playerData)
+    #region °ø¿ë »ó¼¼ °´Ã¼ Á¢±Ù ¿ë
+    public CharacterStatus Status => Controller.Status; // ÇöÀç ±âº» ½ºÅÈ¡¤Àåºñ º¸³Ê½º¡¤ÇÕ»ê ½ºÅÈ Á¶È¸
+    public CharacterInventory Inventory => Controller.Inventory; // º¸À¯ Àåºñ »ó¼¼ Á¶È¸¿ë, ÀÏ¹İ UI µ¿ÀÛÀº ¾Æ·¡ Àåºñ API »ç¿ë
+    public CharacterEquipment Equipment => Controller.Equipment; // Âø¿ë »óÅÂ »ó¼¼ Á¶È¸¿ë, ÀÏ¹İ UI µ¿ÀÛÀº ¾Æ·¡ Âø¿ë¡¤ÇØÁ¦ API »ç¿ë
+    #endregion
+
+    #region Ä³¸¯ÅÍ »ı¼º ¹× ÃÊ±âÈ­
+    public PlayerData Data => Controller.Data; // Ä³¸¯ÅÍ »ı¼º¿¡ »ç¿ëÇÑ ¿øº» µ¥ÀÌÅÍ Á¶È¸, ¼ºÀå ÈÄ ¼öÄ¡´Â Status »ç¿ë
+    public void Initialize(PlayerData playerData) // Controller ÂüÁ¶ ÁÖÀÔ ÈÄ ÃÊ±â µ¥ÀÌÅÍ Àû¿ë
     {
         Controller.Initialize(playerData);
     }
     #endregion
 
-    #region UI?? ??? ???
-    public long CurrentHp => Controller.CurrentHp; // ???? ???
-    public long MaxHp => Controller.MaxHp; // ??? ???
-    public int CurrentMp => Controller.CurrentMp; // ???? ????
-    public int MaxMp => Controller.MaxMp; // ??? ????
-    public int Level => Controller.Level; // ???? ????
-    public long Money => Controller.Money; // ???? ???
-    public int CombatPower => Controller.CombatPower; // ???? ???? ?????
-    public float AttackRating => Controller.AttackRating;
-    public long CurrentExp => Controller.CurrentExp;
-    public long RequiredExpForCurrentLevel => Controller.RequiredExpForCurrentLevel;
-    public string JobName => Controller.JobName; // ???? ???
-
-    public Sprite GetCharacterPortrait()
+    #region ·¹º§ ¼ºÀå ¹× ´É·ÂÄ¡ Æ÷ÀÎÆ®
+    public CharacterStatUpgradeInfo GetStatUpgradeInfo() => Controller.GetStatUpgradeInfo(); // ÀÏ¹İ¡¤Æ¯º° Æ÷ÀÎÆ®, Ä³¸¯ÅÍ µî±Ş, Ç×¸ñº° °­È­ È½¼ö Á¶È¸
+    public bool TryUpgradeStat(CharacterStatUpgradeType type) => Controller.TryUpgradeStat(type); // °­È­ ¹öÆ°: ¼±ÅÃÇÑ Ç×¸ñÀ» 1È¸ °­È­, ¼º°ø ¿©ºÎ ¹İÈ¯
+    public long RequiredExp => Controller.RequiredExp; // ´ÙÀ½ ·¹º§ ¿ä±¸ °æÇèÄ¡ Á¶È¸, 0ÀÌ¸é Ãß°¡ ·¹º§¾÷ ºÒ°¡
+    public event Action StatUpgradeChanged // ·¹º§¾÷¡¤°­È­ ¼º°ø ÈÄ Æ÷ÀÎÆ®¿Í ½ºÅÈ ´Ù½Ã Á¶È¸
     {
-        return Controller.GetCharacterPortrait(); // Controller?? ???? ??? ??? ????
+        add
+        {
+            Controller.StatUpgradeChanged += value;
+        }
+        remove
+        {
+            if (Controller != null)
+                Controller.StatUpgradeChanged -= value;
+        }
     }
     #endregion
 
-    #region UI?? ???? ???? ????
-    public event Action<long, long> HpChanged // ???? ???, ??? ??? ???? ????
+    #region °æÇèÄ¡ ¹× °­È­ Ç¥½Ã
+    public long CurrentExp => Controller.CurrentExp; // ÇöÀç ·¹º§¿¡¼­ ´©ÀûÇÑ °æÇèÄ¡ Á¶È¸
+    public int MainStatValue => Controller.MainStatValue; // Àç Á÷¾÷ ÁÖ ½ºÅÈÀÇ Àåºñ Æ÷ÇÔ ÇÕ»ê °ª Á¶È¸
+    public CharacterStatUpgradeOption GetStatUpgradeOption(CharacterStatUpgradeType type) => Controller.GetStatUpgradeOption(type);
+
+    public event Action<long, long> ExpChanged // °æÇèÄ¡ ¹Ù °»½Å¿ë, ÇöÀç °æÇèÄ¡¡¤¿ä±¸ °æÇèÄ¡ ¼ø¼­·Î Àü´Ş
+    {
+        add
+        {
+            Controller.ExpChanged += value;
+        }
+        remove
+        {
+            if (Controller != null) Controller.ExpChanged -= value;
+        }
+    }
+    public event Action<Sprite> PortraitChanged // ÃÊ»óÈ­ º¯°æ ½Ã ÀÌ¹ÌÁö °»½Å, null Ã³¸® ÇÊ¿ä
+    {
+        add
+        {
+            Controller.PortraitChanged += value;
+        }
+        remove
+        {
+            if (Controller != null) Controller.PortraitChanged -= value;
+        }
+    }
+    #endregion
+
+    #region UI¿ë ÇöÀç°ª Á¶È¸
+    public long CurrentHp => Controller.CurrentHp; // ÇöÀç Ã¼·Â
+    public long MaxHp => Controller.MaxHp; // ÃÖ´ë Ã¼·Â
+    public int CurrentMp => Controller.CurrentMp; // ÇöÀç ¸¶³ª
+    public int MaxMp => Controller.MaxMp; // ÃÖ´ë ¸¶³ª
+    public int Level => Controller.Level; // ÇöÀç ·¹º§
+    public long Money => Controller.Money; // ÇöÀç ÀçÈ­
+    public int CombatPower => Controller.CombatPower; // ÇöÀç ÃÖÁ¾ °ø°İ·Â
+    public string JobName => Controller.JobName; // Á÷¾÷ ÀÌ¸§
+
+    public Sprite GetCharacterPortrait()
+    {
+        return Controller.GetCharacterPortrait(); // Controller¿¡ ÃÊ»óÈ­ Á¶È¸ ¿äÃ» Àü´Ş
+    }
+    #endregion
+
+    #region UI¿ë º¯°æ ÀÌº¥Æ® ±¸µ¶
+    public event Action<long, long> HpChanged // ÇöÀç Ã¼·Â, ÃÖ´ë Ã¼·Â Àü´Ş ÀÌº¥Æ®
     {
         add { Controller.HpChanged += value; }
         remove
@@ -77,7 +151,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action<int, int> MpChanged // ??????, ??? ???? ???? ????
+    public event Action<int, int> MpChanged // ÇöÀç¸¶³ª, ÃÖ´ë ¸¶³ª Àü´Ş ÀÌº¥Æ®
     {
         add { Controller.MpChanged += value; }
         remove
@@ -87,7 +161,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action<int> LevelChanged // ???? ????
+    public event Action<int> LevelChanged // ·¹º§ º¯°æ
     {
         add { Controller.LevelChanged += value; }
         remove
@@ -97,7 +171,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action<long> MoneyChanged // ??? ????
+    public event Action<long> MoneyChanged // ÀçÈ­ º¯°æ
     {
         add { Controller.MoneyChanged += value; }
         remove
@@ -107,7 +181,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action<int> CombatPowerChanged // ???? ????? ????
+    public event Action<int> CombatPowerChanged // ÃÖÁ¾ °ø°İ·Â º¯°æ
     {
         add { Controller.CombatPowerChanged += value; }
         remove
@@ -117,27 +191,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action<float> AttackRatingChanged
-    {
-        add { Controller.AttackRatingChanged += value; }
-        remove
-        {
-            if (Controller != null)
-                Controller.AttackRatingChanged -= value;
-        }
-    }
-
-    public event Action<long, long> ExpChanged
-    {
-        add { Controller.ExpChanged += value; }
-        remove
-        {
-            if (Controller != null)
-                Controller.ExpChanged -= value;
-        }
-    }
-
-    public event Action<string> JobNameChanged // ???? ??? ????
+    public event Action<string> JobNameChanged // Á÷¾÷ ÀÌ¸§ º¯°æ
     {
         add { Controller.JobNameChanged += value; }
         remove
@@ -148,28 +202,28 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
     }
     public void RefreshUiEvents()
     {
-        Controller.RefreshUiEvents(); // ??? ???? ?? ??????? ????
+        Controller.RefreshUiEvents(); // ¸ğµç ÇöÀç °ª ¾Ë¸®µµ·Ï º¯°æ
     }
     #endregion
 
-    #region ??? ?? ??? UI??
-    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // ??? ????
+    #region Àåºñ ¹× Àåºñ UI¿ë
+    public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot) // ¹æ¾î±¸ Âø¿ë
     {
         return Controller.EquipEquipment(instanceId, slot);
-        // Hat(???)=0, Top(????)=1, Bottom(????)=2, Gloves(??)=3, Cape(????)=4, Shoulder(???)=5, Belt(??)=6, Shoes(???)=7, Ring1(????1)=8, Ring2(????2)=9, Necklace(?????)=10
+        // Hat(¸Ó¸®)=0, Top(»óÀÇ)=1, Bottom(ÇÏÀÇ)=2, Gloves(Àå°©)=3, Cape(¸ÁÅä)=4, Shoulder(¾î±ú)=5, Belt(Çã¸®)=6, Shoes(½Å¹ß)=7, Ring1(¹İÁö1)=8, Ring2(¹İÁö2)=9, Necklace(¸ñ°ÉÀÌ)=10
     }
 
-    public bool UnequipEquipment(CharacterEquipmentSlot slot) // ??? ????
+    public bool UnequipEquipment(CharacterEquipmentSlot slot) // ¹æ¾î±¸ ÇØÁ¦
     {
         return Controller.UnequipEquipment(slot);
     }
 
-    public bool IsEquipmentEquipped(Guid instanceId) // ??? ?????????
+    public bool IsEquipmentEquipped(Guid instanceId) // ¹æ¾î±¸ Âø¿ëÇß´ÂÁö
     {
         return Controller.IsEquipmentEquipped(instanceId);
     }
 
-    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item) // ?????? ??? ???
+    public bool TryGetEquippedItem(CharacterEquipmentSlot slot, out CharacterInventoryEquipment item) // Âø¿ëÇÑ ¹æ¾î±¸ Á¶È¸
     {
         return Controller.TryGetEquippedItem(slot, out item);
     }
@@ -179,7 +233,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         return Controller.GetEquipmentSlots();
     }
 
-    public event Action InventoryChanged // ???? ?? ?????? ??? ????? ??????? ???? ???
+    public event Action InventoryChanged // ÀÎº¥Åä¸® ³» ¹ÌÂø¿ë Àåºñ ¸ñ·ÏÀÌ ´Ş¶óÁö´Â °ÍÀ» ¾Ë¸²
     {
         add
         {
@@ -192,7 +246,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public event Action EquipmentChanged // ???? ? ?????
+    public event Action EquipmentChanged // ÀåÂø Ä­ °»½Å¿ë
     {
         add
         {
@@ -205,7 +259,7 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // ???? ??? ?????? ?? ???? ????
+    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // Âø¿ë Àåºñ¸¦ Á¦¿ÜÇÑ ÀĞ±â Àü¿ë º¹»çº»
     {
         return Controller.GetEquipmentInventory();
     }
@@ -215,26 +269,26 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         return Controller.TryGetItemData(itemId, out data);
     }
 
-    public void EquipItem(Guid instanceId) //  ???? ??? ????/???
+    public void EquipItem(Guid instanceId) //  ºÎÀ§ ÀÚµ¿ Âø¿ë/±³Ã¼
     {
         Controller.EquipItem(instanceId);
     }
 
-    public bool TryEquipItem(Guid instanceId) // ????/???? ??? ????? ?? ???
+    public bool TryEquipItem(Guid instanceId) // ¼º°ø/½ÇÆĞ Ç¥½Ã°¡ ÇÊ¿äÇÒ ¶§ »ç¿ë
     {
         return Controller.TryEquipItem(instanceId);
     }
 
-    public bool UnequipItem(CharacterEquipmentSlot slot) // ????? ???, ??????? ???????? ?????? ???? ??? ???
+    public bool UnequipItem(CharacterEquipmentSlot slot) // ÀåÂøÄ­ Å¬¸¯, ¼º°øÇÏ¸é ¾ÆÀÌÅÛÀÌ ¹ÌÂø¿ë ¸ñ·Ï¿¡ ´Ù½Ã Ç¥½Ã
     {
         return Controller.UnequipItem(slot);
     }
     #endregion
 
-    #region ??? UI ?? ??? ??????
-    public int SkillSlotCount => CharacterControllers.SkillSlotCount; // 6??, ?????? 0~5
+    #region ½ºÅ³ UI ¹× ½ºÅ³ ÀåÂø¿ë
+    public int SkillSlotCount => CharacterControllers.SkillSlotCount; // 6°³, ÀÎµ¦½º´Â 0~5
 
-    // ?????? ???? ???????? ??? ???? ????? ????
+    // ÀÌº¥Æ®¸¦ Á÷Á¢ ¹ßÇàÇÏÁö ¾Ê°í ±¸µ¶ Ã¢±¸¸¸ Á¦°ø
     public event Action<SkillSlotInfo> SkillSlotChanged
     {
         add { Controller.SkillSlotChanged += value; }
@@ -245,85 +299,102 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
         }
     }
 
-    // ????? ???? 6??
+    // ½½·Ôº° ÀÌº¥Æ® 6°³
     public IReadOnlyList<CharacterControllers.SkillCooldownChannel> SkillCooldownEvents => Controller.SkillCooldownEvents;
 
-    // ???????? ???? ?? 0~5?? ?????? ??????/????? ???? ??????? ?????
+    // ÇÁ¸®Á¨ÅÍ ÃÊ±âÈ­ ½Ã 0~5¸¦ Á¶È¸ÇÏ¿© ¾ÆÀÌÄÜ/ÀÌ¸§°ú ³²Àº ÄğÅ¸ÀÓÀ» µ¿±âÈ­
     public SkillSlotInfo GetEquippedSkill(int slotIndex) => Controller.GetEquippedSkill(slotIndex);
     public SkillCooldownInfo GetSkillCooldown(int slotIndex) => Controller.GetSkillCooldown(slotIndex);
 
-    // ???? ?????? ??? ????????? ????
+    // °°Àº Ä³¸¯ÅÍÀÇ ½ºÅ³ ÄÄÆ÷³ÍÆ®¸¦ ÀåÂø
     public bool EquipSkill(int slotIndex, CharacterSkillBase skill) => Controller.EquipSkill(slotIndex, skill);
     public bool UnequipSkill(int slotIndex) => Controller.UnequipSkill(slotIndex);
 
-    // UI ????? ????? ????
+    // UI ¹öÆ°Àº ¹øÈ£¸¸ Àü´Ş
     public bool UseSkill(int slotIndex) => Controller.UseSkill(slotIndex);
     #endregion
 
-    #region ???? ?? ??????
-    public void TakeDamage(long damage)
+    #region ÇÇÇØ °è»ê Á¶È¸ ¹× ¾Ë¸²
+    public CharacterDamageMainStat DamageMainStat => Controller.DamageMainStat; // STR¡¤DEX¡¤INT¡¤LUK Áß ÇöÀç ÁÖ ½ºÅÈ Á¾·ù Á¶È¸
+    public CharacterDamageAttackData CaptureDamageAttack() => Controller.CaptureDamageAttack(); // È£Ãâ ½ÃÁ¡ÀÇ °ø°İ ½ºÅÈÀ» º¹»ç, ÀÌ È£Ãâ¸¸À¸·Î ÇÇÇØ¸¦ ÁÖÁö´Â ¾ÊÀ½
+    public event Action<IDamageable, CharacterDamageResult> DamageResolved // ´ë»ó°ú °è»ê °á°ú Àü´Ş, ÀÌ ÀÌº¥Æ®¿¡¼­ ÇÇÇØ¸¦ ´Ù½Ã Àû¿ëÇÏÁö ¾ÊÀ½
+    {
+        add 
+        {
+            Controller.DamageResolved += value; 
+        }
+        remove 
+        { 
+            if (Controller != null)
+                Controller.DamageResolved -= value; 
+        }
+    }
+    #endregion
+
+    #region ¸ó½ºÅÍ ¹× ÀüÅõ¿ë
+    public void TakeDamage(long damage) // Ä³¸¯ÅÍ HP¿¡¼­ Àü´ŞÇÑ ÇÇÇØ·® Â÷°¨
     {
         Controller.Status.TakeDamage(damage);
     }
 
-    public void RecoverHp(long amount)
+    public void RecoverHp(long amount) // Ä³¸¯ÅÍ ÇöÀç HP È¸º¹
     {
         Controller.Status.RecoverHp(amount);
     }
 
-    public bool UseMp(int amount)
+    public bool UseMp(int amount) // MP »ç¿ë ¿äÃ», ºÎÁ·ÇÏ¸é false ¹İÈ¯
     {
         return Controller.Status.UseMp(amount);
     }
 
-    public void RecoverMp(int amount)
+    public void RecoverMp(int amount) // Ä³¸¯ÅÍ ÇöÀç MP È¸º¹
     {
         Controller.Status.RecoverMp(amount);
     }
     #endregion
 
-    #region ???? ?? ??? ??
-    public void GainExp(long amount)
+    #region º¸»ó ¹× ÀçÈ­ ¿ë
+    public void GainExp(long amount) // °æÇèÄ¡ Áö±Ş ¹× Á¶°Ç ÃæÁ· ½Ã ·¹º§¾÷ Ã³¸®
     {
         Controller.GainExp(amount);
     }
 
-    public void SetMoney(long amount)
+    public void SetMoney(long amount) // È¹µæ·®ÀÌ ¾Æ´Ñ ÃÖÁ¾ º¸À¯ ÀÜ¾× Àü´Ş
     {
-        Controller.SetMoney(amount); // ??? ??? ????
+        Controller.SetMoney(amount);
     }
     #endregion
 
-    #region ?????? ?? ???? ??
-    public bool AddEquipment(ItemStatus status, out Guid instanceId) // ??? 1?? ???, ???? ???? ???? ID ???
+    #region ¾ÆÀÌÅÛ ¹× ÀÎº¥Åä¸® ¿ë
+    public bool AddEquipment(ItemStatus status, out Guid instanceId) // ¹æ¾î±¸ 1°³ Ãß°¡, ¼º°ø ¿©ºÎ¿Í °³º° ID ¹İÈ¯
     {
         return Controller.AddEquipment(status, out instanceId);
     }
 
-    public bool RemoveEquipment(Guid instanceId) // ???? ??? ????
+    public bool RemoveEquipment(Guid instanceId) // °³º° ¹æ¾î±¸ Á¦°Å
     {
         return Controller.RemoveEquipment(instanceId);
     }
 
-    public bool TryGetEquipment(Guid instanceId, out CharacterInventoryEquipment equipment) // ???? ??? ???
+    public bool TryGetEquipment(Guid instanceId, out CharacterInventoryEquipment equipment) // °³º° ¹æ¾î±¸ Á¶È¸
     {
         return Controller.TryGetEquipment(instanceId, out equipment);
     }
 
-    public int GetEquipmentCount(int itemId) // ???? ?????? ID?? ???? ????
+    public int GetEquipmentCount(int itemId) // °°Àº ¾ÆÀÌÅÛ IDÀÇ º¸À¯ °¹¼ö
     {
         return Controller.GetEquipmentCount(itemId);
     }
 
-    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment() // ?? ???? ??? ????
+    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment() // ÀĞ±â Àü¿ë ¸ñ·Ï º¹»çº»
     {
         return Controller.GetInventoryEquipment();
     }
     #endregion
 
-    #region ?????? ???? ???? ??
-    // ???? ???? ??? ????? ??? ???, ?????? ????? 0
-    public void SetEquipmentStats(
+    #region ¾ÆÀÌÅÛ ½ºÅÈ ¿¬µ¿ ¿ë
+    // ÇöÀç Âø¿ë Àåºñ ÀüÃ¼ÀÇ ÇÕ°è¸¦ ±³Ã¼, »ı·«ÇÑ Ç×¸ñÀº 0
+    public void SetEquipmentStats( // ÇöÀç Âø¿ë Àåºñ ÀüÃ¼ÀÇ ½ºÅÈ ÇÕ°è¸¦ Àü´Ş
         long maxHp = 0,
         int maxMp = 0,
         int recoverMpPerSec = 0,
@@ -368,67 +439,67 @@ public class CharacterFacade : MonoBehaviour, IBootStrapper
             dodgeRate: dodgeRate);
     }
 
-    public bool RefreshEquipmentStats()
+    public bool RefreshEquipmentStats() // Àåºñ ¿É¼Ç º¯°æ ÈÄ Âø¿ë ÀåºñÀÇ ½ºÅÈ Àç°è»ê ¿äÃ»
     {
-        return Controller.RefreshEquipmentStats(); // ???????????? ????? ????
+        return Controller.RefreshEquipmentStats(); // Á¶È¸¡¤ÇÕ»ê¡¤Àû¿ë ¿äÃ»À» Àü´Ş
     }
 
-    public void ClearEquipmentStats()
+    public void ClearEquipmentStats() // Àåºñ º¸³Ê½º¸¸ ÃÊ±âÈ­, ±âº» ½ºÅÈÀº À¯Áö
     {
         Controller.ClearEquipmentStats();
     }
     #endregion
 
-    #region ??????
-    public void SetAutoFarming(bool enabled) // ?????? ON/OFF
+    #region ÀÚµ¿»ç³É
+    public void SetAutoFarming(bool enabled) // ÀÚµ¿»ç³É ON/OFF
     {
         Controller.SetAutoFarming(enabled); 
     }
 
-    public bool IsAutoFarming => Controller.IsAutoFarming;
-    public string AutoFarmingState => Controller.AutoFarmingState;
+    public bool IsAutoFarming => Controller.IsAutoFarming; // ÇöÀç ON/OFF »óÅÂ Ç¥½Ã
+    public string AutoFarmingState => Controller.AutoFarmingState; // ÀÚµ¿»ç³É »óÅÂ Ç¥½Ã¡¤µğ¹ö±ë¿ë »óÅÂ ¹®ÀÚ¿­ Á¶È¸
 
-    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter)
+    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter) // ÀÚµ¿»ç³ÉÀÌ ¼±ÅÃÇÒ ´ë»óÀÇ Çã¿ë Á¶°Ç ¿¬°á
     {
         Controller.SetAutoFarmingTargetFilter(filter);
     }
     #endregion
 
-    #region ???? ???? ?? ?????????
-    public void SetMoveInput(float input)
+    #region Ä³¸¯ÅÍ Á¶ÀÛ ¹× ÀÚµ¿ÀüÅõ¿ë
+    public void SetMoveInput(float input) // ÁÂ¿ì ÀÌµ¿ ÀÔ·Â Àü´Ş, Á¤Áö ½Ã 0 Àü´Ş
     {
         Controller.SetMoveInput(input);
     }
 
-    public void Jump()
+    public void Jump() // Á¡ÇÁ ¿äÃ», ½ÇÁ¦ °¡´É ¿©ºÎ´Â Controller¿¡¼­ ÆÇ´Ü
     {
         Controller.Jump();
     }
 
-    public bool Attack()
+    public bool Attack() // ÇöÀç ±âº» °ø°İ »ç¿ë ¿äÃ», ¼º°ø ¿©ºÎ ¹İÈ¯
     {
         return Controller.TryAttack();
     }
 
-    public bool SetBasicAttackReplacement(CharacterSkillBase skill)
+    public bool SetBasicAttackReplacement(CharacterSkillBase skill) // ±âº» °ø°İÀ» ´ëÃ¼ÇÒ ½ºÅ³ ÁöÁ¤, ¼º°ø ¿©ºÎ ¹İÈ¯
     {
         return Controller.SetBasicAttackReplacement(skill);
     }
 
-    public void RestoreBasicAttack()
+    public void RestoreBasicAttack() // ±âº» °ø°İ ´ëÃ¼¸¦ ÇØÁ¦ÇÏ°í ÀÏ¹İ °ø°İÀ¸·Î º¹¿ø
     {
         Controller.RestoreBasicAttack();
     }
     #endregion
 
-    #region ???? ?? ???? ??
-    public bool ChangeJob(int id)
+    #region Á÷¾÷ ¹× ¼ºÀå ¿ë
+    public bool ChangeJob(int id) // ÁöÁ¤ ID·Î Á÷¾÷ º¯°æ ¿äÃ», ¼º°ø ¿©ºÎ ¹İÈ¯
     {
         return Controller.ChangeJob(id);
     }
     #endregion
 
-    #region ???? ?? ???? ??
+    #region °³¹ß Áß Å×½ºÆ® ¿ë
     public bool ChangeNextJob()
     {
         return Controller.ChangeNextJob();
