@@ -313,3 +313,98 @@ public readonly struct SkillCooldownInfo // 스킬 UI용 남은 시간 및 시�
         TotalTime = totalTime;
     }
 }
+
+public readonly struct CharacterStatUpgradeInfo
+{
+    public int StatPoints { get; }
+    public int SpecialStatPoints { get; }
+    public int CharacterRank { get; }
+    public int MainStatCount { get; }
+    public int DefenceCount { get; }
+    public int MaxHpCount { get; }
+
+    internal CharacterStatUpgradeInfo(int points, int special, int rank, int main, int defence, int hp)
+    {
+        StatPoints = points;
+        SpecialStatPoints = special;
+        CharacterRank = rank;
+        MainStatCount = main;
+        DefenceCount = defence;
+        MaxHpCount = hp;
+    }
+}
+
+public readonly struct CharacterDamageTargetData
+{
+    public CharacterDamageTargetKind Kind { get; }
+    public double? Defence { get; }
+    public double? DodgeRating { get; }
+    public CharacterDamageTargetData(CharacterDamageTargetKind kind = CharacterDamageTargetKind.Unknown,
+        double? defence = null, double? dodgeRating = null)
+    {
+        Kind = kind;
+        Defence = defence;
+        DodgeRating = dodgeRating;
+    }
+}
+
+public readonly struct CharacterDamageAttackData
+{
+    public double Attack { get; }
+    public double MainStat { get; }
+    public double DamageByMainStat { get; }
+    public double CriticalRate { get; }
+    public double CriticalDamage { get; }
+    public double FinalDamage { get; }
+    public double HitRating { get; }
+    public double ArmorPenetration { get; }
+    public double DamageOnNormal { get; }
+    public double DamageOnBoss { get; }
+
+    public CharacterDamageAttackData(double attack, double mainStat, double damageByMainStat, double criticalRate, double criticalDamage, double finalDamage, double hitRating = 0, double armorPenetration = 0, double damageOnNormal = 0, double damageOnBoss = 0)
+    {
+        Attack = attack;
+        MainStat = mainStat;
+        DamageByMainStat = damageByMainStat;
+        CriticalRate = criticalRate;
+        CriticalDamage = criticalDamage;
+        FinalDamage = finalDamage;
+        HitRating = hitRating;
+        ArmorPenetration = armorPenetration;
+        DamageOnNormal = damageOnNormal;
+        DamageOnBoss = damageOnBoss;
+    }
+}
+
+public readonly struct CharacterDamageResult
+{
+    public int Damage { get; }
+    public bool IsCritical { get; }
+    public bool IsMiss { get; }
+    public CharacterDamageResult(int damage, bool isCritical, bool isMiss)
+    {
+        Damage = damage;
+        IsCritical = isCritical;
+        IsMiss = isMiss;
+    }
+}
+
+public readonly struct CharacterStatUpgradeOption
+{
+    public CharacterStatUpgradeType Type { get; }
+    public int Cost { get; }
+    public int IncreaseAmount { get; }
+    public int CurrentCount { get; }
+    public int MaxCount { get; }
+    public bool CanUpgrade { get; }
+
+    public CharacterStatUpgradeOption(CharacterStatUpgradeType type, int cost, int increaseAmount, int currentCount, int maxCount, bool canUpgrade)
+    {
+        Type = type;
+        Cost = cost;
+        IncreaseAmount = increaseAmount;
+        CurrentCount = currentCount;
+        MaxCount = maxCount;
+        CanUpgrade = canUpgrade;
+    }
+}

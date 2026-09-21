@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CharacterJobAdvancedment), typeof(CharacterInventory))]
 [RequireComponent(typeof(CharacterEquipment))]
@@ -10,21 +11,21 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     [SerializeField] private int scenePlayerId = 1000;
     public int BootOrder => bootOrder;
     public bool IsInitialized {  get; private set; }
-    public bool CanRun => IsInitialized && bootStrapper != null && bootStrapper.IsBootCompleted;
+    public bool CanRun => !duplicateCharacter && IsInitialized && bootStrapper != null && bootStrapper.IsBootCompleted;
     private BootStrapper bootStrapper;
     private bool referencesInjected;
     private CharacterSkillBase[] ownedSkills;
 
     public void IBootStrapperInject(BootstrapContext context)
     {
+        if (!ClaimPlayer())
+            return;
+
+        BindSceneBootstrap(FindSceneBootstrap(SceneManager.GetActiveScene()));
+
         if (referencesInjected)
             return;
         
-        bootStrapper = FindFirstObjectByType<BootStrapper>();
-
-        if (bootStrapper == null)
-            throw new InvalidOperationException("부트스트래퍼 필요");
-
         rigid = GetComponent<Rigidbody2D>();
         jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
 
@@ -65,6 +66,9 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInitialize()
     {
+        if (duplicateCharacter)
+            return;
+
         if (IsInitialized)
             return;
 
@@ -73,6 +77,162 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
         Initialize(data);
     }
+
+    #region DDOL 및 씬 진입
+    public static CharacterControllers Current { get; private set; }
+    private bool duplicateCharacter;
+    private bool scenePhysicsPaused;
+    private bool previousSimulated;
+    private int bootstrapSceneHandle = -1;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCurrent() 
+    {
+        Current = null;
+    }
+
+    private bool ClaimPlayer()
+    {
+        if (duplicateCharacter)
+            return false;
+
+        if (Current != null && Current != this)
+        {
+            duplicateCharacter = true;
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return false;
+        }
+
+        Current = this;
+        return true;
+    }
+
+    private static BootStrapper FindSceneBootstrap(Scene scene)
+    {
+        BootStrapper selected = null;
+
+        foreach (BootStrapper candidate in FindObjectsByType<BootStrapper>(FindObjectsSortMode.None))
+        {
+            if (candidate.gameObject.scene != scene)
+                continue;
+
+            if (selected != null)
+                throw new InvalidOperationException("하나 이상의 부트스트래퍼 존재");
+
+            selected = candidate;
+        }
+
+        if (selected != null)
+            return selected;
+
+        BootStrapper[] all = FindObjectsByType<BootStrapper>(FindObjectsSortMode.None);
+
+        if (all.Length == 1)
+            return all[0];
+
+        throw new InvalidOperationException("지금 씬의 부트스트래퍼 지정 필요");
+    }
+
+    public void BindSceneBootstrap(BootStrapper source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+
+        if (duplicateCharacter)
+            return;
+
+        bootStrapper = source;
+        bootstrapSceneHandle = source.gameObject.scene.handle;
+        hasUiSnapshot = false;
+    }
+
+    public void PrepareForSceneChange()
+    {
+        bootStrapper = null;
+        bootstrapSceneHandle = -1;
+        SuspendSceneMovement();
+
+        if (autoFarming != null)
+            autoFarming.TargetFilter = null;
+    }
+
+    private void SuspendSceneMovement()
+    {
+        moveInput = 0f;
+
+        if (autoFarming != null)
+            autoFarming.SetAutoFarming(false);
+
+        if (rigid == null)
+            return;
+
+        if (!scenePhysicsPaused)
+        {
+            previousSimulated = rigid.simulated;
+            scenePhysicsPaused = true;
+        }
+
+        rigid.linearVelocity = Vector2.zero;
+        rigid.angularVelocity = 0f;
+        rigid.simulated = false;
+    }
+
+    private void RestoreScenePhysics()
+    {
+        if (!scenePhysicsPaused || rigid == null)
+            return;
+
+        rigid.simulated = previousSimulated;
+        scenePhysicsPaused = false;
+    }
+
+    public void MoveToScenePosition(Vector3 position)
+    {
+        if (!IsInitialized || duplicateCharacter)
+            return;
+
+        SuspendSceneMovement();
+        transform.position = position;
+
+        if (rigid != null)
+            rigid.position = new Vector2(position.x, position.y);
+
+        hasUiSnapshot = false;
+    }
+
+    private void HandleSceneUnloaded(Scene scene)
+    {
+        if (scene.handle == bootstrapSceneHandle)
+            PrepareForSceneChange();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mode != LoadSceneMode.Single)
+            return;
+
+        PrepareForSceneChange();
+
+        try 
+        { 
+            BindSceneBootstrap(FindSceneBootstrap(scene));
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneUnloaded -= HandleSceneUnloaded;
+
+        if (Current == this)
+            Current = null;
+    }
+    #endregion
 
     #region
     public const int SkillSlotCount = 6;
@@ -254,6 +414,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     public Animator Animator => animator;
 
     private CharacterLevelUpProvider characterLevelUpProvider;
+    public CharacterLevelUpProvider LevelupProvider => characterLevelUpProvider;
     private CharacterSkillLevelUpProvider skillLevelUpProvider;
     public PlayerData Data { get; private set; }
 
@@ -286,6 +447,9 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     public void Initialize(PlayerData playerData)
     {
+        if (duplicateCharacter)
+            return;
+
         if (!referencesInjected)
             throw new InvalidOperationException("IBootStrapperInject를 먼저 호출");
 
@@ -294,7 +458,8 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
         if (IsInitialized)
         {
-            if (Data != playerData) throw new InvalidOperationException("이미 초기화한 캐릭터의 데이터를 교체할 수 없음");
+            if (Data != playerData)
+                throw new InvalidOperationException("이미 초기화한 캐릭터의 데이터를 교체할 수 없음");
             return;
         }
 
@@ -303,6 +468,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         skillLevelUpProvider = new CharacterSkillLevelUpProvider();
         Data = playerData;
         status.Initialize(playerData);
+        statUpgrade = new CharacterStatUpgrade(status);
 
         if (!jobAdvancedment.TryChangeJob(playerData.id))
             throw new InvalidOperationException("CharacterJobAdvancedment의 플레이어 리스트에 초기 직업이 필요");
@@ -324,6 +490,11 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
         hasUiSnapshot = false;
         IsInitialized = true; // 이 줄까지 모두 성공해야 입력과 전투 실행을 허용
+
+        transform.SetParent(null, true);
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        SceneManager.sceneUnloaded += HandleSceneUnloaded;
     }
 
     private CharacterJobAdvancedment GetJobController() => jobAdvancedment;
@@ -346,6 +517,11 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     private void Update()
     {
+        if (!CanRun)
+            SuspendSceneMovement();
+        else
+            RestoreScenePhysics();
+
         if (!CanRun)
             return;
 
@@ -413,26 +589,28 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     private void CheckLevelUp() // 레벨 수치 상승
     {
-        if (!IsInitialized)
+        if (!IsInitialized || growthChanging)
             return;
 
-        while (true) // 보유 경험치량이 다음 레벨 업 요구 경험치 보다 많으면 반복해서 레벨업함
+        bool changed = false;
+        growthChanging = true;
+
+        try
         {
-            long requiredExp = characterLevelUpProvider.GetRequiredExp(Status.Level);
+            CharacterDamageMainStat mainStat = DamageMainStat;
 
-            if (requiredExp <= 0)
+            while (statUpgrade.CanRewardLevelUp && characterLevelUpProvider.TryLevelUp(Status, mainStat))
             {
-                Debug.LogWarning("요구 경험치는 0보다 커야됨", this);
-                break;
+                statUpgrade.RewardLevelUp();
+                changed = true;
             }
-
-            if (Status.Exp < requiredExp)
-                break;
-
-            status.UseExp(requiredExp);
-            status.IncreaseLevel();
-
-            ApplyLevelUpGrowth();
+            
+            if (changed)
+                NotifyStatUpgradeChanged();
+        }
+        finally 
+        { 
+            growthChanging = false; 
         }
     }
 
@@ -559,6 +737,84 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         return Physics2D.Linecast(origin, target.bounds.center, groundLayer).collider == null;
     }
 
+    #region 공통 피해 계산
+    [System.Serializable]
+    public sealed class DamageMainStatRule
+    {
+        public int jobId;
+        public CharacterDamageMainStat mainStat;
+    }
+    [SerializeField] private CharacterDamageMainStat defaultDamageMainStat = CharacterDamageMainStat.Strength;
+    [SerializeField] private List<DamageMainStatRule> damageMainStatRules = new List<DamageMainStatRule>();
+
+    public CharacterDamageMainStat DamageMainStat
+    {
+        get
+        {
+            CharacterDamageMainStat selected = defaultDamageMainStat;
+            PlayerData job = jobAdvancedment != null ? jobAdvancedment.CurrentJob : null;
+            bool found = false;
+
+            if (job != null && damageMainStatRules != null)
+            {
+                foreach (DamageMainStatRule rule in damageMainStatRules)
+                {
+                    if (rule == null || rule.jobId != job.id)
+                        continue;
+
+                    if (found)
+                        throw new InvalidOperationException("피해 주 스탯 설정에 중복 직업 ID");
+
+                    selected = rule.mainStat;
+                    found = true;
+                }
+            }
+
+            return selected;
+        }
+    }
+
+    public CharacterDamageAttackData CaptureDamageAttack()
+    {
+        if (!IsInitialized)
+            throw new InvalidOperationException("캐릭터 초기화 후 피해 계산");
+
+        return CharacterDamageUtility.Capture(Status, DamageMainStat);
+    }
+
+    public event Action<IDamageable, CharacterDamageResult> DamageResolved;
+
+    internal CharacterDamageResult DealAttackDamage(IDamageable target, float skillMultiplier = 1f)
+    {
+        if (!CanRun)
+            return default;
+
+        CharacterDamageResult result = CharacterDamageUtility.Apply(CaptureDamageAttack(), skillMultiplier, target);
+        ReportDamageResult(target, result);
+        return result;
+    }
+
+    internal void ReportDamageResult(IDamageable target, CharacterDamageResult result)
+    {
+        var handlers = DamageResolved;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            {
+                ((Action<IDamageable, CharacterDamageResult>)handler)(target, result);
+            }
+            catch (Exception exception) 
+            {
+                Debug.LogException(exception, this); 
+            }
+        }
+    }
+    #endregion
+
     public bool TryAttack()
     {
         if (!CanRun)
@@ -599,7 +855,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
             IDamageable target = hit.GetComponentInParent<IDamageable>();
 
             if (target != null && damaged.Add(target))
-                target.TakeDamage(Status.Attack);
+                DealAttackDamage(target);
         }
         return true;
     }
@@ -659,19 +915,95 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         Debug.Log($"{runtime.SkillName} 강화 | Lv.{runtime.Level} / MP {runtime.MpCost} / CD {runtime.Cooldown}");
     }
 
-    private void ApplyLevelUpGrowth() // 실질적인 레벨 업 시 스탯 상승 적용
+    #region 레벨 성장 및 능력치 포인트
+    private CharacterStatUpgrade statUpgrade;
+    public CharacterStatUpgrade StatUpgrade => statUpgrade;
+    private bool growthChanging;
+    public event Action StatUpgradeChanged;
+
+    public CharacterStatUpgradeInfo GetStatUpgradeInfo()
     {
-        int currentLevel = Status.Level;
-        long hpGorwth = characterLevelUpProvider.GetMaxHpGrowth(currentLevel);
-        int attackGrowth = characterLevelUpProvider.GetAttackGrowth(currentLevel);
-        long defenceGrowth = characterLevelUpProvider.GetDefenceGrowth(currentLevel);
+        if (!IsInitialized)
+            throw new InvalidOperationException("캐릭터 초기화 후 조회");
 
-        Status.IncreaseMaxHp(hpGorwth);
-        Status.IncreaseAttack(attackGrowth);
-        Status.IncreaseDefence(defenceGrowth);
-
-        Debug.Log($"레벨업! | Lv.{Status.Level} | 최대체력 +{hpGorwth} | 공격력 +{attackGrowth} | 방어력 +{defenceGrowth}");
+        return statUpgrade.GetInfo();
     }
+
+    public long CurrentExp => IsInitialized ? Status.Exp : 0;
+    public int MainStatValue
+    {
+        get
+        {
+            if (!IsInitialized)
+                return 0;
+
+            switch (DamageMainStat)
+            {
+                case CharacterDamageMainStat.Strength:
+                    return Status.Strength;
+                case CharacterDamageMainStat.Dexterity:
+                    return Status.Dexterity;
+                case CharacterDamageMainStat.Intelligence:
+                    return Status.Intelligence;
+                case CharacterDamageMainStat.Luck:
+                    return Status.Luck;
+                default:
+                    return 0;
+            }
+        }
+    }
+
+    public CharacterStatUpgradeOption GetStatUpgradeOption(CharacterStatUpgradeType type)
+    {
+        if (!IsInitialized)
+            return new CharacterStatUpgradeOption(type, 0, 0, 0, 0, false);
+
+        return statUpgrade.GetOption(type, DamageMainStat, CanRun);
+    }
+
+    public long RequiredExp => IsInitialized ? characterLevelUpProvider.GetRequiredExp(Status.Level) : 0;
+
+    public bool TryUpgradeStat(CharacterStatUpgradeType type)
+    {
+        if (!CanRun || growthChanging)
+            return false;
+
+        growthChanging = true;
+
+        try
+        {
+            if (!statUpgrade.TryUpgrade(type, DamageMainStat))
+                return false;
+
+            NotifyStatUpgradeChanged();
+            return true;
+        }
+        finally 
+        { 
+            growthChanging = false;
+        }
+    }
+
+    private void NotifyStatUpgradeChanged()
+    {
+        Action handlers = StatUpgradeChanged;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            { 
+                ((Action)handler)();
+            }
+            catch (Exception exception) 
+            { 
+                Debug.LogException(exception, this); 
+            }
+        }
+    }
+    #endregion
 
     public bool UseSkillSlash()
     {
@@ -913,6 +1245,11 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     private int previousCurrentMp;
     private int previousMaxMp;
     private int previousLevel;
+    private long previousExp;
+    private long previousRequiredExp;
+    private Sprite previousPortrait;
+    public event Action<long, long> ExpChanged;
+    public event Action<Sprite> PortraitChanged;
     private long previousMoney;
     private int previousCombatPower;
     private string previousJobName;
@@ -965,6 +1302,9 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         int mp = CurrentMp;
         int maxMp = MaxMp;
         int level = Level;
+        long exp = CurrentExp;
+        long requiredExp = RequiredExp;
+        Sprite portrait = GetCharacterPortrait();
         long money = Money;
         int combatPower = CombatPower;
         string jobName = JobName;
@@ -975,6 +1315,8 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         bool changedHp = all || hp != previousCurrentHp || maxHp != previousMaxHp;
         bool changedMp = all || mp != previousCurrentMp || maxMp != previousMaxMp;
         bool changedLevel = all || level != previousLevel;
+        bool changedExp = changedLevel || exp != previousExp || requiredExp != previousRequiredExp;
+        bool changedPortrait = all || portrait != previousPortrait;
         bool changedMoney = all || money != previousMoney;
         bool changedCombatPower = all || combatPower != previousCombatPower;
         bool changedJobName = all || jobName != previousJobName;
@@ -986,11 +1328,20 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         previousCurrentMp = mp;
         previousMaxMp = maxMp;
         previousLevel = level;
+        previousExp = exp;
+        previousRequiredExp = requiredExp;
+        previousPortrait = portrait;
         previousMoney = money;
         previousCombatPower = combatPower;
         previousJobName = jobName;
 
         // 알림이 필요한 항목만 발행. ?.Invoke는 구독자가 있을 때만 호출
+        if (changedExp)
+            NotifyExpChanged(exp, requiredExp);
+
+        if (changedPortrait)
+            NotifyPortraitChanged(portrait);
+
         if (changedHp)
             HpChanged?.Invoke(hp, maxHp);
 
@@ -1014,6 +1365,54 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     public Sprite GetCharacterPortrait()
     {
-        return characterPortrait; // 미지정 상태에서는 null 반환
+        PlayerData job = jobAdvancedment != null ? jobAdvancedment.CurrentJob : null;
+
+        if (job != null && job.portrait != null)
+            return job.portrait;
+
+        if (Data != null && Data.portrait != null)
+            return Data.portrait;
+
+        return characterPortrait;
+    }
+
+    private void NotifyExpChanged(long current, long required)
+    {
+        var handlers = ExpChanged;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            {
+                ((Action<long, long>)handler)(current, required); 
+            }
+            catch (Exception exception) 
+            {
+                Debug.LogException(exception, this); 
+            }
+        }
+    }
+
+    private void NotifyPortraitChanged(Sprite portrait)
+    {
+        var handlers = PortraitChanged;
+
+        if (handlers == null)
+            return;
+
+        foreach (Delegate handler in handlers.GetInvocationList())
+        {
+            try 
+            { 
+                ((Action<Sprite>)handler)(portrait);
+            }
+            catch (Exception exception) 
+            {
+                Debug.LogException(exception, this); 
+            }
+        }
     }
 }

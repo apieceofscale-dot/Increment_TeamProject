@@ -79,3 +79,25 @@ public enum CharacterArmorPart // 장비 부위 종류
     Ring = 8,
     Necklace = 9
 }
+
+public enum CharacterStatUpgradeType
+{
+    MainStat,
+    Defence,
+    MaxHp
+}
+
+public enum CharacterDamageMainStat
+{
+    Strength,
+    Dexterity,
+    Intelligence,
+    Luck
+}
+
+public enum CharacterDamageTargetKind
+{
+    Unknown,
+    Normal,
+    Boss
+}

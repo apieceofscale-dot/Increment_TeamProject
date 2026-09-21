@@ -16,9 +16,9 @@ public class CharacterSkillSlash : CharacterSkillBase
 
     protected override void Execute()
     {
-        int damage = (int)((double)characterControllers.Status.Attack * Mathf.Max(0f, damageMultiplier));
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, Mathf.Max(0.01f, attackRadius), monsterLayer);
         HashSet<IDamageable> damaged = new HashSet<IDamageable>();
+
         foreach (Collider2D hit in hits)
         {
             if (hit == null || !hit.gameObject.activeInHierarchy || hit.transform.IsChildOf(characterControllers.transform))
@@ -27,9 +27,8 @@ public class CharacterSkillSlash : CharacterSkillBase
             IDamageable target = hit.GetComponentInParent<IDamageable>();
 
             if (target != null && damaged.Add(target))
-                target.TakeDamage(damage);
+                characterControllers.DealAttackDamage(target, damageMultiplier);
         }
-        Debug.Log($"{RuntimeSkill.SkillName} 사용 | 피해 {damage}", this);
     }
 
     private void OnDrawGizmosSelected()

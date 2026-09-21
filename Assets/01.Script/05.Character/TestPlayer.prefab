@@ -234,6 +234,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab19079c7fe4c747b41e22bca8dbaea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterControllers
+  bootOrder: 1000
+  scenePlayerId: 1000
   skillSlots:
   - {fileID: 0}
   - {fileID: 0}
@@ -258,6 +260,8 @@ MonoBehaviour:
   skillSlash: {fileID: 357542788659323390}
   skillProjectile: {fileID: 261204065874194282}
   skillAttackBuff: {fileID: 5415692169738909216}
+  defaultDamageMainStat: 0
+  damageMainStatRules: []
   characterPortrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
 --- !u!114 &4813162430074982621
 MonoBehaviour:
@@ -272,6 +276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputController
   characterControllers: {fileID: 1920527207070155292}
+  bootOrder: 1100
 --- !u!70 &4668944163438133813
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -449,8 +454,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0b86dff9dcb86948aa64161457447ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEquipment
-  armorPartRules: []
-  equipmentStatEntries: []
+  armorPartRules:
+  - itemId: 900001
+    part: 0
+  - itemId: 900002
+    part: 0
+  - itemId: 900003
+    part: 0
+  equipmentStatEntries:
+  - itemId: 900001
+    stats:
+      maxHp: 10
+      maxMp: 0
+      recoverMpPerSec: 0
+      moveSpeed: 0
+      strength: 0
+      dexterity: 0
+      intelligence: 0
+      luck: 0
+      attack: 0
+      attackSpeedRate: 0
+      hitRate: 0
+      criticalRate: 0
+      criticalDamage: 0
+      damageByMainStat: 0
+      damageOnBoss: 0
+      damageOnNormal: 0
+      armorPenetration: 0
+      finalDamage: 0
+      defence: 0
+      dodgeRate: 0
+  - itemId: 900002
+    stats:
+      maxHp: 20
+      maxMp: 0
+      recoverMpPerSec: 0
+      moveSpeed: 0
+      strength: 0
+      dexterity: 0
+      intelligence: 0
+      luck: 0
+      attack: 0
+      attackSpeedRate: 0
+      hitRate: 0
+      criticalRate: 0
+      criticalDamage: 0
+      damageByMainStat: 0
+      damageOnBoss: 0
+      damageOnNormal: 0
+      armorPenetration: 0
+      finalDamage: 0
+      defence: 0
+      dodgeRate: 0
 --- !u!114 &-6241320407809059203
 MonoBehaviour:
   m_ObjectHideFlags: 0

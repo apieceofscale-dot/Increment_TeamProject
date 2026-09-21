@@ -74,7 +74,9 @@ public class CharacterAutoFarming : MonoBehaviour
 
         if (!enabled)
         {
-            if (IsRunning) PauseAgent();
+            if (IsRunning)
+                PauseAgent();
+
             IsRunning = false;
             CurrentState = "Idle";
             target = null;
@@ -147,37 +149,65 @@ public class CharacterAutoFarming : MonoBehaviour
 
     private void PauseAgent()
     {
-        if (agent != null) agent.enabled = false;
-        if (controller != null) controller.StopAutoFarmingMovement();
+        if (agent != null)
+            agent.enabled = false;
+
+        if (controller != null)
+            controller.StopAutoFarmingMovement();
     }
 
     private bool IsValidTarget(Collider2D candidate)
     {
-        if (candidate == null || !candidate.enabled || !candidate.gameObject.activeInHierarchy
-            || candidate.transform.IsChildOf(transform)
-            || (controller.AutoFarmingMonsterMask.value & (1 << candidate.gameObject.layer)) == 0
-            || candidate.GetComponentInParent<IDamageable>() == null) return false;
-        if (Vector2.Distance(candidate.bounds.center, bodyCollider.bounds.center) > searchRadius) return false;
-        if (TargetFilter == null) return true;
-        try { return TargetFilter(candidate); }
-        catch (Exception exception) { Debug.LogException(exception, this); return false; }
+        if (candidate == null || !candidate.enabled || !candidate.gameObject.activeInHierarchy || candidate.transform.IsChildOf(transform) || (controller.AutoFarmingMonsterMask.value & (1 << candidate.gameObject.layer)) == 0 || candidate.GetComponentInParent<IDamageable>() == null)
+            return false;
+
+        if (Vector2.Distance(candidate.bounds.center, bodyCollider.bounds.center) > searchRadius)
+            return false;
+
+        if (TargetFilter == null)
+            return true;
+
+        try 
+        { 
+            return TargetFilter(candidate); 
+        }
+        catch (Exception exception) 
+        { 
+            Debug.LogException(exception, this); 
+            return false; 
+        }
     }
     private void FindTarget()
     {
         nextSearch = Time.time + Mathf.Max(0.1f, searchInterval);
         float closest = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(
-            bodyCollider.bounds.center, searchRadius, controller.AutoFarmingMonsterMask))
+
+        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(bodyCollider.bounds.center, searchRadius, controller.AutoFarmingMonsterMask))
         {
-            if (!IsValidTarget(candidate)) continue;
+            if (!IsValidTarget(candidate))
+                continue;
+
             float distance = (candidate.bounds.center - bodyCollider.bounds.center).sqrMagnitude;
-            if (distance >= closest) continue;
+            
+            if (distance >= closest)
+                continue;
+
             closest = distance;
             target = candidate;
         }
     }
+
     [ContextMenu("Auto Farming/시작")]
-    private void StartFromInspector() { if (Application.isPlaying) SetAutoFarming(true); }
+    private void StartFromInspector() 
+    { 
+        if (Application.isPlaying)
+            SetAutoFarming(true);
+    }
+
     [ContextMenu("Auto Farming/중지")]
-    private void StopFromInspector() { if (Application.isPlaying) SetAutoFarming(false); }
+    private void StopFromInspector() 
+    {
+        if (Application.isPlaying)
+            SetAutoFarming(false); 
+    }
 }
