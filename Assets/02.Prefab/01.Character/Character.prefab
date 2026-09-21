@@ -161,6 +161,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterEquipment
   armorPartRules: []
+  equipmentStatEntries: []
 --- !u!114 &4558504022132326190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -173,7 +174,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab19079c7fe4c747b41e22bca8dbaea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterControllers
+  bootOrder: 1000
+  scenePlayerId: 1000
+  skillSlots:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   characterInventory: {fileID: 0}
+  animator: {fileID: 0}
   jumpForce: 8
   groundCheck: {fileID: 0}
   groundCheckRadius: 0.2
@@ -189,3 +200,4 @@ MonoBehaviour:
   skillSlash: {fileID: 0}
   skillProjectile: {fileID: 0}
   skillAttackBuff: {fileID: 0}
+  characterPortrait: {fileID: 0}

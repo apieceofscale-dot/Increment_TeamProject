@@ -21,7 +21,7 @@ public class AutoFarmingView : MonoBehaviour, IUIViewInitialize
 
         OnAutoFarmingChanged?.Invoke(isOn);
     }
-    /*
+    
     public void SetAutoFarming(bool isOn)
     {
         autoFarmingToggle.SetIsOnWithoutNotify(isOn);//중요. 토글 상태와 화면은 on이지만, onValueChanged는 발생시키지 않음.
@@ -29,7 +29,7 @@ public class AutoFarmingView : MonoBehaviour, IUIViewInitialize
 
         SetEffect(isOn);
     }
-    */
+    
     private void SetEffect(bool isOn)
     {
         effect.SetActive(isOn);

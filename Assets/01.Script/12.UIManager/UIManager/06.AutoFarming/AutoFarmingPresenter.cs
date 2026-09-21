@@ -10,13 +10,15 @@ public class AutoFarmingPresenter
         this.model = model;
 
         view.OnAutoFarmingChanged += HandleAutoFarmingChanged;
-        
+        view.SetAutoFarming(model.IsAutoFarming);
+
     }
 
 
     private void HandleAutoFarmingChanged(bool isOn)
     {
-        //model.SetAutoFarming(isON)
+        model.SetAutoFarming(isOn);
+        view.SetAutoFarming(model.IsAutoFarming);
     }  
 
 }

@@ -3,7 +3,9 @@ using UnityEngine;
 public class GameSessionManager : MonoBehaviour, IBootStrapper
 {
     [SerializeField] Transform spawnPosition;
-    //스테이지 완료so 구독.
+    //스테이지 완료so 구독. ???
+
+    private bool gameplayUiBound;
 
     public int BootOrder => (int)BootLayer.GameSessionManager;
         
@@ -26,7 +28,7 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
     {
         uiManager.OnCharacterSelected += HandleCharacterSelected;
 
-        //stageManager.OnStageReady += HandleStageReady; 스테이지 완료 이벤트가 필요합니다. 이름 이걸로 지어주세요. 꼬임 방지용.
+        stageManager.OnStageReady += HandleStageReady;
     }
 
     private void HandleCharacterSelected(int playerId)
@@ -38,32 +40,20 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
             Debug.LogError("[GameSessionManager] 캐릭터 생성 실패");
             return;
         }
+        currentCharacterFacade = currentCharacter.GetComponent<CharacterFacade>();
+
+        if (currentCharacterFacade == null)
+        {
+            Debug.LogError("[GameSessionManager] CharacterFacade가 없습니다.");
+            return;
+        }
 
         stageManager.SetCharacter(currentCharacter); 
-
         
-         //stageManager.EnterStage(int(StageId.St1)); 
+        stageManager.EnterStage((int)StageId.St1); 
     }
 
-    //스테이지 매니저 참고용 코드
-    /*
-    public void SetCharacter(CharacterControllers character)
-    {
-        currentCharacter = character;
-    }
-
-     public void EnterStage(int id) //
-    {
-    ~~~~씬 로딩 등.
-    ~~~~
-    
-        OnStageReady?.Invoke(stageFacade); 마지막에.
-    }
-
-    스테이지 완료 이벤트에, 스테이지 ㅁ
-
-    */
-
+ 
     private void HandleStageReady(StageFacade stageFacade)
     {
         currentStageFacade = stageFacade;
@@ -80,7 +70,12 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
             return;
         }
 
+        if (gameplayUiBound) return;
+
         uiManager.BindGameplayUI(currentCharacterFacade, currentStageFacade);
+
+        gameplayUiBound = true;
+
     }
 
 
