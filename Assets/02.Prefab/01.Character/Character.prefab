@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8735932793350233084}
   - component: {fileID: 2912403601605324706}
   - component: {fileID: 4558504022132326190}
+  - component: {fileID: -2679516447664279667}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -135,7 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d9ff20bbbbe3a4ab2551e0d6e35187, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterJobAdvancedment
-  playerList: {fileID: 0}
+  playerList: {fileID: 11400000, guid: 1735a7ba43621ab4cb706e67dd0ca289, type: 2}
 --- !u!114 &8735932793350233084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,4 +201,19 @@ MonoBehaviour:
   skillSlash: {fileID: 0}
   skillProjectile: {fileID: 0}
   skillAttackBuff: {fileID: 0}
+  defaultDamageMainStat: 0
+  damageMainStatRules: []
   characterPortrait: {fileID: 0}
+--- !u!114 &-2679516447664279667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6497905186299198472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7982590880e852443be5af9784ac9061, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterFacade
+  characterControllers: {fileID: 4558504022132326190}

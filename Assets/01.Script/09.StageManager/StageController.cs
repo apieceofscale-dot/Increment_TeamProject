@@ -26,14 +26,15 @@ public class StageController : MonoBehaviour, IBootStrapper
     public int BootOrder => (int)BootLayer.StageManager;
 
 
-    // 부트 주입
-    //private CharacterFactory characterFactory;
-    private MonsterFactory monsterFactory;
-    private ItemDropManager itemDropManager;
+    // [변경] 몬스터/아이템 생성 시스템은 현재 게임에서 사용하지 않으므로
+    // StageController의 필수 부트 의존성에서 제외한다.
+    // private MonsterFactory monsterFactory;
+    // private ItemDropManager itemDropManager;
 
 
     // 초기화 확보
-    private ItemDropFacade dropFacade;
+    // [변경] 아이템 드랍 시스템을 다시 사용할 때 복구한다.
+    // private ItemDropFacade dropFacade;
     private MonsterSpawner spawner;
     private StageFacade facade;
 
@@ -87,29 +88,34 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-
-        monsterFactory = context.Get<MonsterFactory>();
-        itemDropManager = context.Get<ItemDropManager>();
+        // [변경] 현재 StageController에는 필수로 주입받을 외부 시스템이 없다.
+        // 아래 두 시스템이 없어도 부트 시퀀스와 스테이지 진입이 계속되어야 한다.
+        // monsterFactory = context.Get<MonsterFactory>();
+        // itemDropManager = context.Get<ItemDropManager>();
     }
 
     public void IBootStrapperInitialize()
     {
-        dropFacade = itemDropManager.Facade;
-
+        // [변경] MonsterSpawner는 현재 사용하지 않지만 기존 배치를 확인할 수 있도록 참조만 보관한다.
         spawner = GetComponent<MonsterSpawner>();
-        if (spawner == null)
-        {
-            throw new InvalidOperationException(
-                "[StageController] 오브젝트에 MonsterSpawner가 없습니다");
-        }
-
-        spawner.Initialize(monsterFactory);
+        // [변경] MonsterFactory가 제거되어 초기화할 수 없으므로 기존 필수 초기화는 보존만 한다.
+        // if (spawner == null)
+        // {
+        //     throw new InvalidOperationException(
+        //         "[StageController] 오브젝트에 MonsterSpawner가 없습니다");
+        // }
+        // spawner.Initialize(monsterFactory);
 
         facade = GetComponent<StageFacade>();
         if (facade == null)
         {
-            throw new InvalidOperationException(
-                "[StageController] 오브젝트에 StageFacade가 없습니다.");
+            // [추가] StageFacade는 세션과 UI가 StageController에 접근하는 필수 창구이므로
+            // 메인 씬 배치에서 빠졌을 때 같은 오브젝트에 자동으로 보완한다.
+            facade = gameObject.AddComponent<StageFacade>();
+
+            // [변경] Facade 누락으로 전체 부트를 중단하던 기존 처리는 보존한다.
+            // throw new InvalidOperationException(
+            //     "[StageController] 오브젝트에 StageFacade가 없습니다.");
         }
         facade.Bind(this);
 
@@ -242,8 +248,9 @@ public class StageController : MonoBehaviour, IBootStrapper
         // if (character != null) character.SetPathFinder(null);
 
         // 1.이전 스테이지 정리
-        spawner.DespawnAll();
-        dropFacade.CancelPendingDrops();
+        // [변경] 몬스터 스폰/아이템 드랍 시스템이 배치된 경우에만 이전 상태를 정리한다.
+        if (spawner != null) spawner.DespawnAll();
+        // dropFacade.CancelPendingDrops();
         status.SetState(StageState.None);
 
         // 2.씬 전환(같은 씬이면 로딩 없이 건너뛰기)
@@ -280,8 +287,12 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
         StageMapParts map = provider.ToParts();
-        spawner.SetMap(map);
-        spawner.ResetTimer();
+        // [변경] MonsterSpawner는 현재 선택 기능이므로 존재할 때만 맵 정보를 전달한다.
+        if (spawner != null)
+        {
+            spawner.SetMap(map);
+            spawner.ResetTimer();
+        }
 
         // 4. z캐릭터 배치
         if (character != null && map.PlayerStart != null)
@@ -330,7 +341,8 @@ public class StageController : MonoBehaviour, IBootStrapper
         if (status.State != StageState.Battle) return;
 
 
-        spawner.TickSpawn(status.Definition, Time.deltaTime);
+        // [변경] MonsterFactory가 없는 현재 구조에서는 자동 몬스터 생성을 실행하지 않는다.
+        // spawner.TickSpawn(status.Definition, Time.deltaTime);
 
     }
 
@@ -339,13 +351,19 @@ public class StageController : MonoBehaviour, IBootStrapper
     {
         // ★ 죽은 몬스터 정리는 스테이지가 한다. 씬에 MonsterFacade가 없으므로 여기서 안 하면
         //   시체가 남고 CountAlive가 줄지 않아 스폰이 멈춘다.
-        if (info.Source != null) spawner.Despawn(info.Source);
+        // [변경] MonsterSpawner가 없어도 씬에 배치된 몬스터 사망 처리는 완료한다.
+        if (info.Source != null)
+        {
+            if (spawner != null) spawner.Despawn(info.Source);
+            else info.Source.ReturnToPool();
+        }
 
         if (status.State != StageState.Battle) return;
 
         // 드랍 — DropTableId가 아직 안 채워졌으면 MonsterId로 폴백 (몬스터 담당이 채우면 폴백 제거)
-        int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
-        dropFacade.RequestDrop(dropTableId, info.Position);
+        // [변경] ItemFactory와 드랍 시스템을 현재 사용하지 않으므로 드랍 요청을 중단한다.
+        // int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
+        // dropFacade.RequestDrop(dropTableId, info.Position);
 
         // 경험치 (MonsterData에 exp 필드가 생기기 전까지는 0이라 실제로는 안 오름)
         if (character != null && info.ExpReward > 0)
@@ -365,7 +383,8 @@ public class StageController : MonoBehaviour, IBootStrapper
             if (status.Definition.Type == StageType.Boss)
             {
                 status.SetState(StageState.Cleared);
-                spawner.DespawnAll();
+                // [변경] MonsterSpawner가 없는 씬에서도 보스 클리어 처리가 계속된다.
+                if (spawner != null) spawner.DespawnAll();
                 // TODO(기획): 보스 클리어 후 흐름 (다음 챕터 / 결과창 / 003 복귀) 확정되면 여기서 처리
             }
         }

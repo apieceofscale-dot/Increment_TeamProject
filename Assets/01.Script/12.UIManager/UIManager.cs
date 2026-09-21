@@ -1,6 +1,9 @@
 
 using System;
 using UnityEngine;
+// [추가] 메인 UI 버튼에 프로젝트의 Input System 입력을 전달한다.
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 
 public class UIManager : MonoBehaviour, IBootStrapper
 {
@@ -46,8 +49,27 @@ public class UIManager : MonoBehaviour, IBootStrapper
     }
     public void IBootStrapperInitialize()
     {
+        // [추가] 씬에 EventSystem이 없어도 시작/캐릭터 선택 버튼이 입력을 받도록 준비한다.
+        EnsureEventSystem();
         CreateMainHud();
         CreatPlayerHud();
+    }
+
+    // [추가] 기존 EventSystem은 재사용하고, 없으면 DDOL 매니저 아래에 생성해 유지한다.
+    private void EnsureEventSystem()
+    {
+        EventSystem eventSystem = FindFirstObjectByType<EventSystem>();
+        if (eventSystem == null)
+        {
+            GameObject inputRoot = new GameObject("EventSystem");
+            inputRoot.transform.SetParent(transform, false);
+            eventSystem = inputRoot.AddComponent<EventSystem>();
+        }
+
+        // [추가] 새 Input System 전용 설정에 맞는 모듈을 사용한다.
+        // 모듈은 OnEnable에서 기본 UI 액션(클릭/포인터/확인)을 자동으로 연결한다.
+        if (eventSystem.GetComponent<BaseInputModule>() == null)
+            eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
     }
 
    public void CreateMainHud()
@@ -122,8 +144,8 @@ public class UIManager : MonoBehaviour, IBootStrapper
         AutoFarmingView autoFarmingView = GetView<AutoFarmingView>(playerHud);
 
         //나머지 나중에 선언
-        EquipmentPopupView equipmentPopupView = GetView<EquipmentPopupView>(playerHud);
-        EnchatPopupView enchatPopupView = GetView<EnchatPopupView>(playerHud);
+       // EquipmentPopupView equipmentPopupView = GetView<EquipmentPopupView>(playerHud);
+        //EnchatPopupView enchatPopupView = GetView<EnchatPopupView>(playerHud);
 
         if (itemFacade == null)
         {
@@ -141,9 +163,9 @@ public class UIManager : MonoBehaviour, IBootStrapper
         autoFarmingPresenter = new AutoFarmingPresenter(autoFarmingView, characterFacade);
 
         characterPopupPresenter = new CharacterPopupPresenter();
-        equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
+       // equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
         skillPopupPresenter = new SkillPopupPresenter();
-        enchatPopupPresenter = new EnchatPopupPresenter(enchatPopupView, characterFacade, itemFacade);
+       // enchatPopupPresenter = new EnchatPopupPresenter(enchatPopupView, characterFacade, itemFacade);
       
     }
 

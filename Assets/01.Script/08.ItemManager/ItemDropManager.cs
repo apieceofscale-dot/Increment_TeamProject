@@ -47,8 +47,14 @@ public sealed class ItemDropManager : MonoBehaviour, IBootStrapper
         facade = GetComponent<ItemDropFacade>();
         if (facade == null)
         {
-            throw new System.InvalidOperationException(
-                "[ItemDropManager] ItemDropFacade가 없습니다.");
+            // [변경] 아이템 생성/드랍 시스템을 사용하지 않는 현재 구성에서는
+            // Facade 누락이 전체 부트 시퀀스를 중단시키지 않도록 한다.
+            Debug.LogWarning("[ItemDropManager] ItemDropFacade가 없습니다. 아이템 드랍 기능을 사용하지 않습니다.", this);
+            return;
+
+            // [변경] 아이템 드랍 시스템을 다시 사용할 때 아래 필수 검사도 함께 복구한다.
+            // throw new System.InvalidOperationException(
+            //     "[ItemDropManager] ItemDropFacade가 없습니다.");
         }
         facade.Bind(this);
 

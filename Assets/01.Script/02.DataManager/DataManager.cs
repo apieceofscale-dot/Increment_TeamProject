@@ -7,6 +7,10 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
     public static DataManager instance;
     public int BootOrder => (int)BootLayer.DataManager;
 
+    // [추가] CharacterFactory가 DataManager와 동일한 플레이어 SO를 사용하도록 제공한다.
+    // 자동 생성 파일의 필드는 유지하고 접근용 프로퍼티만 이 파일에 추가한다.
+    public PlayerList PlayerListSource => playerList;
+
     //자동구현
     partial void LoadAllOfDataGenerated();
     private void LoadData<T>(DataRepositary<T> repositary, List<T> dataList) where T : BaseData

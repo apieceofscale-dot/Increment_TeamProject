@@ -39,6 +39,11 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
 
     private void BuildCharacterCatalog()
     {
+        // [추가] Inspector 연결 누락이나 다른 SO 연결에 영향을 받지 않도록
+        // DataManager가 실제로 사용하는 SO를 받아 카탈로그 참조를 맞춘다.
+        // 기존 playerList 필드와 아래 데이터 검증은 그대로 유지한다.
+        playerList = DataManager.instance.PlayerListSource;
+
         if (playerList == null || playerList.baseList == null)
             throw new InvalidOperationException("데이터 매니저와 동일한 SO를 연결");
 
