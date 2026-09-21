@@ -16,7 +16,7 @@ public class PortraitView : MonoBehaviour, IUIViewInitialize
     {
         this.attackRating.text = attackRating.ToString("0");
     }
-    public void SetGold(int gold)
+    public void SetGold(long gold)
     {
         this.gold.text = gold.ToString();  
     }

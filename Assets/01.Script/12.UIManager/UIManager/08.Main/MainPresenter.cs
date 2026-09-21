@@ -7,7 +7,7 @@ public class MainPresenter
 
     private readonly int[] playerIds = { 1000, 1001, 1002, 1003 };
 
-    public Action<int> OnCharacterSelected;
+    public event Action<int> OnCharacterSelected;
 
 
     public MainPresenter(MainView view)
@@ -30,7 +30,7 @@ public class MainPresenter
                 continue;
             }
 
-           // view.SetButton(i, playerData.portarit, playerData.displayName);  초상화 정보가 없음.
+           view.SetButton(i, playerData.portrait, playerData.displayName);  
         }
     }
 

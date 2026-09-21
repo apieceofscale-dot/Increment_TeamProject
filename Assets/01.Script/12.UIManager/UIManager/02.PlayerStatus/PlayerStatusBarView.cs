@@ -13,16 +13,16 @@ public class PlayerStatusBarView : MonoBehaviour, IUIViewInitialize
 
     public void InitializeView()
     {
-
+        //ºó°Ô ¸ÂÀ½.
     }
-    public void SetHpBar(float nowHp,float maxHp)
+    public void SetHpBar(float nowHp, float maxHp)
     {
-        hpBar.fillAmount = nowHp / maxHp;
+        hpBar.fillAmount = maxHp > 0 ? Mathf.Clamp01((float)((double)nowHp / maxHp)) : 0f;
     }
     public void SetMpBar(float nowMp, float maxMp)
     {
-        mpBar.fillAmount = nowMp / maxMp;
-    }    
+        mpBar.fillAmount = maxMp > 0 ? Mathf.Clamp01((float)nowMp / maxMp) : 0f;
+    }
     public void SetExpBar(float nowExp, float maxExp)
     {
         expBar.fillAmount = nowExp / maxExp;

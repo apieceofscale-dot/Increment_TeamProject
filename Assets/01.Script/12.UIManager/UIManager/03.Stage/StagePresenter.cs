@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class StagePresenter
@@ -5,43 +6,45 @@ public class StagePresenter
     StageFacade model;
     StageView view;
 
-    public StagePresenter(StageView view, StageFacade model)
+    private readonly StageChangedEventChannelSO stageChangedChannel;
+
+    public StagePresenter(StageView view, StageFacade model, StageChangedEventChannelSO stageChangedChannel)
     {
+        if (view == null) throw new ArgumentNullException(nameof(view));
+        if (model == null) throw new ArgumentNullException(nameof(model));
+        if (stageChangedChannel == null) throw new ArgumentNullException(nameof(stageChangedChannel));
+
         this.model = model;
         this.view = view;
+        this.stageChangedChannel = stageChangedChannel;
 
         view.OnChallengeBtnClicked += HandleChallengeStageMove;
+        stageChangedChannel.OnRaised += HandleStageChange;
+        model.StageChanged += HandleStageChange;
 
-        model.StageChanged += HandleStageChanged;
-
-        StageChangedInfo info = model.GetStageInfo();
-        if (info.IsValid)
-            ApplyStageInfo(info);
+        HandleStageChange(model.GetStageInfo());
     }
 
-    private void HandleStageChanged(StageChangedInfo data)
+    public void HandleStageChange(StageChangedInfo info)
     {
-        if (!data.IsValid)
+        if (!info.IsValid)
+        {
+            view.SetChallengeAvailable(false);
             return;
+        }
 
-        ApplyStageInfo(data);
-    }
-
-    private void ApplyStageInfo(StageChangedInfo data)
-    {
-        HandleStageChange(data.MapName, data.NowStageNum, data.TotalStageNum);
-    }
-
-    public void HandleStageChange(string nowMapname, int nowStageNum, int totalStageNum)
-    {
-        view.SetName(nowMapname);
-        view.SetChallengeStageNum(nowStageNum);
-        view.SetStageProcedureText(nowStageNum, totalStageNum);
-        view.SetStageProcedureBar(nowStageNum, totalStageNum);
+        view.SetName(info.MapName);
+        view.SetChallengeStageNum(info.ChallengeStageNum);
+        view.SetStageProcedureText(info.NowStageNum, info.TotalStageNum);
+        view.SetStageProcedureBar(info.NowStageNum, Math.Max(1, info.TotalStageNum));
+        view.SetChallengeAvailable(info.CanChallenge);
     }
 
     public void HandleChallengeStageMove()
     {
+        if (model.IsTransitioning)
+            return;
+
         model.MoveToChallengeStage();
     }
 }

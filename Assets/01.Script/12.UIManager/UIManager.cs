@@ -3,7 +3,8 @@ using System;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour, IBootStrapper
-{    
+{
+    [SerializeField] private StageChangedEventChannelSO stageChangedChannel;
 
     public int BootOrder => (int)BootLayer.UIManager;
 
@@ -25,7 +26,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
     PortraitPresenter portraitPresenter;
     PlayerStatusBarPresenter playerStatusBarPresenter;
     StagePresenter stagePresenter;
-    //?????? ?????? ???????? ????
+    ///캐릭터 세팅은 프리젠터 없음
     SkillPresenter skillPresenter;  
     AutoFarmingPresenter autoFarmingPresenter;
 
@@ -41,7 +42,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInject(BootstrapContext context)
     {
-        //?? ?? ????.
+        //빈 게 맞음.
     }
     public void IBootStrapperInitialize()
     {
@@ -85,10 +86,12 @@ public class UIManager : MonoBehaviour, IBootStrapper
        
     }
 
-    // ?? ????? main ui-> ?????? ???? -> ???????? ???? -> ???? ?????? ??.
+    // 이 함수를 main ui-> 캐릭터 생성 -> 스테이지 생성 -> 이후 받으면 됨.
     public void BindGameplayUI(CharacterFacade characterFacade, StageFacade stageFacade)
     {
         playerHud.SetActive(true);
+        mainHud.SetActive(false);
+
 
         this.characterFacade = characterFacade;
         this.stageFacade = stageFacade;
@@ -114,11 +117,11 @@ public class UIManager : MonoBehaviour, IBootStrapper
         PortraitView portraitView = GetView<PortraitView>(playerHud);
         PlayerStatusBarView playerStatusBarView = GetView<PlayerStatusBarView>(playerHud);
         StageView stageView = GetView<StageView>(playerHud);
-        //CharacterSettingView characterSettingView = GetView<CharacterSettingView>(); ??? ????.
+        //CharacterSettingView characterSettingView = GetView<CharacterSettingView>(); 이건 없음.
         SkillView skillView = GetView<SkillView>(playerHud);            
         AutoFarmingView autoFarmingView = GetView<AutoFarmingView>(playerHud);
 
-
+        //나머지 나중에 선언
         EquipmentPopupView equipmentPopupView = GetView<EquipmentPopupView>(playerHud);
         EnchatPopupView enchatPopupView = GetView<EnchatPopupView>(playerHud);
 
@@ -130,10 +133,10 @@ public class UIManager : MonoBehaviour, IBootStrapper
         MainView mainView = GetView<MainView>(mainHud);
 
 
-        // Presenter ?????? ?????? new?????? ???? ?? ????? ??.
+        // Presenter 연결은 어차피 new자동화가 안되서 걍 하나씩 씀.
         portraitPresenter = new PortraitPresenter (portraitView,characterFacade);
         playerStatusBarPresenter = new PlayerStatusBarPresenter(playerStatusBarView, characterFacade);
-        stagePresenter = new StagePresenter(stageView, stageFacade);
+        stagePresenter = new StagePresenter(stageView, stageFacade, stageChangedChannel);
         skillPresenter = new SkillPresenter(skillView, characterFacade);
         autoFarmingPresenter = new AutoFarmingPresenter(autoFarmingView, characterFacade);
 
@@ -141,8 +144,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
         equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
         skillPopupPresenter = new SkillPopupPresenter();
         enchatPopupPresenter = new EnchatPopupPresenter(enchatPopupView, characterFacade, itemFacade);
-
-       // mainPresenter = new MainPresenter(mainPresenter,)?????? ???? ?????
+      
     }
 
     private T GetView<T>(GameObject hud) where T : MonoBehaviour
@@ -152,7 +154,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
 
         if (view == null)
         {
-            Debug.LogError("$\"[UIManager] {typeof(T).Name}?? ??? ?? ???????.\"");
+            throw new InvalidOperationException($"[UIManager] {hud.name}�� {typeof(T).Name}�� �����ϴ�.");
         }
 
        

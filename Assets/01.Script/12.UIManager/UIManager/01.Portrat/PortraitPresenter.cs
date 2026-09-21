@@ -14,6 +14,9 @@ public class PortraitPresenter
         model.AttackRatingChanged += HandleAttackRating;
 
         HandlePortrait(model.GetCharacterPortrait());
+        HandleGoldChanged(model.Money);
+        HandleAttackRating(model.AttackRating);
+
         model.RefreshUiEvents();
     }
 
@@ -29,6 +32,6 @@ public class PortraitPresenter
 
     public void HandleGoldChanged(long gold)
     {
-        view.SetGold((int)gold);
+        view.SetGold(gold);
     }
 }

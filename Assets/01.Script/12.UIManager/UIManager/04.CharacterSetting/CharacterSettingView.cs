@@ -36,8 +36,6 @@ public class CharacterSettingView : MonoBehaviour, IUIViewInitialize
 
     }
 
-
-
     public void SetAllPopUpFalse()//PlayerHud Start에서 선언.
     {
         characterPopUp.SetActive(false);
@@ -45,32 +43,28 @@ public class CharacterSettingView : MonoBehaviour, IUIViewInitialize
         skillPopUp.SetActive(false);
         enchantPopUp.SetActive(false);
         dim.SetActive(false);
-    } 
+    }
 
-    private void OpenCharacterPopup()
+    private void OpenPopup(GameObject target)
     {
-        characterPopUp.SetActive(true);
-        dim.SetActive(true);
-    }
-    private void OpenEquipmentPopup()
-    {
-        equipmentPopUp.SetActive(true);
-        dim.SetActive(true);
-    }
-    private void OpenSkillPopup()
-    {
-        skillPopUp.SetActive(true);
+        characterPopUp.SetActive(target == characterPopUp);
+        equipmentPopUp.SetActive(target == equipmentPopUp);
+        skillPopUp.SetActive(target == skillPopUp);
+        enchantPopUp.SetActive(target == enchantPopUp);
+
         dim.SetActive(true);
     }
 
-    private void OpenEnchantPopup()
-    {
-        enchantPopUp.SetActive(true) ;
-        dim.SetActive(true) ;
-    }
 
 
-    
+    private void OpenCharacterPopup() => OpenPopup(characterPopUp);
+    private void OpenEquipmentPopup() => OpenPopup(equipmentPopUp);
+    private void OpenSkillPopup() => OpenPopup(skillPopUp);
+    private void OpenEnchantPopup() => OpenPopup(enchantPopUp);
+
+
+
+
 
 
 

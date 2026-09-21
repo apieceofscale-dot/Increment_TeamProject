@@ -2,28 +2,35 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterFacade : MonoBehaviour
+public class CharacterFacade : MonoBehaviour, IBootStrapper
 {
     
     [SerializeField] private CharacterControllers characterControllers;
-    private CharacterControllers Controller
-    {
-        get
-        {
-            if (characterControllers == null)
-                characterControllers = GetComponent<CharacterControllers>();
+    private CharacterControllers Controller => characterControllers;
 
-            return characterControllers;
-        }
+    [SerializeField] private int bootOrder = 1100;
+    public int BootOrder => bootOrder;
+    public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;
+    public bool CanRun => characterControllers != null && characterControllers.CanRun;
+    internal void Inject(CharacterControllers owner)
+    {
+        if (owner == null)
+            throw new System.ArgumentNullException(nameof(owner));
+
+        if (characterControllers != null && characterControllers != owner)
+            throw new System.InvalidOperationException("ùùùùù ?ùùù?ù ùùùù ùùù ù?ù");
+
+        characterControllers = owner;
+    }
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+        Inject(characterControllers != null ? characterControllers : GetComponentInParent<CharacterControllers>());
     }
 
-    private void Awake()
+    public void IBootStrapperInitialize()
     {
-        if (characterControllers == null)
-            characterControllers = GetComponent<CharacterControllers>();
-
-        if (characterControllers == null)
-            Debug.LogError("ÔøΩÔøΩ???? ?????? ????", this);
+        if (!IsInitialized)
+            throw new System.InvalidOperationException("Controller must be initialized before CharacterFacade boot.");
     }
 
     #region ???? ?? ??? ???? ??
@@ -32,7 +39,7 @@ public class CharacterFacade : MonoBehaviour
     public CharacterEquipment Equipment => Controller.Equipment;
     #endregion
 
-    #region ÔøΩÔøΩ???? ???? ?? ????
+    #region ùù???? ???? ?? ????
     public PlayerData Data => Controller.Data;
     public void Initialize(PlayerData playerData)
     {
@@ -40,7 +47,7 @@ public class CharacterFacade : MonoBehaviour
     }
     #endregion
 
-    #region UI?? ???ÔøΩÔøΩ ???
+    #region UI?? ???ùù ???
     public long CurrentHp => Controller.CurrentHp; // ???? ???
     public long MaxHp => Controller.MaxHp; // ??? ???
     public int CurrentMp => Controller.CurrentMp; // ???? ????
@@ -172,7 +179,7 @@ public class CharacterFacade : MonoBehaviour
         return Controller.GetEquipmentSlots();
     }
 
-    public event Action InventoryChanged // ?ÔøΩÔøΩ??? ?? ?????? ??? ????? ??????? ???? ???
+    public event Action InventoryChanged // ?ùù??? ?? ?????? ??? ????? ??????? ???? ???
     {
         add
         {
@@ -198,7 +205,7 @@ public class CharacterFacade : MonoBehaviour
         }
     }
 
-    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // ???? ??? ?????? ?ÔøΩÔøΩ? ???? ????
+    public IReadOnlyList<CharacterInventoryEquipment> GetEquipmentInventory() // ???? ??? ?????? ?ùù? ???? ????
     {
         return Controller.GetEquipmentInventory();
     }
@@ -213,7 +220,7 @@ public class CharacterFacade : MonoBehaviour
         Controller.EquipItem(instanceId);
     }
 
-    public bool TryEquipItem(Guid instanceId) // ????/???? ??ÔøΩÔøΩ? ????? ?? ???
+    public bool TryEquipItem(Guid instanceId) // ????/???? ??ùù? ????? ?? ???
     {
         return Controller.TryEquipItem(instanceId);
     }
@@ -225,7 +232,7 @@ public class CharacterFacade : MonoBehaviour
     #endregion
 
     #region ??? UI ?? ??? ??????
-    public int SkillSlotCount => CharacterControllers.SkillSlotCount; // 6??, ?ÔøΩÔøΩ????? 0~5
+    public int SkillSlotCount => CharacterControllers.SkillSlotCount; // 6??, ?ùù????? 0~5
 
     // ?????? ???? ???????? ??? ???? ????? ????
     public event Action<SkillSlotInfo> SkillSlotChanged
@@ -245,7 +252,7 @@ public class CharacterFacade : MonoBehaviour
     public SkillSlotInfo GetEquippedSkill(int slotIndex) => Controller.GetEquippedSkill(slotIndex);
     public SkillCooldownInfo GetSkillCooldown(int slotIndex) => Controller.GetSkillCooldown(slotIndex);
 
-    // ???? ÔøΩÔøΩ?????? ??? ????????? ????
+    // ???? ùù?????? ??? ????????? ????
     public bool EquipSkill(int slotIndex, CharacterSkillBase skill) => Controller.EquipSkill(slotIndex, skill);
     public bool UnequipSkill(int slotIndex) => Controller.UnequipSkill(slotIndex);
 
@@ -287,8 +294,8 @@ public class CharacterFacade : MonoBehaviour
     }
     #endregion
 
-    #region ?????? ?? ?ÔøΩÔøΩ??? ??
-    public bool AddEquipment(ItemStatus status, out Guid instanceId) // ??? 1?? ???, ???? ???ÔøΩÔøΩ? ???? ID ???
+    #region ?????? ?? ?ùù??? ??
+    public bool AddEquipment(ItemStatus status, out Guid instanceId) // ??? 1?? ???, ???? ???ùù? ???? ID ???
     {
         return Controller.AddEquipment(status, out instanceId);
     }
@@ -308,7 +315,7 @@ public class CharacterFacade : MonoBehaviour
         return Controller.GetEquipmentCount(itemId);
     }
 
-    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment() // ?ÔøΩÔøΩ? ???? ??? ????
+    public IReadOnlyList<CharacterInventoryEquipment> GetInventoryEquipment() // ?ùù? ???? ??? ????
     {
         return Controller.GetInventoryEquipment();
     }
@@ -387,7 +394,7 @@ public class CharacterFacade : MonoBehaviour
     }
     #endregion
 
-    #region ÔøΩÔøΩ???? ???? ?? ?????????
+    #region ùù???? ???? ?? ?????????
     public void SetMoveInput(float input)
     {
         Controller.SetMoveInput(input);

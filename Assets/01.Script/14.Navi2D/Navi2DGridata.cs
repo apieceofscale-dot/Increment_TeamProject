@@ -337,8 +337,7 @@ public class Navi2DGridata : MonoBehaviour
         return IsAirArcClear(start, end - start, 1f, 0f, halfWidth, bodyHeight);
     }
 
-    // Check the whole body against actual tiles, including the landing platform.
-    // The parabola's extrema over each tile's X interval give continuous coverage.
+   
     public bool IsAirArcClear(Vector2 start, Vector2 velocity, float duration,
         float gravity, float halfWidth, float bodyHeight)
     {

@@ -5,6 +5,8 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
     [SerializeField] Transform spawnPosition;
     [SerializeField] int firstStageId = 9000;
 
+    private bool gameplayUiBound;
+
     public int BootOrder => (int)BootLayer.GameSessionManager;
 
     CharacterFactory characterFactory;
@@ -42,12 +44,16 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
         currentCharacter = characterFactory.Create(playerId, spawnPosition.position);
 
         if (currentCharacter == null)
+        {
+            Debug.LogError("[GameSessionManager] Character spawn failed.");
             return;
+        }
 
         currentCharacterFacade = currentCharacter.GetComponent<CharacterFacade>();
+
         if (currentCharacterFacade == null)
         {
-            Debug.LogError("[GameSessionManager] CharacterFacade�� �����ϴ�.");
+            Debug.LogError("[GameSessionManager] CharacterFacade is missing.");
             return;
         }
 
@@ -59,10 +65,27 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
     {
         currentStageFacade = stageFacade;
 
+        if (currentCharacterFacade == null)
+        {
+            Debug.LogError("[GameSessionManager] CharacterFacade is missing.");
+            return;
+        }
+
+        if (currentStageFacade == null)
+        {
+            Debug.LogError("[GameSessionManager] StageFacade is missing.");
+            return;
+        }
+
+        if (gameplayUiBound)
+            return;
+
         uiManager.BindGameplayUI(currentCharacterFacade, currentStageFacade);
+
+        gameplayUiBound = true;
     }
 
-    /// <summary>Ŭ���� ���� ���� �� ���� ���������� �̵�. UI���������� ��ư���� ȣ��.</summary>
+    /// <summary>??? ?? ?? ?? ?? ? ?? ????? ??. UI/??? ???? ??.</summary>
     public bool TryGoToNextStage()
     {
         if (currentStageFacade == null)

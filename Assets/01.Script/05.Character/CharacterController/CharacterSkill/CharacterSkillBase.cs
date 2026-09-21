@@ -15,32 +15,34 @@ public abstract class CharacterSkillBase : MonoBehaviour
     protected CharacterSkill skill;
 
     private bool executing;
-    public CharacterSkill RuntimeSkill { get { EnsureInitialized(); return skill; } }
+    public CharacterSkill RuntimeSkill => skill;
     public virtual bool CanReplaceBasicAttack => false;
     public bool BelongsTo(CharacterControllers owner)
     {
-        EnsureInitialized();
-
-        return characterControllers == owner;
+        return skill != null && owner != null && characterControllers == owner;
     }
 
-    protected virtual void Awake()
-    { 
-        EnsureInitialized(); 
-    }
-
-    private void EnsureInitialized()
+    public void Initialize(CharacterControllers owner)
     {
-        if (characterControllers == null)
-            characterControllers = GetComponentInParent<CharacterControllers>();
+        if (owner == null || GetComponentInParent<CharacterControllers>() != owner)
+            throw new System.InvalidOperationException("스킬을 자식에 배치");
 
-        if (skill == null)
-            skill = new CharacterSkill(skillName, initialLevel, mpCost, cooldown, initiallyUnlocked, () => Time.time);
+        if (skill != null)
+        {
+            if (characterControllers != owner)
+                throw new System.InvalidOperationException("스킬 소유자 변경은 없음");
+
+            return; // 쿨타임·강화 상태를 중복 초기화하지 않는다.
+        }
+
+        characterControllers = owner;
+        skill = new CharacterSkill(skillName, initialLevel, mpCost, cooldown, initiallyUnlocked, () => Time.time);
     }
 
     public bool TryUse()
     {
-        EnsureInitialized();
+        if (skill == null || characterControllers == null || !characterControllers.CanRun)
+            return false;
 
         if (!isActiveAndEnabled || executing || characterControllers == null || characterControllers.Status == null || characterControllers.Status.CurrentHp <= 0)
             return false;
@@ -73,7 +75,9 @@ public abstract class CharacterSkillBase : MonoBehaviour
 
     public float GetUseInterval()
     {
-        EnsureInitialized();
+        if (skill == null)
+            return float.PositiveInfinity;
+
         float rate = affectedByAttackSpeed && characterControllers != null && characterControllers.Status != null ? Mathf.Clamp(characterControllers.Status.AttackSpeedRate, 0f, 1.5f) : 0f;
         
         return Mathf.Max(0.01f, skill.Cooldown) / (1f + rate);

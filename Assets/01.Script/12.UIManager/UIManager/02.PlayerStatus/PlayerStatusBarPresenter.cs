@@ -16,6 +16,12 @@ public class PlayerStatusBarPresenter
         model.JobNameChanged += HandleJobChanged;
         model.LevelChanged += HandleLevelChanged;
 
+        HandleHpChanged(model.CurrentHp, model.MaxHp);
+        HandleMpChanged(model.CurrentMp, model.MaxMp);
+        HandleExpChanged(model.CurrentExp, model.RequiredExpForCurrentLevel);
+        HandleLevelChanged(model.Level);
+        HandleJobChanged(model.JobName);
+
         model.RefreshUiEvents();
     }
 

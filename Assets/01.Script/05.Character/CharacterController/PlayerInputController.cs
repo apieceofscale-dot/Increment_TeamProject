@@ -1,19 +1,36 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputController : MonoBehaviour
+public class PlayerInputController : MonoBehaviour, IBootStrapper
 {
     [SerializeField] private CharacterControllers characterControllers;
-
-    private void Awake()
+    [SerializeField] private int bootOrder = 1100;
+    public int BootOrder => bootOrder;
+    public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;
+    public bool CanRun => characterControllers != null && characterControllers.CanRun;
+    internal void Inject(CharacterControllers owner)
     {
-        if (characterControllers == null)
-            characterControllers = GetComponent<CharacterControllers>();
+        if (owner == null)
+            throw new System.ArgumentNullException(nameof(owner));
+
+        if (characterControllers != null && characterControllers != owner)
+            throw new System.InvalidOperationException("연결된 캐릭터와 주입 대상이 다름");
+
+        characterControllers = owner;
+    }
+    public void IBootStrapperInject(BootstrapContext context)
+    {
+        Inject(characterControllers != null ? characterControllers : GetComponentInParent<CharacterControllers>());
+    }
+    public void IBootStrapperInitialize()
+    {
+        if (!IsInitialized)
+            throw new System.InvalidOperationException("컨트롤러 초기화 먼저 완료해야함");
     }
 
     private void Update()
     {
-        if (Keyboard.current == null || characterControllers == null)
+        if (!CanRun || Keyboard.current == null || !characterControllers.isActiveAndEnabled)
             return;
 
         HandleMovement();

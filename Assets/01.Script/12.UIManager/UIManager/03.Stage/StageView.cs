@@ -24,7 +24,7 @@ public class StageView : MonoBehaviour, IUIViewInitialize
     }
     public void SetChallengeStageNum(int nowStageNum /*, string nextStageName*/)
     {
-        this.ChallengeStageNum.text = (nowStageNum + 1).ToString();        
+        this.ChallengeStageNum.text = nowStageNum.ToString();        
     }   
     public void SetStageProcedureText(int nowStageNum, int totalStageNum)
     {
@@ -33,6 +33,10 @@ public class StageView : MonoBehaviour, IUIViewInitialize
     public void SetStageProcedureBar(int nowStageNum, int totalStageNum)
     {
         stageProcedureBar.fillAmount = (float)nowStageNum / totalStageNum;
+    }
+    public void SetChallengeAvailable(bool available)
+    {
+        challengeButton.interactable = available;
     }
 
 }

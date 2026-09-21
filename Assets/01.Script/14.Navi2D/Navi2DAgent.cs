@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-//ï¿½×³ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½Æ®ï¿½ï¿½ï¿½Û¸ï¿½ ï¿½ï¿½ï¿½ï¿½ pathfinderï¿½ï¿½ Ã£ï¿½Â´ï¿½.
-//ï¿½á±¹ FSMï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ Traceï¿½Ô¼ï¿½ ï¿½Ï³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ ï¿½ï¿½.
+//? ???  pathfinder ã´.
+//? FSM ? Trace? ? ? .
 public class Navi2DAgent : MonoBehaviour
 {   
     private const int GroundLayerMask = (1<<30) | (1<<31);
@@ -56,15 +56,15 @@ public class Navi2DAgent : MonoBehaviour
         }
     }
 
-    private void Awake()//ï¿½ï¿½Æ®ï¿½ï¿½Æ®ï¿½ï¿½ï¿½Û¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Öµï¿½.
+    private void Awake()//???  ?.
     {
         pathFinder = FindFirstObjectByType<Navi2DPathFinder>();
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
         groundContactFilter = new ContactFilter2D();
-        groundContactFilter.SetLayerMask(GroundLayerMask); //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½Å© ï¿½ï¿½ï¿½ï¿½
-        groundContactFilter.useTriggers = false; //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Triggerï¿½ï¿½ï¿½ï¿½ ï¿½İ¶ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½
+        groundContactFilter.SetLayerMask(GroundLayerMask); //  ? ? ? ? 
+        groundContactFilter.useTriggers = false; //  Trigger ?? 
     }
 
     private void Start()
@@ -100,8 +100,8 @@ public class Navi2DAgent : MonoBehaviour
 
 
 
-    public void Trace(Vector2 targetPos, float moveSpeed) //FSMï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ ï¿½Ô¼ï¿½.
-                                         //ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ repathï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
+    public void Trace(Vector2 targetPos, float moveSpeed) //FSM  ??  ?.
+                                         //÷?? ?  repath? ?
     {       
         this.moveSpeed = moveSpeed;
         maxAirHorizontalSpeed = moveSpeed;
@@ -147,7 +147,51 @@ public class Navi2DAgent : MonoBehaviour
 
 
     }
-    private void FollowPath() //walkï¿½ï¿½ï¿½ï¿½ MoveToNode ï¿½ï¿½ ï¿½ï¿½È£ï¿½ï¿½ ï¿½Ï´ï¿½ whileï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½.
+
+    public void StopMovement()
+    {
+        isTracing = false;
+
+        path = null;
+        currentPathIndex = 0;
+        lastTargetNode = null;
+        airTargetNode = null;
+        repathPending = false;
+
+        isAirMoving = false;
+        hasLeftGround = false;
+        isApproachingDrop = false;
+        isWaitingToSteerDrop = false;
+
+        dropDeparture = Vector2.zero;
+        dropDirection = 0f;
+        dropApproachTimeLeft = 0f;
+        dropSteeringY = 0f;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(
+                0f,
+                rb.linearVelocity.y);
+        }
+    }
+
+    public void ResetMovement()
+    {
+        StopMovement();
+
+        targetPosition = Vector2.zero;
+        moveSpeed = 0f;
+        maxAirHorizontalSpeed = 0f;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+    }
+
+    private void FollowPath()
     {
         if (path == null || path.Count == 0) return;
 
@@ -188,7 +232,7 @@ public class Navi2DAgent : MonoBehaviour
 
     }
 
-    private void Walk(Navi2DNode targetNode) //ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ´Ù¸ï¿½ ï¿½×³ï¿½ ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½É·ï¿½ ï¿½ï¿½ï¿½ï¿½È­.
+    private void Walk(Navi2DNode targetNode) //?  ?? ? ? ? ?  ? ?.
     {
 
         float distanceX = Mathf.Abs(targetNode.worldPos.x - FootPosition.x);
@@ -234,7 +278,7 @@ public class Navi2DAgent : MonoBehaviour
       
         if (!canAirMove)
         {
-            Debug.LogWarning($"AirMove ï¿½Ò°ï¿½ï¿½ï¿½ :{step.fromNode.gridPos} -> {step.toNode.gridPos}");
+            Debug.LogWarning($"AirMove ? :{step.fromNode.gridPos} -> {step.toNode.gridPos}");
 
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
@@ -430,7 +474,7 @@ public class Navi2DAgent : MonoBehaviour
         currentPathIndex = 0;       
     }
 
-    /// <summary>FSMï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(Trace)ï¿½ï¿½ ï¿½ï¿½ï¿½î³¯ ï¿½ï¿½ È£ï¿½ï¿½. ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ß°ï¿½ Ç® ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½Ê±ï¿½È­ï¿½ï¿½ ResetMovement.</summary>
+    /// <summary>FSM (Trace) ?  ?. ? ? ? ? ü ?? ResetMovement.</summary>
     public void StopMovement()
     {
         isTracing = false;
@@ -442,7 +486,7 @@ public class Navi2DAgent : MonoBehaviour
         }
     }
 
-    /// <summary>ï¿½ï¿½ï¿½ï¿½ Ç®ï¿½ï¿½ OnDespawn ï¿½ï¿½ ? ï¿½ï¿½Î¡ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â¡ï¿½ï¿½Óµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­.</summary>
+    /// <summary> ? OnDespawn  ? ? ¡?  ??.</summary>
     public void ResetMovement()
     {
         isTracing = false;
