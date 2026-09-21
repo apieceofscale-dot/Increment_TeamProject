@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+// 도전 조건: clearKillCount
+
 
 // 스테이지 정의 임시 보관소
 // 스테이지데이터 csv생기면 이 클래스를 데이터매니저 통한 스테이지 데이터 조회로 교체할것

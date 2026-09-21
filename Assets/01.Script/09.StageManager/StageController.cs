@@ -68,6 +68,7 @@ public class StageController : MonoBehaviour, IBootStrapper
     /// <summary>
     /// [도전] 버튼 활성 조건. UI 표시용이며 실제 이동 시 TryGoNextStage가 한 번 더 검사한다.
     /// 전환 중 아님 + 파밍 중 + 10킬 달성 + 다음 스테이지가 존재.
+    /// 도전 조건
     /// </summary>
     public bool CanGoNextStage
     {
