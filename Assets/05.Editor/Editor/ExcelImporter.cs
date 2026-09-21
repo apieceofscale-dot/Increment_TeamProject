@@ -37,6 +37,15 @@ public static class ExcelImporter
         ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
     }
 
+    [MenuItem("Tools/ExcelTest/5. Validate DropTable.csv")]
+    public static void ValidateDropTableCsv()
+    {
+        if (CsvDropTableSource.TryLoadFromAssetPath(CsvDropTableSource.DefaultCsvAssetPath, out _, out string error))
+            Debug.Log("[ExcelTest] DropTable.csv OK.");
+        else
+            Debug.LogError("[ExcelTest] DropTable.csv failed: " + error);
+    }
+
     public static void ImportCsv(string path) 
     {      
         ScriptableObject listAsset  = FindTargetListAsset(path);

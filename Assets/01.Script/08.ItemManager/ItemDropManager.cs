@@ -39,8 +39,16 @@ public sealed class ItemDropManager : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInitialize()
     {
-        //***할일:  drop테이블을 csv로 이관한 다음에 이거 교체할 것.
-        dropTableSource = new TempDropTableSource();
+        if (CsvDropTableSource.TryLoadFromAssetPath(CsvDropTableSource.DefaultCsvAssetPath, out CsvDropTableSource csvSource, out string csvError))
+        {
+            dropTableSource = csvSource;
+            Debug.Log("[ItemDropManager] DropTable loaded from CSV.");
+        }
+        else
+        {
+            Debug.LogWarning($"[ItemDropManager] DropTable CSV load failed ({csvError}). Using TempDropTableSource.");
+            dropTableSource = new TempDropTableSource();
+        }
 
         if (itemFactory == null) Debug.LogWarning("[ItemDropManager] ItemFactory가 없습니다. ");
 

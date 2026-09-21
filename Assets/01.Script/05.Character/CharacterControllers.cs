@@ -877,11 +877,31 @@ public class CharacterControllers : MonoBehaviour //???? ????????? ??? ????? s??
         if (info.Collector == null || !IsPickupCollector(info.Collector))
             return;
 
+        if (info.Type == ItemType.Consumable)
+        {
+            ApplyConsumablePickup(info);
+            return;
+        }
+
         if (info.Type != ItemType.Equipment)
             return;
 
         ItemStatus snapshot = CreateInventoryItemStatus(info);
         AddEquipment(snapshot, out _);
+    }
+
+    private void ApplyConsumablePickup(ItemPickedUpInfo info)
+    {
+        int amount = Mathf.Max(1, info.Value);
+        switch (info.ItemId)
+        {
+            case ItemId.HpPotion:
+                RecoverHp(amount);
+                break;
+            case ItemId.ManaPotion:
+                RecoverMp(amount);
+                break;
+        }
     }
 
     private static ItemStatus CreateInventoryItemStatus(ItemPickedUpInfo info)
