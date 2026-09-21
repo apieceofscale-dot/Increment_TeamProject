@@ -355,6 +355,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         status.AddKill();
 
+        // 도전 조건
         if (!status.IsClearConditionMet && status.KillCount >= status.Definition.ClearKillCount)
         {
             status.CheckClearConditionMet();   // → CanGoNextStage = true → 도전 버튼 활성
