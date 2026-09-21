@@ -39,10 +39,10 @@ public class GameSessionManager : MonoBehaviour, IBootStrapper
             return;
         }
 
-        //stageManager.SetCharacter(currentCharacter); 현재 캐릭터를 자신이 알아낼 방법.
+        stageManager.SetCharacter(currentCharacter); 
 
-        // 스테이지 진입 요청
-        // stageManager.EnterStage(StageId); 스테이지로 넘기는 api. 이게 있는 게 이벤트 받는 거 보다 더 쉬워 보입니다. 
+        
+         //stageManager.EnterStage(int(StageId.St1)); 
     }
 
     //스테이지 매니저 참고용 코드
