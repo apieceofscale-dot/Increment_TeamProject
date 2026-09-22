@@ -243,7 +243,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  characterInventory: {fileID: 7833643248369954958}
   animator: {fileID: 0}
   jumpForce: 16
   groundCheck: {fileID: 7170823015773932389}
@@ -416,7 +415,7 @@ MonoBehaviour:
     m_Bits: 64
   blockingLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1073741824
 --- !u!114 &-5539174653337801884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -545,7 +544,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7982590880e852443be5af9784ac9061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFacade
-  characterControllers: {fileID: 1920527207070155292}
 --- !u!1 &8052424388909427709
 GameObject:
   m_ObjectHideFlags: 0
