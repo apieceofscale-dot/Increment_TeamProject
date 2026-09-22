@@ -25,25 +25,23 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
         if (referencesInjected)
             return;
+
+        if (!TryGetComponent<Rigidbody2D>(out rigid))
+            throw new InvalidOperationException("캐릭터에 Rigidbody2D 필요");
+
+        if (!TryGetComponent<CharacterJobAdvancedment>(out jobAdvancedment))
+            throw new InvalidOperationException("캐릭터에 CharacterJobAdvancedment 필요");
         
-        rigid = GetComponent<Rigidbody2D>();
-        jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
+        if (!TryGetComponent<CharacterInventory>(out characterInventory))
+            throw new InvalidOperationException("캐릭터에 CharacterInventory 필요");
+        
+        if (!TryGetComponent<CharacterEquipment>(out characterEquipment))
+            throw new InvalidOperationException("캐릭터에 CharacterEquipment 필요합");
 
-        if (characterInventory == null)
-            characterInventory = GetComponent<CharacterInventory>();
-
-        characterEquipment = GetComponent<CharacterEquipment>();
+        TryGetComponent<CharacterAutoFarming>(out autoFarming);
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>(true);
-
-        autoFarming = GetComponent<CharacterAutoFarming>();
-
-        if (rigid == null || jobAdvancedment == null || characterInventory == null || characterEquipment == null)
-            throw new InvalidOperationException("캐릭터 필수 컴포넌트 확인");
-
-        if (characterInventory.gameObject != gameObject)
-            throw new InvalidOperationException("Inventory는 같은 캐릭터 오브젝트의 컴포넌트여야힘");
 
         characterInventory.Inject(characterEquipment);
         characterEquipment.Inject(this, characterInventory);
@@ -404,7 +402,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     private CharacterStatus status;
     public CharacterStatus Status => status;
 
-    [SerializeField] private CharacterInventory characterInventory;
+    private CharacterInventory characterInventory;
     public CharacterInventory Inventory => characterInventory;
 
     private CharacterEquipment characterEquipment;
@@ -1088,7 +1086,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
 
     public bool TryEquipItem(Guid instanceId)
     {
-        return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquipItem(instanceId);
+        return Equipment != null && Equipment.TryGetComponent<CharacterInventory>(out var ownerInventory) && ownerInventory == Inventory && Equipment.TryEquipItem(instanceId);
     }
 
     public bool UnequipItem(CharacterEquipmentSlot slot)// 장착칸 클릭 시 호출
@@ -1100,7 +1098,7 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     // 장비착용 관련 호출
     public bool EquipEquipment(Guid instanceId, CharacterEquipmentSlot slot)
     {
-        return Equipment != null && Equipment.GetComponent<CharacterInventory>() == Inventory && Equipment.TryEquip(instanceId, slot);
+        return Equipment != null && Equipment.TryGetComponent<CharacterInventory>(out var ownerInventory) && ownerInventory == Inventory && Equipment.TryEquip(instanceId, slot);
     }
 
     public bool UnequipEquipment(CharacterEquipmentSlot slot)
