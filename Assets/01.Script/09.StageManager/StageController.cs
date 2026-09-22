@@ -99,12 +99,18 @@ public class StageController : MonoBehaviour, IBootStrapper
         // [변경] MonsterSpawner는 현재 사용하지 않지만 기존 배치를 확인할 수 있도록 참조만 보관한다.
         spawner = GetComponent<MonsterSpawner>();
         // [변경] MonsterFactory가 제거되어 초기화할 수 없으므로 기존 필수 초기화는 보존만 한다.
-        // if (spawner == null)
-        // {
-        //     throw new InvalidOperationException(
-        //         "[StageController] 오브젝트에 MonsterSpawner가 없습니다");
-        // }
-        // spawner.Initialize(monsterFactory);
+        // [변경2 - 효림] 경고만 하고 이후 진행되도록 유지하겠습니다. 
+        if (spawner == null)
+        {
+            Debug.LogWarning("[StageController] MonsterSpawner가 없습니다. 몬스터가 스폰되지 않습니다.", this);
+        }
+        if (!spawner.Initialize())
+        {
+            spawner = null;   // 프리팹 누락 → 스폰 비활성(null 체크 경로로 동작)
+        }
+
+
+
 
         facade = GetComponent<StageFacade>();
         if (facade == null)
@@ -205,32 +211,6 @@ public class StageController : MonoBehaviour, IBootStrapper
         return true;
     }
 
-
-    // // 일단 없는셈치고 별도 조건 없이 선형 진행 하겠습니다... 삭제
-    //     public bool TryMoveToChallengeStage()
-    //     {
-    //         if (isTransitioning) return false;
-    //         if (status.Definition.StageId == 0) return false;   // 아직 스테이지에 들어간 적 없음
-
-    //         int chapter = status.Definition.Chapter;
-
-    //         if (!stageTable.TryGetChallengeStageId(chapter, out int challengeStageId))
-    //         {
-
-    //             //스테이지쪽에 도전맵있어어ㅑ함
-    //             Debug.LogWarning($"[StageController] 챕터 {chapter}에 도전맵(Boss 스테이지)이 없습니다.");
-    //             return false;
-    //         }
-
-    //         // 이미 도전맵이면 재진입시키지 않는다(진행도 초기화 방지)
-    //         if (challengeStageId == status.Definition.StageId) return false;
-
-    //         // 클리어 조건을 걸고 싶으면 아래 줄을 살린다 (기획 확정 전까지는 항상 도전 허용)
-    //         // if (!status.IsClearConditionMet) return false;
-
-    //         EnterStage(challengeStageId);
-    //         return true;
-    //     }
 
 
 
@@ -343,6 +323,8 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         // [변경] MonsterFactory가 없는 현재 구조에서는 자동 몬스터 생성을 실행하지 않는다.
         // spawner.TickSpawn(status.Definition, Time.deltaTime);
+
+        if (spawner != null) spawner.TickSpawn(status.Definition, Time.deltaTime);
 
     }
 
