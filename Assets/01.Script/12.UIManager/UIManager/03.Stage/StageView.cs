@@ -24,9 +24,9 @@ public class StageView : MonoBehaviour, IUIViewInitialize
     {
         this.mapName.text = nowMapName;
     }
-    public void SetChallengeStageNum( string nextStageName)
+    public void SetChallengeStageNum(string nextStageName)
     {
-        this.ChallengeStageNum.text = ToString(); 
+        ChallengeStageNum.text = nextStageName ?? string.Empty;
     }   
     public void SetStageProcedureText(int nowStageNum, int totalStageNum)
     {

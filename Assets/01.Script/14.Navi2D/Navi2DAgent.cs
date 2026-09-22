@@ -474,38 +474,4 @@ public class Navi2DAgent : MonoBehaviour
         currentPathIndex = 0;       
     }
 
-    /// <summary>FSM (Trace) ?  ?. ? ? ? ? ü ?? ResetMovement.</summary>
-    public void StopMovement()
-    {
-        isTracing = false;
-        repathPending = false;
-
-        if (rb != null)
-        {
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-        }
-    }
-
-    /// <summary> ? OnDespawn  ? ? ¡?  ??.</summary>
-    public void ResetMovement()
-    {
-        isTracing = false;
-        repathPending = false;
-        isAirMoving = false;
-        isApproachingDrop = false;
-        isWaitingToSteerDrop = false;
-        hasLeftGround = false;
-
-        path = null;
-        currentPathIndex = 0;
-        lastTargetNode = null;
-        airTargetNode = null;
-        targetPosition = default;
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
-    }
-
 }
