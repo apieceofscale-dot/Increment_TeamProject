@@ -53,6 +53,7 @@ ExportedObj/
 *.sln
 *.suo
 *.tmp
+Assets/_Recovery/
 *.user
 *.userprefs
 *.pidb
