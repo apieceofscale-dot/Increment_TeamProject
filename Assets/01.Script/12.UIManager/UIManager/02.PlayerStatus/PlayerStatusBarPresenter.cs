@@ -21,16 +21,14 @@ public class PlayerStatusBarPresenter
         model.MpChanged += HandleMpChanged;
         model.LevelChanged += HandleLevelChanged;
         model.JobNameChanged += HandleJobChanged;
-
-
-        //경험치 변경 이벤트 +=HandleExpChanged
+        model.ExpChanged += HandleExpChanged;
+       
 
         HandleHpChanged(model.CurrentHp, model.MaxHp);
         HandleMpChanged(model.CurrentMp, model.MaxMp);
         HandleLevelChanged(model.Level);
         HandleJobChanged(model.JobName);
-
-        //view.LevelChanged(model.Level);
+        HandleLevelChanged(model.Level);
 
 
 
@@ -46,7 +44,7 @@ public class PlayerStatusBarPresenter
     {
         view.SetMpBar(nowMp, totalMp);
     }
-    private void HandleExpChanged(float nowExp, float totalExp)
+    private void HandleExpChanged(long nowExp, long totalExp)
     {
         view.SetExpBar(nowExp, totalExp);
     }
