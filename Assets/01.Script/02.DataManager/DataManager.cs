@@ -7,7 +7,10 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
     public static DataManager instance;
     public int BootOrder => (int)BootLayer.DataManager;
 
-    //�ڵ�����
+    // CharacterFactory? DataManager? ??? PlayerList SO? ??? ??
+    public PlayerList PlayerListSource => playerList;
+
+    //????
     partial void LoadAllOfDataGenerated();
     private void LoadData<T>(DataRepositary<T> repositary, List<T> dataList) where T : BaseData
     {

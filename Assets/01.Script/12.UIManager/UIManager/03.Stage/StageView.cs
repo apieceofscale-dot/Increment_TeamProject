@@ -41,14 +41,11 @@ public class StageView : MonoBehaviour, IUIViewInitialize
         challengeButton.interactable = available;
     }
 
-
-
     //아래 2개는 시간 남으면 하기.
     public void SetTimeLeft(string timeLeft)
     {
         this.timeleft.text = timeLeft;
     }
-
     public void Monsterleft(int monsterLeft)
     {
         this.monsterLeft.text = monsterLeft.ToString();

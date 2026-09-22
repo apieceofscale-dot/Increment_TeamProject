@@ -34,7 +34,6 @@ public class PlayerStatusBarPresenter
     {
         view.SetMpBar(nowMp, totalMp);
     }
-
     private void HandleExpChanged(long nowExp, long totalExp)
     {
         float required = totalExp > 0 ? totalExp : 1f;

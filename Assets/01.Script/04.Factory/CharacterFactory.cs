@@ -39,6 +39,9 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
 
     private void BuildCharacterCatalog()
     {
+        if (DataManager.instance != null && DataManager.instance.PlayerListSource != null)
+            playerList = DataManager.instance.PlayerListSource;
+
         System.Collections.Generic.IReadOnlyList<PlayerData> catalogSource = null;
         if (playerList != null && playerList.baseList != null && playerList.baseList.Count > 0)
             catalogSource = playerList.baseList;

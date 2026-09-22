@@ -25,8 +25,8 @@ public enum ItemType
 public enum BootLayer // 
 {
     DataManager = 2, // DataManager
-    ObjectPool = 3, // MonsterObjectPoolManager, ItemObjectPoolManager, ProjectileObjectPoolManager
-    Factory = 5, // CharacterFactory, MonsterFactory, ItemFactory
+   // ObjectPool = 3, // MonsterObjectPoolManager, ItemObjectPoolManager, ProjectileObjectPoolManager
+    Factory = 5, // CharacterFactory만. 나머진 필요 없음.
     ItemManager = 6,// ItemDropManager
     StageManager = 7, // StageController
     SoundManager = 8,
