@@ -37,13 +37,7 @@ public static class ExcelImporter
         ImportCsv("Assets/04.Data/Test/Excel/Monster.csv");
     }
 
-    [MenuItem("Tools/ExcelTest/5. Read Player.csv")]
-    public static void ReadPlayerCsv()
-    {
-        ImportCsv("Assets/04.Data/Test/Excel/Player.csv");
-    }
-
-    [MenuItem("Tools/ExcelTest/6. Validate DropTable.csv")]
+    [MenuItem("Tools/ExcelTest/5. Validate DropTable.csv (MonsterItem)")]
     public static void ValidateDropTableCsv()
     {
         if (CsvDropTableSource.TryLoadFromAssetPath(CsvDropTableSource.DefaultCsvAssetPath, out _, out string error))
