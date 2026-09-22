@@ -144,6 +144,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
         AutoFarmingView autoFarmingView = GetView<AutoFarmingView>(playerHud);
 
         //나머지 나중에 선언
+        CharacterPopupView characterPopupView = GetView<CharacterPopupView>(playerHud);
        // EquipmentPopupView equipmentPopupView = GetView<EquipmentPopupView>(playerHud);
         //EnchatPopupView enchatPopupView = GetView<EnchatPopupView>(playerHud);
 
@@ -162,7 +163,7 @@ public class UIManager : MonoBehaviour, IBootStrapper
         skillPresenter = new SkillPresenter(skillView, characterFacade);
         autoFarmingPresenter = new AutoFarmingPresenter(autoFarmingView, characterFacade);
 
-        characterPopupPresenter = new CharacterPopupPresenter();
+        characterPopupPresenter = new CharacterPopupPresenter(characterPopupView, characterFacade);
        // equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
         skillPopupPresenter = new SkillPopupPresenter();
        // enchatPopupPresenter = new EnchatPopupPresenter(enchatPopupView, characterFacade, itemFacade);
