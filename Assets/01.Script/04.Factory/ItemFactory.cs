@@ -44,7 +44,7 @@ public class ItemFactory : MonoBehaviour, IBootStrapper
             return;
         }
 
-        poolManager.MakeFirstPools(new List<ItemController> { defaultPrefab });
+        poolManager.MakeFirstPools(defaultPrefab);
     }
 
     public ItemController Create(int itemId, Vector3 position, Quaternion rotation, int stackAmount = 1, int upgradeLevel = 0, int starForce = 0)

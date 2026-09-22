@@ -340,7 +340,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         if (status.State != StageState.Battle) return;
 
-        int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
+        int dropTableId = info.DropTableId != 0 ? info.DropTableId : (int)info.MonsterId;
         dropFacade.RequestDrop(dropTableId, info.Position);
 
         // 경험치 (MonsterData에 exp 필드가 생기기 전까지는 0이라 실제로는 안 오름)

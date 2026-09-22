@@ -44,7 +44,7 @@ public class MonsterFactory : MonoBehaviour, IBootStrapper
             return;
         }
 
-        poolManager.MakeFirstPools(new List<MonsterController> { defaultPrefab });
+        poolManager.MakeFirstPools(defaultPrefab);
     }
 
     public MonsterController Create(int monsterId, Vector3 position, Quaternion rotation, int stageIndex = 1)

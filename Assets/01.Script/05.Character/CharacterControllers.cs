@@ -1293,10 +1293,10 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         switch (info.ItemId)
         {
             case ItemId.HpPotion:
-                RecoverHp(amount);
+                Status.RecoverHp(amount);
                 break;
             case ItemId.ManaPotion:
-                RecoverMp(amount);
+                Status.RecoverMp(amount);
                 break;
         }
     }
