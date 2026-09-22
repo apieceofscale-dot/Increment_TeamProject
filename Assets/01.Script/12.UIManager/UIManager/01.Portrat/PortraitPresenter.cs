@@ -5,9 +5,6 @@ public class PortraitPresenter
     PortraitView view;
     CharacterFacade model;
 
-    //참조 : 파사드의 골드 변경 이벤트
-    //참조 : 전투력 변경 이벤트.
-
 
     public PortraitPresenter(PortraitView view, CharacterFacade model)
     {
