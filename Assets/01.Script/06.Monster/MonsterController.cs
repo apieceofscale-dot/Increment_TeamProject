@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 {
     [SerializeField] int monsterId = (int)MonsterId.Slime;
@@ -15,6 +16,15 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     [SerializeField] float dropChance = 1f;
     [SerializeField] string targetTag = "Player";
 
+    [Header("Hover")]
+    [SerializeField] bool enableHover;
+    [SerializeField, Min(0f)] float hoverHeight = 0.35f;
+    [SerializeField, Min(0f)] float hoverAmplitude = 0.2f;
+    [SerializeField, Min(0.1f)] float hoverPeriod = 2.5f;
+    [SerializeField, Min(0f)] float hoverMaxSpeed = 1f;
+    float _hoverCenterY;
+    float _hoverPhase;
+
     readonly MonsterStatus _status = new MonsterStatus();
     readonly MonsterAI _ai = new MonsterAI();
     readonly MonsterStageStatusProvider _stageProvider = MonsterStageStatusProvider.Default;
@@ -23,6 +33,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     SpriteRenderer _spriteRenderer;
     Animator _animator;
     Navi2DAgent _naviAgent;
+    Rigidbody2D _body;
     Color _baseSpriteColor = Color.white;
     bool _spawned;
     bool _deathNotified;
@@ -35,6 +46,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     void Awake()
     {
+        _body = GetComponent<Rigidbody2D>();
         _ai.Bind(this);
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _animator = GetComponentInChildren<Animator>();
@@ -77,6 +89,9 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnSpawn()
     {
+        ResetMovement();
+        _hoverCenterY = _body.position.y + hoverHeight;
+        _hoverPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
         ApplyVisuals(_runtimeData);
 
         var palette = _stageProvider.GetPalette(stageIndex);
@@ -103,6 +118,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnDespawn()
     {
+        ResetMovement();
         _spawned = false;
         _deathNotified = false;
         _runtimeData = null;
@@ -114,14 +130,56 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (!_spawned || IsDead)
         {
+            StopMovement();
             return;
         }
 
-        _ai.Tick(Time.deltaTime);
+        _ai.Tick(Time.fixedDeltaTime);
+        if (_ai.State != MonsterState.Trace)
+            StopMovement();
+
+        if (_spawned && !IsDead && enableHover && _naviAgent == null)
+            UpdateHover();
+    }
+
+    private void UpdateHover()
+    {
+        float angularSpeed = Mathf.PI * 2f / Mathf.Max(0.1f, hoverPeriod);
+        _hoverPhase = Mathf.Repeat(_hoverPhase + angularSpeed * Time.fixedDeltaTime, Mathf.PI * 2f);
+        float desiredY = _hoverCenterY + Mathf.Sin(_hoverPhase) * hoverAmplitude;
+        float desiredVelocity = Mathf.Cos(_hoverPhase) * hoverAmplitude * angularSpeed;
+        desiredVelocity += (desiredY - _body.position.y) * 4f;
+        float verticalSpeedLimit = _ai.State == MonsterState.Trace
+            ? Mathf.Max(hoverMaxSpeed, _status.MoveSpeed)
+            : hoverMaxSpeed;
+        desiredVelocity = Mathf.Clamp(desiredVelocity, -verticalSpeedLimit, verticalSpeedLimit);
+
+        // Balance weak gravity while alive. Move the rigidbody, never its transform,
+        // so floors and ceilings still block the motion without accumulated force.
+        desiredVelocity -= Physics2D.gravity.y * _body.gravityScale * Time.fixedDeltaTime;
+        _body.linearVelocity = new Vector2(_body.linearVelocity.x, desiredVelocity);
+    }
+
+    private void StopMovement()
+    {
+        if (_naviAgent != null)
+            _naviAgent.StopMovement();
+        if (_body != null)
+            _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
+    }
+
+    private void ResetMovement()
+    {
+        StopMovement();
+        if (_body != null)
+        {
+            _body.linearVelocity = Vector2.zero;
+            _body.angularVelocity = 0f;
+        }
     }
 
     public void TakeDamage(int amount)
@@ -199,10 +257,13 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            worldPosition,
-            speed * Time.deltaTime);
+        // Hovering monsters chase the target's height as well as its X position.
+        // UpdateHover applies vertical velocity; physics still blocks solid terrain.
+        if (enableHover)
+            _hoverCenterY = worldPosition.y;
+        float deltaX = worldPosition.x - _body.position.x;
+        float horizontalSpeed = Mathf.Clamp(deltaX / Time.fixedDeltaTime, -speed, speed);
+        _body.linearVelocity = new Vector2(horizontalSpeed, _body.linearVelocity.y);
     }
 
     public void PerformAttack(Transform target)
