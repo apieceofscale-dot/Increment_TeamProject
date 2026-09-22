@@ -175,6 +175,8 @@ GameObject:
   m_Component:
   - component: {fileID: 186185354}
   - component: {fileID: 186185355}
+  - component: {fileID: 186185356}
+  - component: {fileID: 186185357}
   m_Layer: 0
   m_Name: 04.StageManager
   m_TagString: Untagged
@@ -210,6 +212,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageController
   stageChangedChannel: {fileID: 11400000, guid: 948d24d8af9604745b9ff7e593c2659c, type: 2}
+--- !u!114 &186185356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186185353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d7b9f504e659b1408ddb1f246276f41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageFacade
+--- !u!114 &186185357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 186185353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90b57e1a1b58a4348af216d77bc70268, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
+  monsterPrefab: {fileID: 8800020000000000001, guid: 160becc24130bd648b26402d76696e96, type: 3}
 --- !u!1 &352816365
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,7 +617,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFactory
   bootOrder: 5
-  characterPrefab: {fileID: 4558504022132326190, guid: 0f337fdbba158df48a717da13652e576, type: 3}
+  characterPrefab: {fileID: 1920527207070155292, guid: 821bf097d1c75a24cb58ddbd35e7ea93, type: 3}
   testSpawnPoint: {fileID: 0}
   playerList: {fileID: 0}
   testCharacterIndex: 0

@@ -54,6 +54,11 @@ public class CharacterFacade : MonoBehaviour
         RequireSceneController().MoveToScenePosition(spawnPosition);
     }
 
+    public void SetPathFinder(Navi2DPathFinder pathFinder)
+    {
+        RequireSceneController().SetPathFinder(pathFinder);
+    }
+
     private CharacterControllers RequireSceneController()
     {
         if (Controller == null || !Controller.IsInitialized || Controller != CharacterControllers.Current)

@@ -67,6 +67,13 @@ public class Navi2DAgent : MonoBehaviour
         groundContactFilter.useTriggers = false; //필터 정보에 Trigger쓰는 콜라이더 제외
     }
 
+    public void SetPathFinder(Navi2DPathFinder value)
+    {
+        // A new map invalidates all nodes and movement from the previous map.
+        ResetMovement();
+        pathFinder = value;
+    }
+
     private void Start()
     {
         gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
@@ -76,6 +83,11 @@ public class Navi2DAgent : MonoBehaviour
     private void FixedUpdate()
     {
         if (!isTracing) return;
+        if (pathFinder == null)
+        {
+            StopMovement();
+            return;
+        }
 
         if (isApproachingDrop)
         {
@@ -103,6 +115,12 @@ public class Navi2DAgent : MonoBehaviour
     public void Trace(Vector2 targetPos, float moveSpeed) //FSM에서 실제로 호출해야 할 함수.
                                          //플레이어가 이동했을 때 repath하도록 최적화
     {       
+        if (pathFinder == null)
+        {
+            StopMovement();
+            return;
+        }
+
         this.moveSpeed = moveSpeed;
         maxAirHorizontalSpeed = moveSpeed;
         targetPosition = targetPos;
@@ -470,6 +488,12 @@ public class Navi2DAgent : MonoBehaviour
     }
     public void RequestPath()
     {       
+        if (pathFinder == null)
+        {
+            StopMovement();
+            return;
+        }
+
         path = pathFinder.PathFinding(
             FootPosition,
             targetPosition,

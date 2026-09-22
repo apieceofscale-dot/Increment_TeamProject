@@ -685,6 +685,13 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
     public LayerMask AutoFarmingGroundMask => groundLayer;
     public LayerMask AutoFarmingMonsterMask => monsterLayer;
 
+    public void SetPathFinder(Navi2DPathFinder pathFinder)
+    {
+        Navi2DAgent navigationAgent = GetComponent<Navi2DAgent>();
+        if (navigationAgent != null)
+            navigationAgent.SetPathFinder(pathFinder);
+    }
+
     public void SetAutoFarming(bool enabled)
     {
         if (AutoFarming != null)

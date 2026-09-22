@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterControllers), typeof(Navi2DAgent), typeof(Collider2D))]
 public class CharacterAutoFarming : MonoBehaviour
 {
-    [SerializeField, Min(0.1f)] private float searchRadius = 12f;
+    [SerializeField, Min(0.1f)] private float searchRadius = 1000f;
     [SerializeField, Min(0.1f)] private float searchInterval = 0.5f;
     [SerializeField] private bool startAutomatically;
 
@@ -150,7 +150,10 @@ public class CharacterAutoFarming : MonoBehaviour
     private void PauseAgent()
     {
         if (agent != null)
+        {
+            agent.StopMovement();
             agent.enabled = false;
+        }
 
         if (controller != null)
             controller.StopAutoFarmingMovement();

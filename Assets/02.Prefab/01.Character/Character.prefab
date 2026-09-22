@@ -518,7 +518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5888c4a6318b62844a3e20dfef99da5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterAutoFarming
-  searchRadius: 15
+  searchRadius: 1000
   searchInterval: 0.4
   startAutomatically: 0
 --- !u!114 &7082280804679611285
