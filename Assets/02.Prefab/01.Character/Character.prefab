@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4684922624461042475}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,7 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7170823015773932389}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: groundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 432509142014007215}
   - component: {fileID: 4398935080556105850}
   - component: {fileID: 6096708656508017736}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PlayerRanderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 928933550070573220}
   - component: {fileID: 7082280804679611285}
   - component: {fileID: -5414565109194042100}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Character
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -223,6 +223,21 @@ Transform:
   - {fileID: 959367817500804254}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8222745739006123401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578696860319802453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f291ac1b634fc097d7a7f3716f430c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterCameraFollow
+  offset: {x: 0, y: 1}
+  smoothTime: 0.15
+  teleportDistance: 10
 --- !u!114 &1920527207070155292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,7 +259,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  characterInventory: {fileID: 7833643248369954958}
   animator: {fileID: 0}
   jumpForce: 16
   groundCheck: {fileID: 7170823015773932389}
@@ -546,7 +560,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7982590880e852443be5af9784ac9061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFacade
-  characterControllers: {fileID: 1920527207070155292}
 --- !u!1 &8052424388909427709
 GameObject:
   m_ObjectHideFlags: 0
@@ -556,7 +569,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 959367817500804254}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: VisualRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -580,18 +593,3 @@ Transform:
   - {fileID: 4684922624461042475}
   m_Father: {fileID: 2675875742998363829}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8222745739006123401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7578696860319802453}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41f291ac1b634fc097d7a7f3716f430c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterCameraFollow
-  offset: {x: 0, y: 1}
-  smoothTime: 0.15
-  teleportDistance: 10
