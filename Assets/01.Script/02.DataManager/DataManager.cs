@@ -41,6 +41,17 @@ public partial class DataManager : MonoBehaviour, IBootStrapper
         return itemRepository.TryGet(id, out itemData);
     }
 
+    /// <summary>팩토리 등에서 SO 직렬화 없이 플레이어 목록 id를 순회할 때 사용.</summary>
+    public bool TryGetPlayerCatalogEntries(out System.Collections.Generic.IReadOnlyList<PlayerData> entries)
+    {
+        entries = null;
+        if (playerList == null || playerList.baseList == null || playerList.baseList.Count == 0)
+            return false;
+
+        entries = playerList.baseList;
+        return true;
+    }
+
 
 
     //��Ʈ ��Ʈ���ۿ�.

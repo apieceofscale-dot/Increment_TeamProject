@@ -11,8 +11,17 @@ public class StageMapProvider : MonoBehaviour
     [SerializeField] private Transform[] monsterSpawnPoints;
     [SerializeField] private Transform bossSpawnPoint; // 보스 맵 아닐시 비우기
 
+    private void Awake()
+    {
+        if (monsterSpawnPoints == null || monsterSpawnPoints.Length == 0)
+            CollectSpawnPoints();
+    }
+
     public StageMapParts ToParts()
     {
+        if (monsterSpawnPoints == null || monsterSpawnPoints.Length == 0)
+            CollectSpawnPoints();
+
         if (playerStart == null)
         {
             Debug.LogError($"[StageMapProvider] PlayerStart가 없습니다. scene={gameObject.scene.name}", this);

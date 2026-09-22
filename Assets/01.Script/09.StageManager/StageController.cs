@@ -191,7 +191,30 @@ public class StageController : MonoBehaviour, IBootStrapper
     /// 도전 조건 체크</summary>
     public bool TryGoNextStage()
     {
-        if (!CanGoNextStage) return false;
+        if (isTransitioning)
+        {
+            Debug.LogWarning("[StageController] 전환 중에는 다음 스테이지로 이동할 수 없습니다.");
+            return false;
+        }
+
+        if (status.Definition.StageId == 0)
+        {
+            Debug.LogWarning("[StageController] 아직 스테이지에 진입하지 않았습니다.");
+            return false;
+        }
+
+        if (!status.IsClearConditionMet)
+        {
+            Debug.LogWarning(
+                $"[StageController] 클리어 조건 미달 (킬 {status.KillCount}/{status.Definition.ClearKillCount}).");
+            return false;
+        }
+
+        if (status.Definition.NextStageId == status.Definition.StageId)
+        {
+            Debug.LogWarning("[StageController] 다음 스테이지가 없습니다.");
+            return false;
+        }
 
         EnterStage(status.Definition.NextStageId);
         return true;
@@ -344,12 +367,14 @@ public class StageController : MonoBehaviour, IBootStrapper
         if (playerStart == null)
             playerStart = mapRoot;
 
+        Transform[] spawnPoints = CollectSpawnPointsFromScene(roots);
+
         map = new StageMapParts(
             mapRoot,
             ground,
             pathFinder,
             playerStart,
-            System.Array.Empty<Transform>(),
+            spawnPoints,
             null);
 
         Debug.LogWarning(
@@ -371,6 +396,24 @@ public class StageController : MonoBehaviour, IBootStrapper
         }
 
         return null;
+    }
+
+    private static Transform[] CollectSpawnPointsFromScene(GameObject[] roots)
+    {
+        var points = new System.Collections.Generic.List<Transform>();
+        for (int i = 0; i < roots.Length; i++)
+            CollectSpawnPointsRecursive(roots[i].transform, points);
+
+        return points.Count > 0 ? points.ToArray() : System.Array.Empty<Transform>();
+    }
+
+    private static void CollectSpawnPointsRecursive(Transform node, System.Collections.Generic.List<Transform> points)
+    {
+        if (node.name.StartsWith("SpawnPoint", System.StringComparison.OrdinalIgnoreCase))
+            points.Add(node);
+
+        for (int i = 0; i < node.childCount; i++)
+            CollectSpawnPointsRecursive(node.GetChild(i), points);
     }
 
 

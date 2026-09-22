@@ -39,13 +39,19 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
 
     private void BuildCharacterCatalog()
     {
-        if (playerList == null || playerList.baseList == null)
-            throw new InvalidOperationException("데이터 매니저와 동일한 SO를 연결");
+        System.Collections.Generic.IReadOnlyList<PlayerData> catalogSource = null;
+        if (playerList != null && playerList.baseList != null && playerList.baseList.Count > 0)
+            catalogSource = playerList.baseList;
+        else if (DataManager.instance != null && DataManager.instance.TryGetPlayerCatalogEntries(out var fromManager))
+            catalogSource = fromManager;
+
+        if (catalogSource == null)
+            throw new InvalidOperationException("PlayerList가 없습니다. DataManager PlayerData SO 또는 Factory playerList를 연결하세요.");
 
         var entries = new List<PlayerData>();
         var ids = new HashSet<int>();
 
-        foreach (PlayerData source in playerList.baseList)
+        foreach (PlayerData source in catalogSource)
         {
             if (source == null)
                 throw new InvalidOperationException("목록에 비어 있는 캐릭터 항목 존재");
