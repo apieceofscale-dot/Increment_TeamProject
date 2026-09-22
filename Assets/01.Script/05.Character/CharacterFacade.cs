@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CharacterFacade : MonoBehaviour
 {
-    
-    [SerializeField] private CharacterControllers characterControllers;
+
+    private CharacterControllers characterControllers;
     private CharacterControllers Controller => characterControllers;
 
     public bool IsInitialized => characterControllers != null && characterControllers.IsInitialized;

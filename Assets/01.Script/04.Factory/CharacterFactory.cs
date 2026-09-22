@@ -14,6 +14,7 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
     [SerializeField] private CharacterControllers characterPrefab;
     [SerializeField] private Transform testSpawnPoint; // 테스트용
 
+    private DataManager dataManager;
     [SerializeField] private PlayerList playerList;
     [SerializeField, Min(0)] private int testCharacterIndex;
     private IReadOnlyList<PlayerData> availableCharacters;
@@ -21,7 +22,13 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
 
     public void IBootStrapperInject(BootstrapContext context)
     {
+        DataManager source = context.Get<DataManager>();
+
+        if (source == null)
+            throw new InvalidOperationException("부트 대상 DataManager 필요");
+
         bootContext = context;
+        dataManager = source;
         injected = true;
     }
 
@@ -30,19 +37,16 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
         if (initialized)
             return;
 
-        if (!injected || DataManager.instance == null || characterPrefab == null)
+        if (!injected || dataManager == null || characterPrefab == null)
             throw new System.InvalidOperationException("Factory 주입, DataManager, Character Prefab 확인");
-        
+
         BuildCharacterCatalog();
         initialized = true;
     }
 
     private void BuildCharacterCatalog()
     {
-        // [추가] Inspector 연결 누락이나 다른 SO 연결에 영향을 받지 않도록
-        // DataManager가 실제로 사용하는 SO를 받아 카탈로그 참조를 맞춘다.
-        // 기존 playerList 필드와 아래 데이터 검증은 그대로 유지한다.
-        playerList = DataManager.instance.PlayerListSource;
+        playerList = dataManager.PlayerListSource;
 
         if (playerList == null || playerList.baseList == null)
             throw new InvalidOperationException("데이터 매니저와 동일한 SO를 연결");
@@ -100,13 +104,13 @@ public class CharacterFactory : MonoBehaviour, IBootStrapper
             return existing;
         }
 
-        if (DataManager.instance == null)
+        if (dataManager == null)
         {
             Debug.LogError("데이터 매니저 없음", this);
             return null;
         }
 
-        if (!DataManager.instance.TryGetPlayerData(playerId, out PlayerData playerData) || playerData == null)
+        if (!dataManager.TryGetPlayerData(playerId, out PlayerData playerData) || playerData == null)
         {
             Debug.LogError($"플레이어 데이터를 찾을 수 없음 ID: {playerId}", this);
             return null;
