@@ -26,21 +26,19 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         if (referencesInjected)
             return;
         
-        rigid = GetComponent<Rigidbody2D>();
-        jobAdvancedment = GetComponent<CharacterJobAdvancedment>();
+        if (!TryGetComponent(out rigid)
+            || !TryGetComponent(out jobAdvancedment)
+            || !TryGetComponent(out characterInventory)
+            || !TryGetComponent(out characterEquipment))
+        {
+            Debug.LogError("[CharacterControllers] Required components missing on character root.", this);
+            return;
+        }
 
-        if (characterInventory == null)
-            characterInventory = GetComponent<CharacterInventory>();
+        if (animator == null && !TryGetComponentInChildren(out animator, true))
+            Debug.LogWarning("[CharacterControllers] Animator not found; player visuals may not play.", this);
 
-        characterEquipment = GetComponent<CharacterEquipment>();
-
-        if (animator == null)
-            animator = GetComponentInChildren<Animator>(true);
-
-        autoFarming = GetComponent<CharacterAutoFarming>();
-
-        if (rigid == null || jobAdvancedment == null || characterInventory == null || characterEquipment == null)
-            throw new InvalidOperationException("????? ??? ??????? ???");
+        TryGetComponent(out autoFarming);
 
         if (characterInventory.gameObject != gameObject)
             throw new InvalidOperationException("Inventory?? ???? ????? ????????? ?????????????");
@@ -482,14 +480,17 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
         if (visualRoot != null)
             FacingDirection = visualRoot.localScale.x < 0f ? -1 : 1;
 
+        ApplyPlayerVisual(playerData);
+
         if (!RefreshEquipmentStats())
-            throw new InvalidOperationException("??? ??? ???? ???? ????");
+            throw new InvalidOperationException("Initial equipment stats could not be applied.");
 
         if (autoFarming != null)
             autoFarming.Initialize();
 
         hasUiSnapshot = false;
-        IsInitialized = true; // ?? ????? ??? ??????? ??°? ???? ?????? ???
+        IsInitialized = true;
+        PublishUiChanges(true);
 
         transform.SetParent(null, true);
         DontDestroyOnLoad(gameObject);
@@ -1432,7 +1433,16 @@ public class CharacterControllers : MonoBehaviour, IBootStrapper
             JobNameChanged?.Invoke(jobName);
     }
 
-    [SerializeField] private Sprite characterPortrait; // ?????? ?????
+    [SerializeField] private Sprite characterPortrait;
+
+    private void ApplyPlayerVisual(PlayerData data)
+    {
+        if (data == null)
+            return;
+
+        if (animator != null && data.animatorController != null)
+            animator.runtimeAnimatorController = data.animatorController;
+    }
 
     public Sprite GetCharacterPortrait()
     {

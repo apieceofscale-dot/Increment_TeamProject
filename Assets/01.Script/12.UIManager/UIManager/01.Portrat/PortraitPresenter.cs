@@ -12,6 +12,7 @@ public class PortraitPresenter
 
         model.MoneyChanged += HandleGoldChanged;
         model.CombatPowerChanged += HandleCombatPower;
+        model.PortraitChanged += HandlePortrait;
 
         HandlePortrait(model.GetCharacterPortrait());
         HandleGoldChanged(model.Money);

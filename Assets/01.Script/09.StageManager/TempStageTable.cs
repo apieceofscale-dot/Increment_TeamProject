@@ -9,7 +9,8 @@ using System.Collections.Generic;
 // 0921-> StageData.csv에 스테이지 필드(씬 이름, 킬 수 등)가 아직 없어서 코드에 하드코딩해 둔다
 
 /// [진행 흐름 - 09-21 확정]
-///   9000 Stage001 ─(10킬 → 도전)→ 9001 Stage002 ─(10킬 → 도전)→ 9002 Stage003 ─(10킬 → 도전)→ 9003 StageChallenge(보스)
+///   9000 Stage01 ─(10킬 → 도전)→ 9001 Stage02 ─(10킬 → 도전)→ 9002 Stage03 ─(10킬 → 도전)→ 9003 StageChallenge(보스)
+///   (Build Settings·Navi2D는 Stage01~03 씬 기준. Stage001~003 신규 씬은 사용하지 않음)
 ///   - "도전" = NextStageId로 이동. 003의 NextStageId가 보스맵이라 보스맵 이동도 같은 경로로 처리된다.
 ///   - 마지막(보스) 스테이지는 NextStageId를 자기 자신으로 둔다 → StageController가 "다음 없음"으로 판단.
 ///   - 엘리트는 이번 범위 밖이라 eliteMonsterId를 전부 0으로 둔다.
@@ -32,7 +33,7 @@ public sealed class TempStageTable
             [9000] = new StageDefinition(
                 stageId: 9000, chapter: 1, indexInChapter: 1,
                 stageCodeName: "St1", displayName: "초원 입구",
-                sceneName: "Stage001",
+                sceneName: "Stage01",
                 type: StageType.Farm,
                 monsterId: 2000, dropTableId: 2000, statMultiplier: 1.0f,
                 clearKillCount: 10, maxAliveMonster: 6, spawnInterval: 1.5f, timeLimit: 0f,
@@ -43,7 +44,7 @@ public sealed class TempStageTable
             [9001] = new StageDefinition(
                 stageId: 9001, chapter: 1, indexInChapter: 2,
                 stageCodeName: "St2", displayName: "초원 안쪽",
-                sceneName: "Stage002",
+                sceneName: "Stage02",
                 type: StageType.Farm,
                 monsterId: 2001, dropTableId: 2001, statMultiplier: 1.25f,
                 clearKillCount: 10, maxAliveMonster: 6, spawnInterval: 1.4f, timeLimit: 0f,
@@ -54,7 +55,7 @@ public sealed class TempStageTable
             [9002] = new StageDefinition(
                 stageId: 9002, chapter: 1, indexInChapter: 3,
                 stageCodeName: "St3", displayName: "오크 마을",
-                sceneName: "Stage003",
+                sceneName: "Stage03",
                 type: StageType.Farm,
                 monsterId: 2002, dropTableId: 2002, statMultiplier: 1.5f,
                 clearKillCount: 10, maxAliveMonster: 6, spawnInterval: 1.3f, timeLimit: 0f,

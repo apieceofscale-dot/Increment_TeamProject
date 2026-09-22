@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// [역할] 스테이지 진입 이후의 흐름을 맡는 스테이지 내부 허브(Controller)
@@ -267,16 +268,16 @@ public class StageController : MonoBehaviour, IBootStrapper
             loadedSceneName = definition.SceneName;
         }
 
-        //  3.맵 요소 확보
-        if (!TryFindMapProvider(loadedSceneName, out StageMapProvider provider))
+        //  3.맵 요소 확보 (StageMapProvider 우선, 없으면 Stage01 레거시 Navi2D 씬 폴백)
+        if (!TryResolveMapParts(loadedSceneName, out StageMapParts map))
         {
-            Debug.LogError($"[StageController] 씬에 StageMapProvider가 없습니다. sceneName={loadedSceneName}");
+            Debug.LogWarning(
+                $"[StageController] StageMapProvider/Navi2D를 찾지 못했습니다. sceneName={loadedSceneName}. " +
+                "타일맵·Navi2DGridData·PathFinder·Link 구성을 확인하세요.");
             status.SetState(StageState.Failed);
             isTransitioning = false;
             yield break;
         }
-
-        StageMapParts map = provider.ToParts();
         spawner.SetMap(map);
         spawner.ResetTimer();
 
@@ -301,22 +302,75 @@ public class StageController : MonoBehaviour, IBootStrapper
         OnStageReady?.Invoke(facade);
     }
 
-    // 로드된 씬 안에서만 StageMapProvider를 찾아서 로드 직후 1회만 돈다
-    private bool TryFindMapProvider(string sceneName, out StageMapProvider provider)
+    private bool TryResolveMapParts(string sceneName, out StageMapParts map)
     {
-        provider = null;
+        map = default;
         Scene scene = SceneManager.GetSceneByName(sceneName);
-        if (!scene.IsValid() || !scene.isLoaded) return false;
+        if (!scene.IsValid() || !scene.isLoaded)
+            return false;
 
         GameObject[] roots = scene.GetRootGameObjects();
         for (int i = 0; i < roots.Length; i++)
         {
-            provider = roots[i].GetComponentInChildren<StageMapProvider>(true);
-            if (provider != null) return true;
+            StageMapProvider provider = roots[i].GetComponentInChildren<StageMapProvider>(true);
+            if (provider == null)
+                continue;
+
+            map = provider.ToParts();
+            return map.PathFinder != null;
         }
 
-        return false;
+        Navi2DPathFinder pathFinder = null;
+        Tilemap ground = null;
+        Transform playerStart = null;
+        Transform mapRoot = null;
 
+        for (int i = 0; i < roots.Length; i++)
+        {
+            if (pathFinder == null)
+                pathFinder = roots[i].GetComponentInChildren<Navi2DPathFinder>(true);
+
+            if (ground == null)
+                ground = roots[i].GetComponentInChildren<Tilemap>(true);
+
+            if (playerStart == null)
+                playerStart = FindTransformByName(roots[i].transform, "PlayerStart");
+        }
+
+        if (pathFinder == null)
+            return false;
+
+        mapRoot = pathFinder.transform;
+        if (playerStart == null)
+            playerStart = mapRoot;
+
+        map = new StageMapParts(
+            mapRoot,
+            ground,
+            pathFinder,
+            playerStart,
+            System.Array.Empty<Transform>(),
+            null);
+
+        Debug.LogWarning(
+            $"[StageController] StageMapProvider 없음 → Navi2DPathFinder 폴백 사용. scene={sceneName}",
+            pathFinder);
+        return true;
+    }
+
+    private static Transform FindTransformByName(Transform root, string objectName)
+    {
+        if (root.name == objectName)
+            return root;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform found = FindTransformByName(root.GetChild(i), objectName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
 
