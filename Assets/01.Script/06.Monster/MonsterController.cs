@@ -99,6 +99,9 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnSpawn()
     {
+        if (_body != null)
+            _body.simulated = true;
+
         ResetMovement();
         _hoverCenterY = _body.position.y + hoverHeight;
         _hoverPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
@@ -228,6 +231,13 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
 
         _ai.ForceDead();
+        // 사망 연출 중에는 물리에서 제외한다. 자동사냥이 시체를 타깃하지 않게
+        if (_body != null)
+        {
+            _body.linearVelocity = Vector2.zero;
+            _body.simulated = false;
+        }
+
         if (_animator != null)
             _animator.SetBool(IsDeadHash, true);
 
