@@ -267,13 +267,19 @@ public readonly struct StageChangedInfo
     public readonly int ChallengeStageNum; // 도전(보스) 스테이지 번호. 없으면 0
     public readonly bool CanChallenge;
 
+    // [변경] 기존 보스 번호는 유지하고, 실제 다음 이동 대상의 ID와 이름을 별도로 전달한다.
+    public readonly int NextStageId;
+    public readonly string NextStageName;
+    public bool HasNextStage => NextStageId > 0 && NextStageId != StageId;
+
     public bool IsValid => StageId > 0; //스테이지 진입 전(기본값)인지
 
 
     public StageChangedInfo(
         int stageId, int chapter, string mapName,
         int nowStageNum, int totalStageNum, StageType type,
-        int challengeStageNum, bool canChallenge)
+        // [변경] 선택 인자를 추가해 기존 생성자 호출도 그대로 사용할 수 있게 한다.
+        int challengeStageNum, bool canChallenge, int nextStageId = 0, string nextStageName = null)
     {
         StageId = stageId;
         Chapter = chapter;
@@ -283,6 +289,9 @@ public readonly struct StageChangedInfo
         Type = type;
         ChallengeStageNum = challengeStageNum;
         CanChallenge = canChallenge;
+        // [변경] 다음 스테이지가 없을 때 이름은 빈 문자열로 보관한다.
+        NextStageId = nextStageId;
+        NextStageName = nextStageName ?? string.Empty;
     }
 }
 
