@@ -357,7 +357,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5973861185476682479}
   - component: {fileID: 5010905451796472932}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Toggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -441,7 +441,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6758036959440230610}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: PlayerHud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4849,7 +4849,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Challenge
+  m_text: NextStage
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5421,7 +5421,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3299682681994943280}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 06.AutoFarming
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5931,7 +5931,7 @@ GameObject:
   - component: {fileID: 3702754883466118078}
   - component: {fileID: 8773784072425421855}
   - component: {fileID: 7875766235394708327}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 00.Script
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7879,7 +7879,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3390174284556646819}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 99.Popup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9846,7 +9846,7 @@ GameObject:
   - component: {fileID: 1287156812395984534}
   - component: {fileID: 5248766915064425109}
   - component: {fileID: 5738867345467285653}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12627,7 +12627,7 @@ GameObject:
   - component: {fileID: 4617063430102616529}
   - component: {fileID: 3176670150575179455}
   - component: {fileID: 936977953511979020}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 04.DynamicInteractiveCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14183,7 +14183,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: TimeLeft
+  m_text: MonsterLeft
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

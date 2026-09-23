@@ -224,8 +224,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         // 이전 씬의 PathFinder는 곧 언로드되어 파괴된다. 언로드 전에 끊어서
         // 전환 중에 캐릭터가 파괴된 PathFinder로 길찾기를 시도하지 않게 한다.
-        // TODO(자동사냥 머지 후 주석 해제)
-        // if (character != null) character.SetPathFinder(null);
+        if (character != null) character.SetPathFinder(null);
 
         // 1.이전 스테이지 정리
         // [변경] 몬스터 스폰/아이템 드랍 시스템이 배치된 경우에만 이전 상태를 정리한다.
@@ -282,8 +281,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         // 씬마다 PathFinder가 다르므로 씬을 로드한 쪽(스테이지)이 새 맵의 PathFinder를 넣어준다. (규칙 6)
         // 캐릭터는 스테이지 로드 전에 메인 씬에서 생성되므로 Navi2DAgent.Awake에서는 찾지 못한다.
-        // TODO(자동사냥 머지 후 주석 해제)
-        // if (character != null) character.SetPathFinder(map.PathFinder);
+        if (character != null) character.SetPathFinder(map.PathFinder);
 
         // 5. 상태 초기화(State = Battle → Update에서 스폰 시작)
         status.Reset(definition);

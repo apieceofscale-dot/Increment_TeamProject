@@ -58,6 +58,11 @@ MonoBehaviour:
   dropItemId: 1
   dropChance: 1
   targetTag: Player
+  enableHover: 1
+  hoverHeight: 0.35
+  hoverAmplitude: 0.2
+  hoverPeriod: 2.5
+  hoverMaxSpeed: 1
 --- !u!70 &8800020000000000002
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -103,14 +108,14 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8662083666288718600}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 0.3
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -120,7 +125,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!1 &8800020000000000010
 GameObject:

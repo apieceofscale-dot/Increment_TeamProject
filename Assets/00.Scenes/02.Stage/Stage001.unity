@@ -167,14 +167,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1352357382739810181, guid: 09f139a76aa51452082e8e872d616df9, type: 3}
-      propertyPath: pathFinder
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1352357382739810181, guid: 09f139a76aa51452082e8e872d616df9, type: 3}
-      propertyPath: groundTilemap
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5918377476527902786, guid: 09f139a76aa51452082e8e872d616df9, type: 3}
       propertyPath: m_Name
       value: StageMap

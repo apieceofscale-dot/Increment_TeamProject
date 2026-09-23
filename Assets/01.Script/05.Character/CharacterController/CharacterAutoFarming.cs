@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterControllers), typeof(Navi2DAgent), typeof(Collider2D))]
 public class CharacterAutoFarming : MonoBehaviour
 {
-    [SerializeField, Min(0.1f)] private float searchRadius = 12f;
+    [SerializeField, Min(0.1f)] private float searchRadius = 1000f;
     [SerializeField, Min(0.1f)] private float searchInterval = 0.5f;
     [SerializeField] private bool startAutomatically;
 
@@ -18,6 +18,7 @@ public class CharacterAutoFarming : MonoBehaviour
     private Navi2DAgent agent;
     private Collider2D bodyCollider, target;
     private float nextSearch;
+    private const float TargetSwitchDistance = 0.25f;
 
     private bool initialized;
     private bool automaticStartPending;
@@ -116,12 +117,14 @@ public class CharacterAutoFarming : MonoBehaviour
             CurrentState = "Search";
             PauseAgent();
 
-            if (Time.time >= nextSearch)
-                FindTarget();
-
-            if (target == null)
-                return;
         }
+
+        // Reconsider nearby enemies even while the current target is valid.
+        if (Time.time >= nextSearch)
+            FindTarget();
+
+        if (target == null)
+            return;
 
         controller.FaceAutoFarmingTarget(target.bounds.center.x);
         
@@ -150,7 +153,10 @@ public class CharacterAutoFarming : MonoBehaviour
     private void PauseAgent()
     {
         if (agent != null)
+        {
+            agent.StopMovement();
             agent.enabled = false;
+        }
 
         if (controller != null)
             controller.StopAutoFarmingMovement();
@@ -181,6 +187,7 @@ public class CharacterAutoFarming : MonoBehaviour
     {
         nextSearch = Time.time + Mathf.Max(0.1f, searchInterval);
         float closest = float.PositiveInfinity;
+        Collider2D nearest = null;
 
         foreach (Collider2D candidate in Physics2D.OverlapCircleAll(bodyCollider.bounds.center, searchRadius, controller.AutoFarmingMonsterMask))
         {
@@ -193,8 +200,22 @@ public class CharacterAutoFarming : MonoBehaviour
                 continue;
 
             closest = distance;
-            target = candidate;
+            nearest = candidate;
         }
+
+        if (nearest == null || nearest == target)
+            return;
+
+        // Keep the current target when distances are nearly equal.
+        if (target != null)
+        {
+            float currentDistance = Vector2.Distance(target.bounds.center, bodyCollider.bounds.center);
+            if (Mathf.Sqrt(closest) + TargetSwitchDistance >= currentDistance)
+                return;
+        }
+
+        PauseAgent();
+        target = nearest;
     }
 
     [ContextMenu("Auto Farming/½ÃÀÛ")]

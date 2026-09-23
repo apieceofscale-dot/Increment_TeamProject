@@ -24,6 +24,7 @@ public class StagePresenter
         view.OnChallengeBtnClicked += HandleChallengeStageMove;
         stageChangedChannel.OnRaised += HandleStageChange;
 
+
         //도전 활성화 이벤트 += HandleChallengeAvailabilityChanged;
 
         HandleStageChange(model.GetStageInfo());
@@ -38,6 +39,7 @@ public class StagePresenter
         if (!info.IsValid)
         {
             view.SetChallengeAvailable(false);
+            view.Monsterleft(0);
             return;
         }
 
@@ -45,6 +47,9 @@ public class StagePresenter
         view.SetChallengeStageNum(info.ChallengeStageNum.ToString()); //사실 이름인데 잘못넣엇는데 걍 넘어감.
         view.SetStageProcedureText(info.NowStageNum, info.TotalStageNum);
         view.SetStageProcedureBar(info.NowStageNum, Math.Max(1, info.TotalStageNum));
+
+        StageProgressInfo progress = model.GetProgress();
+        view.Monsterleft(Math.Max(0, progress.ClearKillCount - progress.KillCount));
 
         view.SetChallengeAvailable(info.CanChallenge);
 

@@ -401,7 +401,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7821396913061769476}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: MainHud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1091,7 +1091,7 @@ GameObject:
   m_Component:
   - component: {fileID: 376100873675768489}
   - component: {fileID: 6972779486530607414}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: s00.Script
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1317,7 +1317,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8351063548016980185}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: StartHud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1352,7 +1352,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5680886829673822694}
   - component: {fileID: 1173978323192279270}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SpawnPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
