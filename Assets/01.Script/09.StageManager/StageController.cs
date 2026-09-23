@@ -345,7 +345,8 @@ public class StageController : MonoBehaviour, IBootStrapper
         // int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
         // dropFacade.RequestDrop(dropTableId, info.Position);
 
-        // 경험치 (MonsterData에 exp 필드가 생기기 전까지는 0이라 실제로는 안 오름)
+        // [연결] 몬스터가 전달한 ExpReward로 기존 경험치/레벨업/강화 포인트 처리를 실행한다.
+        // 기존 메모: MonsterData에 경험치 필드가 없어 보상이 0이던 상태를 연결 완료했다.
         if (character != null && info.ExpReward > 0)
         {
             character.GainExp(info.ExpReward);

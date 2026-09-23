@@ -11,6 +11,8 @@ public class MonsterData : BaseData
     public float attackRange = 1.4f;
     public float attackCooldown = 1f;
     public int dropTableId;
+    // [추가] 처치 경험치. 기존 데이터는 기본 10이며 몬스터별로 조절한다.
+    [Min(0)] public long expReward = 10;
 
     public RuntimeAnimatorController animatorController;
     public AnimationClip idleClip;
@@ -41,6 +43,8 @@ public class MonsterData : BaseData
         clone.attackRange = attackRange;
         clone.attackCooldown = attackCooldown;
         clone.dropTableId = dropTableId;
+        // [연결] 런타임 데이터 복제 시에도 경험치 보상을 유지한다.
+        clone.expReward = expReward;
 
         clone.animatorController = animatorController;
         clone.idleClip = idleClip;
