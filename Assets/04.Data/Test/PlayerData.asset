@@ -17,6 +17,18 @@ MonoBehaviour:
     codeName: Knight
     description: something
     displayName: Knight
+    animatorController: {fileID: 9100000, guid: 3527a24c09f2a1f4fbbe8d55fd7344d5, type: 2}
+    idleClip: {fileID: 7400000, guid: 8288caaba5851db4e9246ee3d6f5c722, type: 2}
+    runClip: {fileID: 7400000, guid: 001ee0f0006ad6a4a875ff4f58ad7b95, type: 2}
+    attackClip: {fileID: 7400000, guid: 24286d41aecc3d04ab2bc6833b8adf3b, type: 2}
+    jumpClip: {fileID: 7400000, guid: 4448bb92f1dc80c45ba8a41fe1e14dde, type: 2}
+    deadClip: {fileID: 7400000, guid: 0ac4e870277ee0d409d5a37b567c3a45, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    jumpAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
     level: 1
     exp: 0
     maxHp: 100
@@ -45,6 +57,18 @@ MonoBehaviour:
     codeName: Wizard
     description: nothing
     displayName: Wizard
+    animatorController: {fileID: 9100000, guid: 3527a24c09f2a1f4fbbe8d55fd7344d5, type: 2}
+    idleClip: {fileID: 7400000, guid: 8288caaba5851db4e9246ee3d6f5c722, type: 2}
+    runClip: {fileID: 7400000, guid: 001ee0f0006ad6a4a875ff4f58ad7b95, type: 2}
+    attackClip: {fileID: 7400000, guid: 24286d41aecc3d04ab2bc6833b8adf3b, type: 2}
+    jumpClip: {fileID: 7400000, guid: 4448bb92f1dc80c45ba8a41fe1e14dde, type: 2}
+    deadClip: {fileID: 7400000, guid: 0ac4e870277ee0d409d5a37b567c3a45, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    jumpAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
     level: 1
     exp: 0
     maxHp: 100
@@ -73,6 +97,18 @@ MonoBehaviour:
     codeName: Rogue
     description: anyting
     displayName: Rogue
+    animatorController: {fileID: 9100000, guid: 3527a24c09f2a1f4fbbe8d55fd7344d5, type: 2}
+    idleClip: {fileID: 7400000, guid: 8288caaba5851db4e9246ee3d6f5c722, type: 2}
+    runClip: {fileID: 7400000, guid: 001ee0f0006ad6a4a875ff4f58ad7b95, type: 2}
+    attackClip: {fileID: 7400000, guid: 24286d41aecc3d04ab2bc6833b8adf3b, type: 2}
+    jumpClip: {fileID: 7400000, guid: 4448bb92f1dc80c45ba8a41fe1e14dde, type: 2}
+    deadClip: {fileID: 7400000, guid: 0ac4e870277ee0d409d5a37b567c3a45, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    jumpAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
     level: 1
     exp: 0
     maxHp: 100
@@ -99,8 +135,20 @@ MonoBehaviour:
     dodgeRate: 0
   - id: 1003
     codeName: arhcer
-    description: '"---"'
+    description: ---
     displayName: Archer
+    animatorController: {fileID: 9100000, guid: 3527a24c09f2a1f4fbbe8d55fd7344d5, type: 2}
+    idleClip: {fileID: 7400000, guid: 8288caaba5851db4e9246ee3d6f5c722, type: 2}
+    runClip: {fileID: 7400000, guid: 001ee0f0006ad6a4a875ff4f58ad7b95, type: 2}
+    attackClip: {fileID: 7400000, guid: 24286d41aecc3d04ab2bc6833b8adf3b, type: 2}
+    jumpClip: {fileID: 7400000, guid: 4448bb92f1dc80c45ba8a41fe1e14dde, type: 2}
+    deadClip: {fileID: 7400000, guid: 0ac4e870277ee0d409d5a37b567c3a45, type: 2}
+    idleAudioClip: {fileID: 0}
+    runAudioClip: {fileID: 0}
+    attackAudioClip: {fileID: 0}
+    jumpAudioClip: {fileID: 0}
+    deadAudioClip: {fileID: 0}
+    portrait: {fileID: 21300000, guid: 3756222a571afa946bdc300fe3e08105, type: 3}
     level: 1
     exp: 0
     maxHp: 100

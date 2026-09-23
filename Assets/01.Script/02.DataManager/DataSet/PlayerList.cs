@@ -70,6 +70,13 @@ public class PlayerData : BaseData
         clone.attackClip = this.attackClip;
         clone.jumpClip = this.jumpClip;
         clone.deadClip = this.deadClip;
+
+        clone.idleAudioClip = this.idleAudioClip;
+        clone.runAudioClip = this.runAudioClip;
+        clone.attackAudioClip = this.attackAudioClip;
+        clone.jumpAudioClip = this.jumpAudioClip;
+        clone.deadAudioClip = this.deadAudioClip;
+
         clone.portrait = this.portrait;
 
         // 기본 상태
