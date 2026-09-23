@@ -1,4 +1,4 @@
-//자동생성됨. 수정금지.
+//�ڵ�������. ��������.
 using UnityEngine;
 public partial class DataManager
 {
