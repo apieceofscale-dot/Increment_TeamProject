@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// [역할] 스테이지 진입 이후의 흐름을 맡는 스테이지 내부 허브(Controller)
@@ -64,6 +65,28 @@ public class StageController : MonoBehaviour, IBootStrapper
     public StageChangedInfo StageInfo => BuildStageChangedInfo();
     public CharacterFacade Character => character;
     public bool IsTransitioning => isTransitioning;
+
+
+    [Header("사망 연출")]
+    //몬스터 사망 후 풀 반납까지 대기(초)
+    [SerializeField, Min(0f)] private float deathDespawnDelay = 0.7f;
+
+    // 사망 모션 재생 중인 몬스터 목록
+    // 사망마다 코루틴을 쓰면 IEnumerator가 힙에 할당된다 → 리스트 + Update 폴링으로 GC 0.
+    private readonly List<PendingDespawn> pendingDespawns = new List<PendingDespawn>(32);
+
+    // 반납 예약 1건
+    private readonly struct PendingDespawn
+    {
+        public readonly MonsterController Monster;
+        public readonly float DespawnTime;
+
+        public PendingDespawn(MonsterController monster, float despawnTime)
+        {
+            Monster = monster;
+            DespawnTime = despawnTime;
+        }
+    }
 
 
     /// <summary>
@@ -228,6 +251,7 @@ public class StageController : MonoBehaviour, IBootStrapper
 
         // 1.이전 스테이지 정리
         // [변경] 몬스터 스폰/아이템 드랍 시스템이 배치된 경우에만 이전 상태를 정리한다.
+        pendingDespawns.Clear();
         if (spawner != null) spawner.DespawnAll();
         // dropFacade.CancelPendingDrops();
         status.SetState(StageState.None);
@@ -314,6 +338,8 @@ public class StageController : MonoBehaviour, IBootStrapper
 
     private void Update()
     {
+        TickPendingDespawns();
+
         // 스폰은 파밍/보스 전투 중에만. Cleared(보스 처치 후)·None(전환 중)·Failed에서는 멈춘다.
         if (isTransitioning) return;
         if (status.State != StageState.Battle) return;
@@ -332,10 +358,11 @@ public class StageController : MonoBehaviour, IBootStrapper
         // ★ 죽은 몬스터 정리는 스테이지가 한다. 씬에 MonsterFacade가 없으므로 여기서 안 하면
         //   시체가 남고 CountAlive가 줄지 않아 스폰이 멈춘다.
         // [변경] MonsterSpawner가 없어도 씬에 배치된 몬스터 사망 처리는 완료한다.
+        // 킬 집계·경험치는 아래에서 '즉시' 처리하고, 오브젝트 반납만 모션 길이만큼 미룬다.
         if (info.Source != null)
         {
-            if (spawner != null) spawner.Despawn(info.Source);
-            else info.Source.ReturnToPool();
+            if (deathDespawnDelay <= 0f) DespawnMonster(info.Source);
+            else pendingDespawns.Add(new PendingDespawn(info.Source, Time.time + deathDespawnDelay));
         }
 
         if (status.State != StageState.Battle) return;
@@ -365,6 +392,7 @@ public class StageController : MonoBehaviour, IBootStrapper
             {
                 status.SetState(StageState.Cleared);
                 // [변경] MonsterSpawner가 없는 씬에서도 보스 클리어 처리가 계속된다.
+                pendingDespawns.Clear();
                 if (spawner != null) spawner.DespawnAll();
                 // TODO(기획): 보스 클리어 후 흐름 (다음 챕터 / 결과창 / 003 복귀) 확정되면 여기서 처리
             }
@@ -419,6 +447,39 @@ public class StageController : MonoBehaviour, IBootStrapper
         if (stageChangedChannel == null) return;   // 누락 경고는 초기화 때 1회만
         stageChangedChannel.Raise(BuildStageChangedInfo());
     }
+
+    // 스포너 유무에 따른 반납 경로를 한 곳으로 모음 (기존 분기 그대로)
+    private void DespawnMonster(MonsterController monster)
+    {
+        if (spawner != null) spawner.Despawn(monster);
+        else monster.ReturnToPool();
+    }
+
+    // 대기 시간이 지난 몬스터를 반납
+    private void TickPendingDespawns()
+    {
+        float now = Time.time;
+
+        // 뒤에서부터 순회: RemoveAt 시 인덱스가 밀리지 않음
+        for (int i = pendingDespawns.Count - 1; i >= 0; i--)
+        {
+            PendingDespawn pending = pendingDespawns[i];
+            if (now < pending.DespawnTime) continue;
+
+            pendingDespawns.RemoveAt(i);
+
+            // activeSelf 체크: 이미 풀에 들어간(비활성) 개체를 두 번 반납하지 않도록.
+            // IsDead만으로는 부족  반납된 개체도 Status.Clear()로 HP 0이라 IsDead == true.
+            MonsterController m = pending.Monster;
+            if (m != null && m.gameObject.activeSelf && m.IsDead)
+                DespawnMonster(m);
+        }
+    }
+
+
+
+
+
 
 
 #if UNITY_EDITOR

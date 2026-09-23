@@ -111,9 +111,7 @@ public class MonsterFacade : MonoBehaviour
             itemDropFacade.RequestDrop(info.MonsterId, info.Position);
         }
 
-        if (info.Source != null)
-        {
-            Despawn(info.Source);
-        }
+        // [변경] 사망 몬스터의 풀 반납은 StageController가 사망 연출 시간(deathDespawnDelay) 후에 처리한다.
+        //        여기서 즉시 Despawn하면 Die 애니메이션이 잘리고, StageController와 이중 반납이 된다.
     }
 }

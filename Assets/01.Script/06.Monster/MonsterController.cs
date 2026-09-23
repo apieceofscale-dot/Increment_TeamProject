@@ -46,6 +46,12 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     public bool IsDead => _status.IsDead;
     public int DropTableId => dropItemId;
 
+
+    static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    static readonly int AttackHash = Animator.StringToHash("Attack");
+    static readonly int HitHash = Animator.StringToHash("Hit");
+    static readonly int IsDeadHash = Animator.StringToHash("IsDead");
+
     void Awake()
     {
         _body = GetComponent<Rigidbody2D>();
@@ -93,6 +99,9 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnSpawn()
     {
+        if (_body != null)
+            _body.simulated = true;
+
         ResetMovement();
         _hoverCenterY = _body.position.y + hoverHeight;
         _hoverPhase = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
@@ -122,6 +131,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void OnDespawn()
     {
+        if (_animator != null)
+            _animator.WriteDefaultValues();
         ResetMovement();
         _spawned = false;
         _deathNotified = false;
@@ -148,6 +159,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
         if (_spawned && !IsDead && enableHover && _naviAgent == null)
             UpdateHover();
+        if (_animator != null)
+            _animator.SetBool(IsMovingHash, _ai.State == MonsterState.Trace);
     }
 
     private void UpdateHover()
@@ -195,8 +208,13 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
         if (_status.ApplyDamage(amount))
         {
-            Die();
+            Die();   // 치명타면 Hit 대신 Die가 재생되도록 여기서 끝
+            return;
         }
+
+        // 살아남은 타격만 피격 모션
+        if (_animator != null)
+            _animator.SetTrigger(HitHash);
     }
 
     public void Die()
@@ -213,6 +231,16 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         }
 
         _ai.ForceDead();
+        // 사망 연출 중에는 물리에서 제외한다. 자동사냥이 시체를 타깃하지 않게
+        if (_body != null)
+        {
+            _body.linearVelocity = Vector2.zero;
+            _body.simulated = false;
+        }
+
+        if (_animator != null)
+            _animator.SetBool(IsDeadHash, true);
+
         MonsterFacade.NotifyDied(new MonsterDiedInfo
         {
             MonsterId = dropItemId,
@@ -279,6 +307,9 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
+        if (_animator != null)
+            _animator.SetTrigger(AttackHash);
+
         int damage = Mathf.Max(1, _status.AttackDamage);
 
         if (target.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -303,6 +334,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
 
     public void ReturnToPool()
     {
+
         OnDespawn();
         if (MonsterFactory.Instance != null)
         {
@@ -326,9 +358,7 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
             return;
         }
 
-        if (data.animatorController != null)
-        {
+        if (data.animatorController != null && _animator.runtimeAnimatorController != data.animatorController)
             _animator.runtimeAnimatorController = data.animatorController;
-        }
     }
 }
