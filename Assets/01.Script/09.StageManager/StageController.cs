@@ -345,7 +345,8 @@ public class StageController : MonoBehaviour, IBootStrapper
         // int dropTableId = info.DropTableId != 0 ? info.DropTableId : info.MonsterId;
         // dropFacade.RequestDrop(dropTableId, info.Position);
 
-        // 경험치 (MonsterData에 exp 필드가 생기기 전까지는 0이라 실제로는 안 오름)
+        // [연결] 몬스터가 전달한 ExpReward로 기존 경험치/레벨업/강화 포인트 처리를 실행한다.
+        // 기존 메모: MonsterData에 경험치 필드가 없어 보상이 0이던 상태를 연결 완료했다.
         if (character != null && info.ExpReward > 0)
         {
             character.GainExp(info.ExpReward);
@@ -389,6 +390,17 @@ public class StageController : MonoBehaviour, IBootStrapper
             challengeStageNum = boss.IndexInChapter;
         }
 
+        // [변경] 챕터 보스가 아닌 NextStageId가 가리키는 실제 다음 스테이지를 조회한다.
+        // 마지막 스테이지의 자기 자신 참조는 다음 스테이지 없음으로 처리한다.
+        int nextStageId = 0;
+        string nextStageName = string.Empty;
+        if (definition.NextStageId > 0 && definition.NextStageId != definition.StageId
+            && stageTable.TryGet(definition.NextStageId, out StageDefinition nextStage))
+        {
+            nextStageId = nextStage.StageId;
+            nextStageName = nextStage.DisplayName;
+        }
+
         return new StageChangedInfo(
             definition.StageId,
             definition.Chapter,
@@ -397,7 +409,9 @@ public class StageController : MonoBehaviour, IBootStrapper
             totalStageNum,
             definition.Type,
             challengeStageNum,
-            CanGoNextStage);   // ★ 도전 버튼 활성 여부 = 다음 스테이지로 갈 수 있는가
+            // [변경] 기존 버튼 활성 조건을 유지하면서 다음 스테이지 정보도 전달한다.
+            // CanGoNextStage);
+            CanGoNextStage, nextStageId, nextStageName);   // ★ 도전 버튼 활성 여부 = 다음 스테이지로 갈 수 있는가
     }
 
     private void RaiseStageChanged()

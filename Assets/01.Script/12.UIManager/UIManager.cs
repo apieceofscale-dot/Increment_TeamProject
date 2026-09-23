@@ -163,6 +163,8 @@ public class UIManager : MonoBehaviour, IBootStrapper
         skillPresenter = new SkillPresenter(skillView, characterFacade);
         autoFarmingPresenter = new AutoFarmingPresenter(autoFarmingView, characterFacade);
 
+        // [연결] 다시 바인딩할 때 이전 팝업 Presenter의 이벤트 구독부터 해제한다.
+        characterPopupPresenter?.Dispose();
         characterPopupPresenter = new CharacterPopupPresenter(characterPopupView, characterFacade);
        // equipmentPopupPresenter = new EquipmentPopupPresenter(equipmentPopupView, characterFacade);
         skillPopupPresenter = new SkillPopupPresenter();

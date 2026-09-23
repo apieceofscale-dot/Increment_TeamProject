@@ -24,7 +24,8 @@ MonoBehaviour:
     attackRange: 1.4
     attackCooldown: 1
     dropTableId: 2000
-    animatorController: {fileID: 22100000, guid: ab78c06da915f4a61a68839e1a60405e, type: 2}
+    expReward: 10
+    animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
     attackClip: {fileID: 7400000, guid: fe941ea52c58bdf4ea8979cab7a1ab29, type: 2}
@@ -46,6 +47,7 @@ MonoBehaviour:
     attackRange: 1.5
     attackCooldown: 0.9
     dropTableId: 2001
+    expReward: 10
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}
@@ -68,6 +70,7 @@ MonoBehaviour:
     attackRange: 1.6
     attackCooldown: 1.2
     dropTableId: 2002
+    expReward: 10
     animatorController: {fileID: 9100000, guid: 6bda1f5bf4224db44b12251ff5bfe8cb, type: 2}
     idleClip: {fileID: 7400000, guid: 2199d1ed2131c0748a4a51ec4677e04e, type: 2}
     runClip: {fileID: 7400000, guid: c7adfee818a90a94db0774a14d14fc06, type: 2}

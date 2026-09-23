@@ -40,11 +40,16 @@ public class StagePresenter
         {
             view.SetChallengeAvailable(false);
             view.Monsterleft(0);
+            // [변경] 스테이지 정보가 없으면 이전 다음 스테이지 표시를 지운다.
+            view.SetChallengeStageNum(string.Empty);
             return;
         }
 
         view.SetName(info.MapName);
-        view.SetChallengeStageNum(info.ChallengeStageNum.ToString()); //사실 이름인데 잘못넣엇는데 걍 넘어감.
+        // [변경] 기존 보스 번호 표시는 보존하고, 실제 다음 스테이지 이름으로 교체한다.
+        // view.SetChallengeStageNum(info.ChallengeStageNum.ToString()); //사실 이름인데 잘못넣엇는데 걍 넘어감.
+        // [변경] 기존 View 메서드와 Inspector 연결을 그대로 사용한다.
+        view.SetChallengeStageNum(info.HasNextStage ? info.NextStageName : "Last Stage");
         view.SetStageProcedureText(info.NowStageNum, info.TotalStageNum);
         view.SetStageProcedureBar(info.NowStageNum, Math.Max(1, info.TotalStageNum));
 

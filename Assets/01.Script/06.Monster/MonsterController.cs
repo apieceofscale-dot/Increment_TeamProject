@@ -13,6 +13,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
     [SerializeField] float attackRange = 1.4f;
     [SerializeField] float attackCooldown = 1f;
     [SerializeField] int dropItemId = 1;
+    // [추가] 데이터 없이 배치된 몬스터의 기본 처치 경험치.
+    [SerializeField, Min(0)] long expReward = 10;
     [SerializeField] float dropChance = 1f;
     [SerializeField] string targetTag = "Player";
 
@@ -85,6 +87,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         traceRange = data.traceRange;
         attackRange = data.attackRange;
         attackCooldown = data.attackCooldown;
+        // [연결] 풀 재사용 시 이번 몬스터 데이터의 보상을 다시 적용한다.
+        expReward = Math.Max(0L, data.expReward);
         dropItemId = data.dropTableId > 0 ? data.dropTableId : data.id;
     }
 
@@ -230,6 +234,8 @@ public class MonsterController : MonoBehaviour, IPoolable, IDamageable
         MonsterFacade.NotifyDied(new MonsterDiedInfo
         {
             MonsterId = dropItemId,
+            // [연결] StageController의 기존 GainExp 경로에 보상값을 전달한다.
+            ExpReward = expReward,
             Position = transform.position,
             Source = this
         });

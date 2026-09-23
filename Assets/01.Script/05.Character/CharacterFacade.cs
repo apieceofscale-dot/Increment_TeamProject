@@ -82,9 +82,25 @@ public class CharacterFacade : MonoBehaviour
     }
     #endregion
 
+    #region UI용 현재값 조회
+    public long CurrentHp => Controller.CurrentHp; // 현재 체력
+    public long MaxHp => Controller.MaxHp; // 최대 체력
+    public int CurrentMp => Controller.CurrentMp; // 현재 마나
+    public int MaxMp => Controller.MaxMp; // 최대 마나
+    public int Level => Controller.Level; // 현재 레벨
+    public long Money => Controller.Money; // 현재 재화
+    public int CombatPower => Controller.CombatPower; // 현재 최종 공격력
+    public string JobName => Controller.JobName; // 직업 이름
+
+    public Sprite GetCharacterPortrait()
+    {
+        return Controller.GetCharacterPortrait(); // Controller에 초상화 조회 요청 전달
+    }
+    #endregion
+
     #region 레벨 성장 및 능력치 포인트
     public CharacterStatUpgradeInfo GetStatUpgradeInfo() => Controller.GetStatUpgradeInfo(); // 일반·특별 포인트, 캐릭터 등급, 항목별 강화 횟수 조회
-    public bool TryUpgradeStat(CharacterStatUpgradeType type) => Controller.TryUpgradeStat(type); // 강화 버튼: 선택한 항목을 1회 강화, 성공 여부 반환
+    public bool TryUpgradeStat(CharacterStatUpgradeType type) => Controller.TryUpgradeStat(type); // 강화 버튼: 선택한 항목을 1회 강화, 성공 여부 반환, type에 MainStat, Defence, MaxHp 입력해서 사용
     public long RequiredExp => Controller.RequiredExp; // 다음 레벨 요구 경험치 조회, 0이면 추가 레벨업 불가
     public event Action StatUpgradeChanged // 레벨업·강화 성공 후 포인트와 스탯 다시 조회
     {
@@ -103,7 +119,7 @@ public class CharacterFacade : MonoBehaviour
     #region 경험치 및 강화 표시
     public long CurrentExp => Controller.CurrentExp; // 현재 레벨에서 누적한 경험치 조회
     public int MainStatValue => Controller.MainStatValue; // 재 직업 주 스탯의 장비 포함 합산 값 조회
-    public CharacterStatUpgradeOption GetStatUpgradeOption(CharacterStatUpgradeType type) => Controller.GetStatUpgradeOption(type);
+    public CharacterStatUpgradeOption GetStatUpgradeOption(CharacterStatUpgradeType type) => Controller.GetStatUpgradeOption(type); // type에 MainStat, Defence, MaxHp 입력하여 사용
 
     public event Action<long, long> ExpChanged // 경험치 바 갱신용, 현재 경험치·요구 경험치 순서로 전달
     {
@@ -126,22 +142,6 @@ public class CharacterFacade : MonoBehaviour
         {
             if (Controller != null) Controller.PortraitChanged -= value;
         }
-    }
-    #endregion
-
-    #region UI용 현재값 조회
-    public long CurrentHp => Controller.CurrentHp; // 현재 체력
-    public long MaxHp => Controller.MaxHp; // 최대 체력
-    public int CurrentMp => Controller.CurrentMp; // 현재 마나
-    public int MaxMp => Controller.MaxMp; // 최대 마나
-    public int Level => Controller.Level; // 현재 레벨
-    public long Money => Controller.Money; // 현재 재화
-    public int CombatPower => Controller.CombatPower; // 현재 최종 공격력
-    public string JobName => Controller.JobName; // 직업 이름
-
-    public Sprite GetCharacterPortrait()
-    {
-        return Controller.GetCharacterPortrait(); // Controller에 초상화 조회 요청 전달
     }
     #endregion
 
@@ -319,6 +319,21 @@ public class CharacterFacade : MonoBehaviour
     public bool UseSkill(int slotIndex) => Controller.UseSkill(slotIndex);
     #endregion
 
+    #region 자동사냥
+    public void SetAutoFarming(bool enabled) // 자동사냥 ON/OFF
+    {
+        Controller.SetAutoFarming(enabled);
+    }
+
+    public bool IsAutoFarming => Controller.IsAutoFarming; // 현재 ON/OFF 상태 표시
+    public string AutoFarmingState => Controller.AutoFarmingState; // 자동사냥 상태 표시·디버깅용 상태 문자열 조회
+
+    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter) // 자동사냥이 선택할 대상의 허용 조건 연결
+    {
+        Controller.SetAutoFarmingTargetFilter(filter);
+    }
+    #endregion
+
     #region 피해 계산 조회 및 알림
     public CharacterDamageMainStat DamageMainStat => Controller.DamageMainStat; // STR·DEX·INT·LUK 중 현재 주 스탯 종류 조회
     public CharacterDamageAttackData CaptureDamageAttack() => Controller.CaptureDamageAttack(); // 호출 시점의 공격 스탯을 복사, 이 호출만으로 피해를 주지는 않음
@@ -452,21 +467,6 @@ public class CharacterFacade : MonoBehaviour
     public void ClearEquipmentStats() // 장비 보너스만 초기화, 기본 스탯은 유지
     {
         Controller.ClearEquipmentStats();
-    }
-    #endregion
-
-    #region 자동사냥
-    public void SetAutoFarming(bool enabled) // 자동사냥 ON/OFF
-    {
-        Controller.SetAutoFarming(enabled); 
-    }
-
-    public bool IsAutoFarming => Controller.IsAutoFarming; // 현재 ON/OFF 상태 표시
-    public string AutoFarmingState => Controller.AutoFarmingState; // 자동사냥 상태 표시·디버깅용 상태 문자열 조회
-
-    public void SetAutoFarmingTargetFilter(Func<Collider2D, bool> filter) // 자동사냥이 선택할 대상의 허용 조건 연결
-    {
-        Controller.SetAutoFarmingTargetFilter(filter);
     }
     #endregion
 

@@ -31,7 +31,7 @@ public sealed class TempStageTable
             // 1-1 파밍 : 슬라임
             [9000] = new StageDefinition(
                 stageId: 9000, chapter: 1, indexInChapter: 1,
-                stageCodeName: "St1", displayName: "초원 입구",
+                stageCodeName: "St1", displayName: "Meadow Entry",
                 sceneName: "Stage001",
                 type: StageType.Farm,
                 monsterId: 2000, dropTableId: 2000, statMultiplier: 1.0f,
@@ -42,7 +42,7 @@ public sealed class TempStageTable
             // 1-2 파밍 : 고블린
             [9001] = new StageDefinition(
                 stageId: 9001, chapter: 1, indexInChapter: 2,
-                stageCodeName: "St2", displayName: "초원 안쪽",
+                stageCodeName: "St2", displayName: "Deep Meadow",
                 sceneName: "Stage002",
                 type: StageType.Farm,
                 monsterId: 2001, dropTableId: 2001, statMultiplier: 1.25f,
@@ -53,7 +53,7 @@ public sealed class TempStageTable
             // 1-3 파밍 : 오크. 여기서 [도전]을 누르면 보스맵(9003)으로 간다
             [9002] = new StageDefinition(
                 stageId: 9002, chapter: 1, indexInChapter: 3,
-                stageCodeName: "St3", displayName: "오크 마을",
+                stageCodeName: "St3", displayName: "Orc Village",
                 sceneName: "Stage003",
                 type: StageType.Farm,
                 monsterId: 2002, dropTableId: 2002, statMultiplier: 1.5f,
@@ -65,7 +65,7 @@ public sealed class TempStageTable
             // nextStageId == stageId → "다음 스테이지 없음" (보스 클리어 후 흐름은 기획 확정 후 추가)
             [BossStageId] = new StageDefinition(
                 stageId: BossStageId, chapter: 1, indexInChapter: 4,
-                stageCodeName: "St4", displayName: "오크 족장의 방",
+                stageCodeName: "St4", displayName: "Orc Chief's Throne",
                 sceneName: "StageChallenge",
                 type: StageType.Boss,
                 monsterId: 2002, dropTableId: 2002, statMultiplier: 3.0f,

@@ -36,7 +36,7 @@ public class CharacterSettingView : MonoBehaviour, IUIViewInitialize
 
     }
 
-    public void SetAllPopUpFalse()//PlayerHud Start���� ����.
+    public void SetAllPopUpFalse()//PlayerHud Start에서 선언.
     {
         characterPopUp.SetActive(false);
         equipmentPopUp.SetActive(false);
@@ -57,7 +57,15 @@ public class CharacterSettingView : MonoBehaviour, IUIViewInitialize
 
 
 
-    private void OpenCharacterPopup() => OpenPopup(characterPopUp);
+    // [변경] View는 00.Script에 있으므로 팝업 활성화만으로 OnEnable이 호출되지 않는다.
+    // private void OpenCharacterPopup() => OpenPopup(characterPopUp);
+    private void OpenCharacterPopup()
+    {
+        OpenPopup(characterPopUp);
+        CharacterPopupView popupView = GetComponent<CharacterPopupView>();
+        if (popupView != null)
+            popupView.InitializePopup();
+    }
     private void OpenEquipmentPopup() => OpenPopup(equipmentPopUp);
     private void OpenSkillPopup() => OpenPopup(skillPopUp);
     private void OpenEnchantPopup() => OpenPopup(enchantPopUp);
